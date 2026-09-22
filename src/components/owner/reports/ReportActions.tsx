@@ -1,0 +1,30 @@
+"use client";
+
+import { PrintButton } from "@/components/common";
+import type { Lang } from "@/lib/i18n/i18n";
+
+const LINKS = [
+  { section: "receipts", mr: "पावती नोंदी", en: "Receipts" },
+  { section: "grain", mr: "धान्य अहवाल", en: "Grain" },
+  { section: "customers", mr: "ग्राहक उधारी", en: "Customers" },
+  { section: "summary", mr: "सारांश", en: "Summary" },
+] as const;
+
+/** CSV download links (one per report section) + print-to-PDF for the page. */
+export function ReportActions({ query, lang }: { query: string; lang: Lang }) {
+  return (
+    <div className="no-print flex flex-wrap items-center gap-2">
+      {LINKS.map((l) => (
+        <a
+          key={l.section}
+          href={`/api/owner/reports/export?${query}&section=${l.section}`}
+          download
+          className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        >
+          ⬇ {lang === "mr" ? l.mr : l.en} CSV
+        </a>
+      ))}
+      <PrintButton label={lang === "mr" ? "🖨 प्रिंट / PDF" : "🖨 Print / PDF"} />
+    </div>
+  );
+}
