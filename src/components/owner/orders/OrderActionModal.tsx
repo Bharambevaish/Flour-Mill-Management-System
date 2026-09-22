@@ -102,7 +102,7 @@ export function OrderActionModal({
 
       const res = await apiFetch(`/api/orders/${order.id}/status`, {
         method: "PATCH",
-        body: JSON.stringify(payload),
+        body: payload,
       });
 
       if (!res.ok) {
