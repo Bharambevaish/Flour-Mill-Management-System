@@ -140,6 +140,11 @@ export const createOrderPayloadSchema = z.union([createOrderSchema, createOrders
 export const broadcastNotificationSchema = z.object({
   message: z.string().trim().min(1, "Enter a message").max(500),
   lang: z.enum(["mr", "en"]).default("mr"),
+  /** Optional targeted recipients (24-hex ObjectIds). Empty = all active customers. */
+  customerIds: z
+    .array(z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid customer"))
+    .max(200, "Too many recipients")
+    .optional(),
 });
 
 /* Owner settings ----------------------------------------------------- */

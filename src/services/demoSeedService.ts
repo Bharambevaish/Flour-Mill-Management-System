@@ -27,6 +27,12 @@ const OrderSchema = new mongoose.Schema(
         recordedAt: Date,
       },
     ],
+    statusHistory: [
+      {
+        status: String,
+        at: Date,
+      },
+    ],
     status: String,
   },
   { timestamps: true },
@@ -136,6 +142,10 @@ export async function runDemoSeed(): Promise<DemoSeedSummary> {
             },
           ]
         : [];
+    // Timeline matches the notification spread: step i happened i×5 min later.
+    const statusHistory = STATUS_ORDER.slice(0, STATUS_ORDER.indexOf(s.status) + 1).map(
+      (status, i) => ({ status, at: minutesAgo(s.ageMin - i * 5) }),
+    );
 
     await Order.create({
       orderId,
@@ -147,6 +157,7 @@ export async function runDemoSeed(): Promise<DemoSeedSummary> {
       totalCharges,
       paidAmount,
       payments,
+      statusHistory,
       status: s.status,
       createdAt: minutesAgo(s.ageMin),
       updatedAt: minutesAgo(s.ageMin),

@@ -5,9 +5,62 @@ Payments hub to record receipts on any order (including already-collected ones
 settling their उधारी), an Outstanding/उधारी view, and dashboard shortcuts — all
 DB-persisted in ONE atomic write and in sync across every tab. Keep the
 automated DB round-trip test green (user: "keep making tests"). Since then:
-owner Reports hub with CSV/print export and a printable customer पावती.
+owner Reports hub with CSV/print export and a printable customer पावती, then a
+**secure read-only customer portal** (order tracking + payment statuses +
+notifications inbox, owner targeted/all-customer messaging) with real PIN
+login hardening (lockout, timing equalization, idle timeout, deactivation gate).
 
 # Completed (all verified: lint clean, `next build` clean, DB round-trip test green (user: "keep making tests"))
+- **Order status timeline** (`0.10.1`): customers now see the journey on each
+  order card — an `OrderProgress` bar (रांगेत → दळण सुरू → तयार → घेतले, filled
+  to the current step, live "Currently:" caption) with an expandable **View
+  times** vertical timeline of every reached step's timestamp. Backed by durable
+  `Order.statusHistory: {status, at}[]` written atomically: `[pending, now]` at
+  intake (`createOrder` + each `createOrders` batch line), and the next step
+  pushed inside the same single `doc.save()` as the transition (status + payment
+  + balance + history can never disagree). Exposed via `OrderView.statusHistory`
+  and `/api/my/overview`. Legacy rows migrated idempotently with
+  `npm run backfill-status` → `[pending@createdAt, current@updatedAt]`, middle
+  steps render as "वेळ माहित नाही / time n/a" (shared logic in
+  `src/lib/order-status-history.ts`, filter-scoped so tests never touch live
+  rows). Demo seed writes matching `statusHistory`. Status notifications per step
+  already existed (section 20). Test section 21 (12 assertions) + self-cleanup.
+  **Tests now 113/113 passing.**
+- **Secure read-only customer portal** (`0.10.0`): `/my` (was Coming Soon) is
+  now a real bilingual dashboard — greeting, `mustChangePin` temp-PIN banner,
+  three stat cards (Total Outstanding Due / Active Orders / Unread) and two
+  panels: **notifications inbox** (tap-to-mark-read, mark-all, live unread
+  badge) and **order tracker** (token, status badge, grain·size·weight·rate,
+  Total/Paid/Due, expandable Payment history reusing the owner's own
+  `OrderView.outstanding` math). **No IDOR surface**: customer APIs
+  (`GET /api/my/overview`, `PATCH /api/my/notifications/[id]/read`,
+  `PATCH /api/my/notifications/read-all`) are 100% session-scoped (id never
+  from URL/body); single-read is always 200 (no existence oracle) and only
+  matches `{_id, customerId}`; read actions are CSRF'd + `customer-mutation:<ip>`
+  rate-limited + audited. Backed by new `customerDashboardService.getCustomerDashboard`,
+  `getOrdersForCustomer`, `listNotificationsForCustomer` /
+  `markAllNotificationsRead` / `sendCustomersMessage`, `CustomerNotificationsPanel` +
+  `CustomerOrdersPanel`. **Owner targeted messaging**: Notifications composer has an
+  All-active / Specific-customers audience picker (multi-select, count badge);
+  `POST /api/owner/notifications/broadcast` takes optional `customerIds` (24-hex,
+  ≤200) → one *private* row per recipient, no cross-customer leaks; audit meta
+  `{customers, lang, targeted, message}`. **Latent bug fixed**: `notif.*` keys
+  were missing from the i18n dict (stored messages were raw keys) — added
+  `notif.*` + `cust.*` so inbox rows read like sentences. **Pin/PIN login
+  hardening**: progressive lockout (5 fails → 15-min base, doubling rounds;
+  persisted `lockedUntil`, cleared on success, `429 ACCOUNT_LOCKED`), sale timing-equalized unknown-mobile verify (`verifyAgainstDummy`, Argon2) → uniform
+  401 (no enumeration), `TRUST_PROXY` env flag gates `x-forwarded-for` trust for
+  rate buckets, `SESSION_IDLE_TTL` (default 1800s) idle-timeout in
+  `requireSession` (revoke → 401, lastUsedAt touched ≤ every 60s), and a
+  **deactivation gate** that revokes a customer session on the very next request.
+  Fixed `AppError` 4-arg→3-arg throw in lockout; `ObjectId` value import
+  (`new Types.ObjectId`) in notificationService + broadcast route. `OrderActionModal`
+  double-encoded body fix (`body: payload`; `apiFetch` already stringifies).
+  Test section 20 (26 assertions) covers all of the above + cross-read no-op,
+  unknown-mobile 401 + self-cleanup. **Tests at that point: 101/101 (see 0.10.1 → 113).**
+
+*** IMPLEMENTATION NOTE (Jan-2026 parity): the sections under 0.9.0 and earlier
+are version-tagged history; grep for a feature's path before trusting a tag. ***
 - **Reports hub + CSV/PDF export + printable पावती** (`0.9.0`): `/owner/reports`
   (was Coming Soon) shows a range-scoped business summary (orders, kg, charges,
   collected, dues on new orders), grain breakdown, cash-vs-UPI split + UPI txn
@@ -112,10 +165,8 @@ owner Reports hub with CSV/print export and a printable customer पावती
 - **Tests** (`scripts/test-db-roundtrip.ts`, self-cleaning, restores DB): covers
   advance-on-create, UPI validation, over-pay rejection + no counter burn,
   recordPayment on pending/processing AND on already-collected, full-payment
-  notification, single-write invariant, audit trail, cleanup, and section 19
-  reports (range aggregation + BOM'd CSV export + unknown-section 400).
-  **75 assertions, all passing** against the live stack (leaf-verified for both
-  login flows).
+  notification, single-write invariant, audit trail, cleanup. See the 0.10.0
+  entry at the top for the current suite (sections 1–21, **113 assertions**).
 - **CHANGELOG**: new `[0.5.0]` section (Payments module: receipts + उधारी hub).
 
 # Blocked
@@ -123,11 +174,32 @@ owner Reports hub with CSV/print export and a printable customer पावती
   chip-customer win.)
 
 # Next Move
-None pending — reports feature verified end-to-end (75/75). Remaining plan
-(when asked): customer notifications **inbox** UI (`markNotificationRead` exists,
-no API/UI yet), PWA/web push, broadcast SMS/WhatsApp phase 2.
+None pending — customer portal + status timeline verified end-to-end (113/113).
+Remaining plan (when asked): PWA/web push, broadcast SMS/WhatsApp phase 2, and
+(pre-launch) verify/fix the production CSP in `next.config.ts` (prod
+`script-src 'self'` with no nonce may break Next hydration).
 
 # Relevant Files
+- **Order status timeline (`0.10.1`)**: `src/components/customer/OrderProgress.tsx`,
+  `src/lib/order-status-history.ts` (backfill, filter-scoped),
+  `scripts/backfill-status-history.ts` (`npm run backfill-status`),
+  `src/models/Order.ts` (`statusHistory`), `src/services/orderService.ts`
+  (seeds/append + `OrderView.statusHistory`)
+- **Customer portal (`0.10.0`)**: `src/app/my/page.tsx` (dashboard),
+  `src/services/customerDashboardService.ts`, `src/components/customer/*
+  ({CustomerNotificationsPanel,CustomerOrdersPanel}.tsx)`,
+  `src/app/api/my/{overview, notifications/[id]/read, notifications/read-all}/route.ts`
+- **Portal hardening**: `src/services/authService.ts` (lockout, dummy-verify,
+  idle + deactivation gate), `src/models/{Customer,Session}.ts`,
+  `src/lib/config/env.ts` (`SESSION_IDLE_TTL`, `TRUST_PROXY`),
+  `src/lib/request-context.ts` (XFF gating)
+- **Owner targeted messaging**: `src/app/api/owner/notifications/broadcast/route.ts`
+  (`customerIds`), `src/lib/i18n/validation.ts` (`broadcastNotificationSchema`),
+  `src/components/owner/notifications/NotificationsComposer.tsx` (audience picker),
+  `src/app/owner/notifications/page.tsx`, `src/services/notificationService.ts`
+  (`sendCustomersMessage`, `markAllNotificationsRead`, `listNotificationsForCustomer`,
+  `unreadNotificationCount`)
+- `src/lib/i18n/i18n.ts` (`notif.*` + `cust.*` keys)
 - `src/services/reportService.ts` (`resolveRange`, `getReportSummary`),
   `src/lib/csv.ts` (`toCsv`/`downloadCsv`), `src/app/api/owner/reports/route.ts`,
   `src/app/api/owner/reports/export/route.ts`
@@ -135,26 +207,22 @@ no API/UI yet), PWA/web push, broadcast SMS/WhatsApp phase 2.
   (`ReportRangePicker`, `ReportActions`, `ReportsSummary`)
 - `src/app/print/receipt/[id]/page.tsx` (printable पावती, `requirePageSession`),
   `src/components/common/PrintButton.tsx`, `src/app/globals.css` (`@media print`)
-- `src/models/Notification.ts` (`broadcast` type), `src/lib/i18n/validation.ts`
-  (`broadcastNotificationSchema`)
-- `src/services/notificationService.ts` — `broadcastToActiveCustomers` +
-  `markNotificationRead` (unwired)
-- `src/app/api/owner/notifications/broadcast/route.ts` (new),
-  `src/components/owner/notifications/NotificationsComposer.tsx`,
-  `src/app/owner/notifications/page.tsx`, `src/services/demoSeedService.ts`
 - `src/models/Order.ts` — PaymentMethod/PaymentEntry types + `payments[]`
 - `src/lib/validation.ts` — recordPayment/createOrder/transition zod schemas
 - `src/services/orderService.ts` — recordPayment, advance-on-create, single-write
-  transition, OrderView.payments, `getOrder(id)`/`getOrderByNumber(n)`
+  transition, OrderView.payments, `getOrder(id)`/`getOrderByNumber(n)`,
+  `getOrdersForCustomer`
 - `src/components/owner/payments/PaymentsPanel.tsx` — CSV/Print toolbar +
   per-row पावती link, `lang` prop (hydration-safe); `PaymentModal`/`PaymentEntry`
   take `lang` too
-- `src/app/api/orders/[id]/payment/route.ts` (new) + `src/app/api/orders/route.ts`
+- `src/app/api/orders/[id]/payment/route.ts` + `src/app/api/orders/route.ts`
   + `src/app/api/orders/[id]/status/route.ts` — API layer
 - `src/components/owner/PaymentEntry.tsx`, `src/app/owner/payments/page.tsx`,
   `src/app/owner/outstanding/page.tsx`, `src/components/owner/PaymentsHubPanel.tsx`,
-  `src/app/owner/queue/OrderActionModal.tsx` (`next enum` mutated), 
-  `src/app/owner/CustomerStatusGrid.tsx` (chip→link), `NewOrderForm.tsx`
+  `src/app/owner/queue/OrderActionModal.tsx` (`next enum` mutated,
+  double-encode bug fixed), `src/app/owner/CustomerStatusGrid.tsx` (chip→link),
+  `NewOrderForm.tsx`
 - `src/services/demoSeedService.ts` — seeded `payments[]`
-- `scripts/test-db-roundtrip.ts`, `src/lib/http.ts`/`audit.ts`/`notify.ts`
-- `CHANGELOG.md` ([0.5.0])
+- `scripts/test-db-roundtrip.ts` (sections 1–21, **113 assertions**),
+  `src/lib/http.ts`/`audit.ts`/`notify.ts`
+- `CHANGELOG.md` ([0.10.0], [0.5.0])

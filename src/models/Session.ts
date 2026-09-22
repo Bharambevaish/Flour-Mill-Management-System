@@ -9,6 +9,8 @@ export interface Session {
   ip: string | null;
   userAgent: string | null;
   createdAt: Date;
+  /** Last request that used this session (idle-timeout enforcement). */
+  lastUsedAt: Date;
   expiresAt: Date;
   revokedAt: Date | null;
 }
@@ -22,6 +24,7 @@ const SessionSchema = new Schema<Session>(
     ip: { type: String, default: null },
     userAgent: { type: String, default: null },
     createdAt: { type: Date, default: Date.now },
+    lastUsedAt: { type: Date, default: Date.now },
     expiresAt: { type: Date, required: true, index: true },
     revokedAt: { type: Date, default: null },
   },

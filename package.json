@@ -9,6 +9,7 @@
     "lint": "eslint",
     "seed": "node scripts/seed-admin.mjs",
     "seed:demo": "node scripts/seed-demo-orders.ts",
+    "backfill-status": "node scripts/backfill-status-history.ts",
     "test": "node scripts/test-db-roundtrip.ts",
     "mongo": "bash scripts/mongo-start.sh",
     "mongo:stop": "bash scripts/mongo-stop.sh"
