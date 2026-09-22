@@ -8,6 +8,10 @@ export interface Customer {
   mustChangePin: boolean;
   active: boolean;
   lang: Lang;
+  /** Consecutive failed PIN attempts since the last success (brute-force guard). */
+  failedPinAttempts: number;
+  /** Locked until this time after repeated failures (progressive). */
+  lockedUntil: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,6 +24,8 @@ const CustomerSchema = new Schema<Customer>(
     mustChangePin: { type: Boolean, default: true },
     active: { type: Boolean, default: true },
     lang: { type: String, enum: ["mr", "en"], default: "mr" },
+    failedPinAttempts: { type: Number, default: 0, min: 0 },
+    lockedUntil: { type: Date, default: null },
   },
   { timestamps: true },
 );

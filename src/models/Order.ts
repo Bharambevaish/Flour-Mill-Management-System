@@ -19,6 +19,13 @@ export interface PaymentEntry {
   recordedAt: Date;
 }
 
+/** One step of the order's journey (pending → processing → completed → collected). */
+export interface StatusHistoryEntry {
+  status: OrderStatus;
+  /** When this status was entered (falls back to createdAt/updatedAt on old rows). */
+  at: Date;
+}
+
 export interface Order {
   orderId: number;
   customerId: Types.ObjectId;
@@ -30,6 +37,8 @@ export interface Order {
   paidAmount: number;
   payments: PaymentEntry[];
   status: OrderStatus;
+  /** Durable per-step timestamps — drives the customer's progress timeline. */
+  statusHistory: StatusHistoryEntry[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -56,6 +65,15 @@ const OrderSchema = new Schema<Order>(
       default: [],
     },
     status: { type: String, enum: ORDER_STATUSES, default: "pending", index: true },
+    statusHistory: {
+      type: [
+        {
+          status: { type: String, enum: ORDER_STATUSES, required: true },
+          at: { type: Date, required: true },
+        },
+      ],
+      default: [],
+    },
   },
   { timestamps: true },
 );

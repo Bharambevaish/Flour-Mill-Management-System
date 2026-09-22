@@ -30,13 +30,14 @@ export default async function NotificationsPage() {
   const lang = await getLang();
 
   await connectDb();
-  const [customerCount, settings, rows] = await Promise.all([
+  const [customerCount, settings, rows, activeCustomers] = await Promise.all([
     CustomerModel.countDocuments({ active: true }),
     getSettingsOrDefault(),
     NotificationModel.find({ type: "broadcast", customerId: { $ne: null } })
       .sort({ sentAt: -1 })
       .limit(300)
       .lean(),
+    CustomerModel.find({ active: true }).select("name mobile").sort({ name: 1 }).lean(),
   ]);
 
   // Group the fan-out rows back into "one send" per message+language.
@@ -67,6 +68,11 @@ export default async function NotificationsPage() {
 
       <NotificationsComposer
         customerCount={customerCount}
+        customers={activeCustomers.map((c) => ({
+          id: String(c._id),
+          name: c.name,
+          mobile: c.mobile,
+        }))}
         inAppEnabled={settings.notifications.inApp}
         initialLang={lang}
       />

@@ -18,6 +18,7 @@ import { loadEnvFile } from "node:process";
 loadEnvFile(".env.local");
 
 import mongoose from "mongoose";
+import { backfillStatusHistory } from "../src/lib/order-status-history.ts";
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -108,6 +109,7 @@ async function main() {
   const Notif = mongoose.connection.collection("notifications");
   const Aud = mongoose.connection.collection("auditlogs");
   const Customer = mongoose.connection.collection("customers");
+  const Sessions = mongoose.connection.collection("sessions");
   const SettingsC = mongoose.connection.collection("settings");
   const Admin = mongoose.connection.collection("admins");
 
@@ -475,6 +477,232 @@ async function main() {
   // cleanup this section
   await Order.deleteOne({ orderId: rptId });
   await Aud.deleteMany({ "meta.orderId": rptId });
+
+  /* --------------------------------------------------------------------- */
+  /* 20) Customer portal: own-scope reads + hardening                       */
+  /*     (overview scoping, notification read one/all, targeted broadcast,  */
+  /*      cross-customer tamper no-op, PIN lockout, deactivation gate,      */
+  /*      idle-timeout revocation)                                          */
+  /* --------------------------------------------------------------------- */
+
+  // Two fresh, unique test customers — A is the target, B is the "other"
+  // account that must never see A's data (no IDOR). Mobiles are 10 digits.
+  const mobileA = "9" + String(testStart).padStart(10, "0").slice(-9);
+  const mobileB = "9" + String(testStart + 977771).padStart(10, "0").slice(-9);
+  const pinA = "1111";
+  const pinB = "2222";
+
+  await freshCsrf();
+  const cA = await api<{ customer?: { id?: string } }>("/api/customers", "POST", { name: "Portal Test A", mobile: mobileA, pin: pinA });
+  const cB = await api<{ customer?: { id?: string } }>("/api/customers", "POST", { name: "Portal Test B", mobile: mobileB, pin: pinB });
+  const aId = cA.json.customer?.id ?? "";
+  const bId = cB.json.customer?.id ?? "";
+  check("portal: two test customers created", cA.status === 201 && cB.status === 201 && !!aId && !!bId, `A ${cA.status} B ${cB.status}`);
+
+  const po = await api<{ order?: { orderId: number; id: string; paidAmount: number; outstanding: number } }>(
+    "/api/orders", "POST",
+    { customerId: aId, grainType: "wheat", requiredSize: "fine", weightKg: 12, ratePerKg: 8, advanceAmount: 10, advanceMethod: "cash" },
+  );
+  const poNum = po.json.order?.orderId;
+  const poDoc = po.json.order?.id;
+  check("portal: order for A created (₹10 paid, ₹86 due)", po.status === 201 && po.json.order?.paidAmount === 10 && po.json.order?.outstanding === 86, `got ${po.status}`);
+
+  await freshCsrf();
+  const poT = await api(`/api/orders/${poDoc}/status`, "PATCH", { status: "processing" });
+  check("portal: owner transitions A's order → processing", poT.status === 200, `got ${poT.status}`);
+
+  // Targeted broadcast to ONLY A.
+  const portalMsg = `Portal-specific note ${testStart}`;
+  await freshCsrf();
+  const tgt = await api<{ count?: number }>("/api/owner/notifications/broadcast", "POST", { message: portalMsg, lang: "en", customerIds: [aId] });
+  check("portal: targeted broadcast → count 1", tgt.status === 200 && tgt.json.count === 1, `got ${tgt.status} count ${tgt.json.count}`);
+  const tgtAudit = await Aud.countDocuments({ action: "notifications.broadcast", "meta.customers": 1, "meta.message": portalMsg });
+  check("portal: targeted broadcast audited with recipient count", tgtAudit >= 1, `found ${tgtAudit}`);
+
+  type Dash = { dashboard?: { orders?: { orderId: number }[]; outstandingTotal?: number; unreadCount?: number; notifications?: { id: string; type: string; message: string; read: boolean }[] } };
+
+  // A logs in — own-scope overview.
+  await freshCsrf();
+  const la = await api<{ user?: { id?: string }; csrfToken?: string }>("/api/auth/customer/login", "POST", { mobile: mobileA, pin: pinA });
+  check("portal: A logs in with mobile + PIN", la.status === 200 && !!la.json.user?.id, `got ${la.status}`);
+  await freshCsrf();
+  const ov = await api<Dash>("/api/my/overview", "GET");
+  const notifs = ov.json.dashboard?.notifications ?? [];
+  const unread = ov.json.dashboard?.unreadCount ?? -1;
+  const oneId = notifs.find((n) => !n.read)?.id ?? notifs[0]?.id ?? "";
+  check("portal: A overview shows own order + ₹86 due", ov.status === 200 && (ov.json.dashboard?.orders ?? []).some((o) => o.orderId === poNum) && ov.json.dashboard?.outstandingTotal === 86, `got ${ov.status}`);
+  check("portal: A has unread orderReceived + orderProcessing + broadcast", unread >= 3, `unread ${unread}`);
+  check("portal: messages are translated, not raw 'notif.*' keys", notifs.every((n) => !n.message.startsWith("notif.")), JSON.stringify(notifs.map((n) => n.message)));
+
+  // B logs in — must see none of A's data.
+  await freshCsrf();
+  const lb = await api("/api/auth/customer/login", "POST", { mobile: mobileB, pin: pinB });
+  check("portal: B logs in", lb.status === 200, `got ${lb.status}`);
+  await freshCsrf();
+  const ovB = await api<Dash>("/api/my/overview", "GET");
+  check("portal: B cannot see A's order", ovB.status === 200 && !(ovB.json.dashboard?.orders ?? []).some((o) => o.orderId === poNum), `got ${ovB.status}`);
+  check("portal: B has zero unread (no leaked notifications)", (ovB.json.dashboard?.unreadCount ?? -1) === 0, `unread ${ovB.json.dashboard?.unreadCount}`);
+  check("portal: targeted broadcast did NOT reach B", !(ovB.json.dashboard?.notifications ?? []).some((n) => n.message === portalMsg));
+
+  // B pokes A's UNREAD notification id → must be a silent no-op (200, DB untouched).
+  await freshCsrf();
+  const cross = await api<{ marked?: number }>(`/api/my/notifications/${oneId}/read`, "PATCH", {});
+  check("portal: cross-customer read → 200 (no existence oracle)", cross.status === 200, `got ${cross.status}`);
+  const notifDoc = await Notif.findOne({ _id: new mongoose.Types.ObjectId(oneId) });
+  const readAtAfterTamper = (notifDoc as unknown as { readAt?: Date | null } | null)?.readAt ?? null;
+  check("portal: A's notification still unread after B's tamper", readAtAfterTamper == null, `readAt ${String(readAtAfterTamper)}`);
+
+  // Back to A: mark one read, then read-all.
+  await freshCsrf();
+  const la2 = await api("/api/auth/customer/login", "POST", { mobile: mobileA, pin: pinA });
+  check("portal: A re-logs in", la2.status === 200, `got ${la2.status}`);
+  await freshCsrf();
+  const r1 = await api<{ marked?: number }>(`/api/my/notifications/${oneId}/read`, "PATCH", {});
+  check("portal: A marks one notification read → 200", r1.status === 200, `got ${r1.status}`);
+  const unreadAfterOne = (await api<Dash>("/api/my/overview", "GET")).json.dashboard?.unreadCount ?? -1;
+  check("portal: unread drops by one after single read", unreadAfterOne === unread - 1, `was ${unread}, now ${unreadAfterOne}`);
+  await freshCsrf();
+  const rAll = await api<{ marked?: number }>("/api/my/notifications/read-all", "PATCH", {});
+  check("portal: read-all → marks the rest", rAll.status === 200 && (rAll.json.marked ?? 0) >= 1, `got ${rAll.status} marked ${rAll.json.marked}`);
+  const unreadAll = (await api<Dash>("/api/my/overview", "GET")).json.dashboard?.unreadCount ?? -1;
+  check("portal: unread now 0 after read-all", unreadAll === 0, `unread ${unreadAll}`);
+
+  // Unknown mobile → 401 (never reveals whether the account exists).
+  await freshCsrf();
+  const ghost = await api("/api/auth/customer/login", "POST", { mobile: `${Number(mobileA) === 9999888800 ? 9999888801 : 9999888800}`, pin: pinA });
+  check("portal: unknown mobile → 401 (no enumeration)", ghost.status === 401, `got ${ghost.status}`);
+
+  // PIN lockout: 5 wrong attempts lock the account, then even the right PIN → 429.
+  const wrongPin = "0000"; // 4 digits, differs from pinA/pinB
+  for (let i = 0; i < 5; i++) {
+    await freshCsrf();
+    await api("/api/auth/customer/login", "POST", { mobile: mobileB, pin: wrongPin });
+  }
+  await freshCsrf();
+  const locked = await api<{ error?: { code?: string } }>("/api/auth/customer/login", "POST", { mobile: mobileB, pin: pinB });
+  check("portal: correct PIN during lockout → 429 ACCOUNT_LOCKED", locked.status === 429 && locked.json.error?.code === "ACCOUNT_LOCKED", `got ${locked.status} ${locked.json.error?.code}`);
+  const bDoc = await Customer.findOne({ _id: new mongoose.Types.ObjectId(bId) });
+  check("portal: B lockedUntil persisted in DB", !!bDoc?.lockedUntil && bDoc.lockedUntil.getTime() > Date.now(), JSON.stringify({ lockedUntil: bDoc?.lockedUntil }));
+  await Customer.updateOne({ _id: new mongoose.Types.ObjectId(bId) }, { $set: { lockedUntil: null, failedPinAttempts: 0 } });
+  await freshCsrf();
+  const lb2 = await api<{ user?: { id?: string } }>("/api/auth/customer/login", "POST", { mobile: mobileB, pin: pinB });
+  check("portal: B logs in again after clearing the lock", lb2.status === 200 && !!lb2.json.user?.id, `got ${lb2.status}`);
+  await freshCsrf();
+
+  // Idle timeout: push B's latest session's lastUsedAt back past the TTL → 401.
+  const bSesh = await Sessions.find({ kind: "customer", refId: new mongoose.Types.ObjectId(bId), revokedAt: null }).sort({ createdAt: -1 }).limit(1).next();
+  await Sessions.updateOne({ _id: bSesh?._id }, { $set: { lastUsedAt: new Date(0) } });
+  const idle = await api("/api/my/overview", "GET");
+  check("portal: idle session past SESSION_IDLE_TTL → 401", idle.status === 401, `got ${idle.status}`);
+
+  // Deactivation gate: flipping A inactive kills the session on the next request.
+  await Customer.updateOne({ _id: new mongoose.Types.ObjectId(aId) }, { $set: { active: false } });
+  const inactive = await api<{ error?: { code?: string } }>("/api/my/overview", "GET");
+  check("portal: deactivated customer loses access instantly (401)", inactive.status === 401 && inactive.json.error?.code === "UNAUTHORIZED", `got ${inactive.status} ${inactive.json.error?.code}`);
+  await Customer.updateOne({ _id: new mongoose.Types.ObjectId(aId) }, { $set: { active: true } });
+
+  // cleanup this section
+  await Order.deleteOne({ orderId: poNum });
+  await Notif.deleteMany({ message: portalMsg });
+  await Notif.deleteMany({ customerId: { $in: [new mongoose.Types.ObjectId(aId), new mongoose.Types.ObjectId(bId)] } });
+  await Aud.deleteMany({ "meta.message": portalMsg });
+  await Aud.deleteMany({ "actor.actorId": { $in: [aId, bId] } });
+  await Sessions.deleteMany({ refId: { $in: [new mongoose.Types.ObjectId(aId), new mongoose.Types.ObjectId(bId)] } });
+  await Customer.deleteMany({ _id: { $in: [new mongoose.Types.ObjectId(aId), new mongoose.Types.ObjectId(bId)] } });
+  await Aud.deleteMany({ "meta.orderId": poNum });
+
+  /* --------------------------------------------------------------------- */
+  /* 21) Status history: per-step timestamps on the journey + backfill      */
+  /* --------------------------------------------------------------------- */
+  const hCustomer = await Customer.findOne({ active: true });
+  if (!hCustomer) throw new Error("No active customer for the status-history test");
+  const hCustomerId = String(hCustomer._id);
+
+  // Single order: create → processing → completed (fully settled) → collected.
+  const h1 = await api<{ order?: { id: string; orderId: number } }>("/api/orders", "POST", {
+    customerId: hCustomerId, grainType: "wheat", requiredSize: "fine", weightKg: 12, ratePerKg: 8,
+    advanceAmount: 10, advanceMethod: "cash",
+  });
+  const hDoc = h1.json.order?.id ?? "";
+  const hNum = h1.json.order?.orderId;
+  check("history: order created for lifecycle test", h1.status === 201 && !!hDoc, `got ${h1.status}`);
+
+  let hRow = await Order.findOne({ _id: new mongoose.Types.ObjectId(hDoc) });
+  const h0 = ((hRow?.statusHistory ?? []) as { status: string; at: Date }[]);
+  check("history: seeded [{pending @ createdAt}] at intake", h0.length === 1 && h0[0]?.status === "pending" && Math.abs(h0[0].at.getTime() - (hRow?.createdAt as Date).getTime()) < 5000, JSON.stringify(h0));
+
+  await freshCsrf();
+  const hTa = await api(`/api/orders/${hDoc}/status`, "PATCH", { status: "processing" });
+  await freshCsrf();
+  const hTb = await api(`/api/orders/${hDoc}/status`, "PATCH", { status: "completed", payment: { amount: 86, method: "cash" } });
+  await freshCsrf();
+  const hTc = await api(`/api/orders/${hDoc}/status`, "PATCH", { status: "collected" });
+  check("history: three transitions succeed", hTa.status === 200 && hTb.status === 200 && hTc.status === 200, `got ${hTa.status}/${hTb.status}/${hTc.status}`);
+
+  hRow = await Order.findOne({ _id: new mongoose.Types.ObjectId(hDoc) });
+  const hHist = ((hRow?.statusHistory ?? []) as { status: string; at: Date }[]);
+  check("history: full lifecycle → pending/processing/completed/collected", hHist.length === 4 && hHist.map((x) => x.status).join() === "pending,processing,completed,collected", JSON.stringify(hHist.map((x) => x.status)));
+  check("history: timestamps strictly non-decreasing", hHist.every((x, i) => i === 0 || hHist[i - 1].at.getTime() <= x.at.getTime()), JSON.stringify(hHist.map((x) => x.at.toISOString())));
+  check("history: last step time == updatedAt (one atomic save)", Math.abs((hRow?.updatedAt as Date).getTime() - hHist[3].at.getTime()) < 5000);
+
+  // Backfill a legacy-style row (no statusHistory) → pending@created + current@updated; idempotent.
+  await Order.updateOne({ _id: new mongoose.Types.ObjectId(hDoc) }, { $unset: { statusHistory: "" } });
+  const stripped = await Order.findOne({ _id: new mongoose.Types.ObjectId(hDoc) });
+  check("history: stripped row has no statusHistory (legacy shape)", !stripped || (stripped as { statusHistory?: unknown }).statusHistory === undefined);
+  const backfilled1 = await backfillStatusHistory(Order, { _id: new mongoose.Types.ObjectId(hDoc) });
+  const bRow = await Order.findOne({ _id: new mongoose.Types.ObjectId(hDoc) });
+  const bHist = ((bRow?.statusHistory ?? []) as { status: string; at: Date }[]);
+  check("history: backfill builds [pending@created, collected@updated]", backfilled1 === 1 && bHist.length === 2 && bHist[0].status === "pending" && bHist[1].status === "collected" && Math.abs(bHist[0].at.getTime() - (bRow?.createdAt as Date).getTime()) < 5000 && Math.abs(bHist[1].at.getTime() - (bRow?.updatedAt as Date).getTime()) < 5000, JSON.stringify(bHist));
+  const backfilled2 = await backfillStatusHistory(Order, { _id: new mongoose.Types.ObjectId(hDoc) });
+  const bRow2 = await Order.findOne({ _id: new mongoose.Types.ObjectId(hDoc) });
+  check("history: backfill is idempotent (re-run changes nothing)", backfilled2 === 0 && ((bRow2?.statusHistory ?? []) as unknown[]).length === 2, `modified ${backfilled2}`);
+
+  // Batch intake: every line gets its own pending step.
+  const h3 = await api<{ orders?: { orderId: number }[] }>("/api/orders", "POST", {
+    customerId: hCustomerId,
+    items: [
+      { grainType: "maize", requiredSize: "medium", weightKg: 10, ratePerKg: 5 },
+      { grainType: "jowar", requiredSize: "fine", weightKg: 8, ratePerKg: 4 },
+    ],
+  });
+  const h3Nums = (h3.json.orders ?? []).map((o) => o.orderId);
+  const h3rows = await Order.find({ orderId: { $in: h3Nums } }).toArray();
+  check("history: every batch line starts with one pending step", h3.status === 201 && h3rows.length === 2 && h3rows.every((r) => { const h = (r as { statusHistory?: { status: string }[] }).statusHistory ?? []; return h.length === 1 && h[0].status === "pending"; }), `rows ${h3rows.length}`);
+
+  // Customer sees the timeline in the portal (overview DTO carries statusHistory).
+  const hMobile = "9" + String(testStart + 137331).padStart(10, "0").slice(-9);
+  const hPin = "3333";
+  await freshCsrf();
+  const hC = await api<{ customer?: { id?: string } }>("/api/customers", "POST", { name: "History Test D", mobile: hMobile, pin: hPin });
+  const hDid = hC.json.customer?.id ?? "";
+  await freshCsrf();
+  const h2 = await api<{ order?: { id: string; orderId: number } }>("/api/orders", "POST", {
+    customerId: hDid, grainType: "rice", requiredSize: "coarse", weightKg: 10, ratePerKg: 4, advanceAmount: 5, advanceMethod: "cash",
+  });
+  await freshCsrf();
+  const h2T = await api(`/api/orders/${h2.json.order?.id}/status`, "PATCH", { status: "processing" });
+  await freshCsrf();
+  const h2L = await api("/api/auth/customer/login", "POST", { mobile: hMobile, pin: hPin });
+  check("history: D's journey + login ready", h2.status === 201 && h2T.status === 200 && h2L.status === 200, `got ${h2.status}/${h2T.status}/${h2L.status}`);
+  await freshCsrf();
+  const oHas = await api<{ dashboard?: { orders?: { orderId: number; statusHistory?: { status: string; at: string }[] }[] } }>("/api/my/overview", "GET");
+  const mine = (oHas.json.dashboard?.orders ?? []).find((o) => o.orderId === h2.json.order?.orderId);
+  check("history: overview exposes per-step times to the customer", (mine?.statusHistory?.length ?? 0) === 2 && mine?.statusHistory?.[0]?.status === "pending" && mine?.statusHistory?.[1]?.status === "processing" && !!mine?.statusHistory?.[1]?.at, JSON.stringify(mine?.statusHistory));
+
+  // cleanup this section
+  await Order.deleteOne({ _id: new mongoose.Types.ObjectId(hDoc) });
+  await Order.deleteMany({ _id: { $in: h3rows.map((r) => r._id) } });
+  await Order.deleteMany({ _id: new mongoose.Types.ObjectId(h2.json.order?.id ?? "") });
+  await Notif.deleteMany({ customerId: hCustomer._id, sentAt: { $gte: new Date(testStart) } });
+  await Aud.deleteMany({
+    $or: [
+      { "meta.orderId": { $in: [hNum, h2.json.order?.orderId].filter(Boolean) } },
+      { "meta.orderIds": { $in: h3Nums } },
+      { "actor.actorId": hDid },
+    ],
+  });
+  await Customer.deleteOne({ _id: new mongoose.Types.ObjectId(hDid) });
+  await Sessions.deleteMany({ refId: new mongoose.Types.ObjectId(hDid) });
 
   /* ---------- cleanup: remove every trace the test created ---------- */
   await Order.deleteOne({ orderId });

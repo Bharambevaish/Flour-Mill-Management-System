@@ -5,9 +5,108 @@ All notable changes to this project, in reverse chronological order. Format base
 ## [Unreleased]
 
 ### Next milestones (planned)
-- Customer dashboard notifications inbox (bilingual, mark-read)
 - PWA + web push
 - Phase 2: SMS (MSG91) + WhatsApp (Meta)
+
+## [0.10.1] - 2026-09-22 — Order status timeline for customers
+
+### Added
+- **Progress tracker on every customer order card** (`OrderProgress`): a thin
+  4-step bar — रांगेत → दळण सुरू → तयार → घेतले — filled up to the current
+  step, the current one highlighted, and a live "Currently: …" caption. Tapping
+  **View times** expands a vertical timeline showing the timestamp of every
+  reached step (or "वेळ माहित नाही / time n/a" when a step was provably reached
+  but has no stored time).
+- **Durable per-step timestamps**: `Order.statusHistory: {status, at}[]` written
+  atomically — `[pending, now]` at intake (`createOrder` + every `createOrders`
+  batch line) and the next step appended inside the same single `doc.save()` as
+  the transition, so status, payment, balance and history can never disagree.
+  Exposed to the customer via `OrderView.statusHistory` / `/api/my/overview`.
+- **Migration** `npm run backfill-status`: idempotent backfill for orders placed
+  before this shipped. Synthesizes the provable timeline — `pending@createdAt` +
+  current status @ `updatedAt` — and skips rows that already have history
+  (`src/lib/order-status-history.ts`, shared by the script and the test).
+- Demo seed scenarios now carry matching `statusHistory` so sampled orders show a
+  complete timeline.
+
+### Tests
+- Section 21 (12 assertions): pending step seeded at intake (+ per batch line),
+  strict ascending steps across a full lifecycle, last step == `updatedAt`
+  (single atomic write), legacy-row stripping + backfill → `[pending@created,
+  current@updated]`, re-run is a no-op, and the customer overview DTO exposing
+  per-step times. **Now 113/113 passing.**
+
+## [0.10.0] - 2026-09-22 — Secure read-only customer portal
+
+### Added
+- **Customer dashboard** (`/my`, was the Coming Soon stub): a real page now —
+  greeting with the customer's name, `mustChangePin` temp-PIN banner, three stat
+  cards (Total Outstanding Due / Active Orders / Unread Notifications) and two
+  panels: the **notifications inbox** and the **order tracker**. Fully bilingual
+  (mr/en) via server-side `getLang()`.
+- **Notifications inbox**: every row shows its type label + translated message;
+  tapping a row marks it read; a **Mark all as read** button clears the rest.
+  Unread count is a live badge in the panel and the stat card.
+- **Order tracker**: per-order cards with token number, status badge, grain ·
+  size · weight · rate, Total / Paid / Due, and an expandable **Payment history**
+  (cash/UPI, txn id, date) — no re-entering his उधारी figure, it's the same
+  `OrderView.outstanding` math the owner side shows.
+- **Targeted owner messaging**: the Notifications composer gained an audience
+  picker — **All active customers** (fan-out) or **Specific customers**
+  (multi-select from the active list). Each recipient gets one *private* row;
+  no customer ever sees who else was messaged or any balances.
+  `sendCustomersMessage()` (dedupe, honours the in-app switch),
+  `broadcastNotificationSchema` accepts optional `customerIds` (max 200,
+  24-hex), the broadcast route audits `{customers: count, lang, targeted,
+  message}`, and `/owner/notifications` now pages the active customer list to
+  the composer.
+- **Customer APIs** (all session-scoped — the customer id NEVER comes from the
+  URL or body, so there is **no IDOR surface**): `GET /api/my/overview`
+  (`getCustomerDashboard`), `PATCH /api/my/notifications/[id]/read` and
+  `PATCH /api/my/notifications/read-all`. The single-notification route always
+  answers 200 (no existence oracle) and only ever touches a row whose
+  `customerId` matches the session; read actions are CSRF'd + rate-limited on a
+  `customer-mutation:<ip>` bucket + audited (`notification.read`,
+  `notification.read.noop`, `notification.readAll`).
+- **Login hardening for PIN customers**:
+  - **Progressive lockout**: 5 wrong PINs lock the account (15-minute base,
+    doubling per round); the lock is persisted (`lockedUntil`), cleared on a
+    correct PIN, and enforced before verification → `429 ACCOUNT_LOCKED`.
+    Attempts are counted in `failedPinAttempts` on the Customer doc.
+  - **Timing equalization**: unknown mobiles verify against a real Argon2 dummy
+    hash (`verifyAgainstDummy`) so response time never reveals whether an
+    account exists; status codes stay uniform `401 INVALID_CREDENTIALS`.
+  - **`TRUST_PROXY` env flag**: `clientIp` only trusts `x-forwarded-for` when
+    the app runs behind a trusted proxy (default `false`), so a directly-exposed
+    app can't have its rate buckets spoofed.
+  - **Idle timeout**: sessions die after `SESSION_IDLE_TTL` seconds of
+    inactivity (default 1800, `0` disables) — `Session.lastUsedAt` is tracked and
+    only written at most every 60s; an idle session is revoked → 401.
+  - **Deactivation gate**: flipping a customer inactive revokes their session on
+    the very next request (checked in `requireSession`, not just at login) and
+    the same check runs at login → `403 ACCOUNT_INACTIVE`.
+
+### Changed
+- **Latent i18n bug fixed**: stored notification messages were often raw
+  `notif.*` keys because those keys were missing from the dictionary. Added
+  bilingual `notif.*` + new `cust.*` entries, so inbox rows are real sentences
+  in the customer's language (test asserts no message starts with `notif.`).
+- `AppError` fix: constructor is 3 args (status, message, code); a lockout throw
+  was passing a 4th arg and would have been `500 INTERNAL`.
+- `sendCustomersMessage` / `notifyCustomer` now build recipient ObjectIds via
+  `new Types.ObjectId(s)` (value import fix — was `ObjectId` type-only).
+- Owner `OrderActionModal` double-encoding fixed (`body: payload`, `apiFetch`
+  already JSON-stringifies) — status transitions were silently failing with
+  `400 Invalid input`.
+
+### Tests
+- `scripts/test-db-roundtrip.ts` grew a **section 20 — customer portal +
+  hardening** (26 new assertions): own-scope overview, translated-notification
+  check, target-only broadcast + recipient isolation, cross-customer read no-op,
+  mark-one/read-all unread math, unknown-mobile 401, PIN lockout (5 fails →
+  `429 ACCOUNT_LOCKED` + persisted `lockedUntil`), idle-timeout 401, and
+  deactivation 401. Full self-cleanup of customers, sessions, orders,
+  notifications and audits. **Now 101/101 passing.**
 
 ## [0.9.0] - 2026-09-21 — Reports hub, CSV/PDF export & printable पावती
 

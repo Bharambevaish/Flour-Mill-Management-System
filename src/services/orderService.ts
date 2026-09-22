@@ -11,6 +11,7 @@ import {
   type OrderStatus,
   type PaymentEntry,
   type PaymentMethod,
+  type StatusHistoryEntry,
 } from "@/models/Order";
 import { SequenceModel } from "@/models/Sequence";
 import { requireSession } from "@/services/authService";
@@ -54,6 +55,8 @@ export interface OrderView {
   paidAmount: number;
   outstanding: number;
   payments: { amount: number; method: PaymentMethod; upiTxnId?: string; recordedAt: string }[];
+  /** Per-step timestamps of the order's journey, oldest first (see OrderProgress). */
+  statusHistory: { status: OrderStatus; at: string }[];
   status: OrderStatus;
   createdAt: string;
   updatedAt: string;
@@ -77,6 +80,7 @@ type OrderRow = {
   paidAmount: number;
   payments: PaymentEntry[];
   status: OrderStatus;
+  statusHistory?: StatusHistoryEntry[];
   createdAt: Date;
   updatedAt: Date;
   customer?: { _id: Types.ObjectId; name: string; mobile: string } | null;
@@ -102,6 +106,10 @@ function toView(doc: OrderRow): OrderView {
       method: p.method,
       upiTxnId: p.upiTxnId,
       recordedAt: p.recordedAt instanceof Date ? p.recordedAt.toISOString() : String(p.recordedAt),
+    })),
+    statusHistory: (doc.statusHistory ?? []).map((h) => ({
+      status: h.status,
+      at: h.at instanceof Date ? h.at.toISOString() : String(h.at),
     })),
     status: doc.status,
     createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : String(doc.createdAt),
@@ -157,6 +165,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderView> {
     ];
   }
 
+  const now = new Date();
   const doc = await OrderModel.create({
     orderId: await nextOrderId(),
     customerId: customer._id,
@@ -168,6 +177,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderView> {
     paidAmount,
     payments,
     status: "pending",
+    statusHistory: [{ status: "pending", at: now }],
   });
 
   await safelyNotify({
@@ -268,6 +278,7 @@ export async function createOrders(input: CreateOrdersInput): Promise<OrderView[
           ]
         : [],
     status: "pending",
+    statusHistory: [{ status: "pending", at: now }],
   }));
 
   const created = await OrderModel.insertMany(docs);
@@ -327,6 +338,7 @@ export async function listOrders(options: ListOrdersOptions = {}): Promise<Order
 
 /** Fresh order view with the customer populated — used after mutations. */
 export async function getOrder(orderId: string): Promise<OrderView> {
+  await connectDb();
   const row = await OrderModel.findById(orderId)
     .populate<{ customerId: OrderRow["customer"] }>("customerId", "name mobile")
     .lean();
@@ -335,6 +347,21 @@ export async function getOrder(orderId: string): Promise<OrderView> {
     ...(row as unknown as OrderRow),
     customer: (row.customerId as OrderRow["customer"]) ?? null,
   });
+}
+
+/**
+ * Every order belonging to one customer, newest first, with the same
+ * `outstanding` math as the owner side. Caller is responsible for session
+ * gating (customer dashboard / /api/my/overview).
+ */
+export async function getOrdersForCustomer(
+  customerId: Types.ObjectId | string,
+): Promise<OrderView[]> {
+  await connectDb();
+  const docs = await OrderModel.find({ customerId: customerId as Types.ObjectId })
+    .sort({ createdAt: -1 })
+    .lean();
+  return docs.map((d) => toView({ ...(d as unknown as OrderRow), customer: null }));
 }
 
 /** Look up an order by its human-readable order number (printable पावती links). */
@@ -427,6 +454,10 @@ export async function transitionOrder(
   applyPayment(doc, input.payment);
 
   doc.status = input.status;
+  doc.statusHistory = [
+    ...(doc.statusHistory ?? []),
+    { status: input.status, at: new Date() },
+  ];
   await doc.save();
 
   const nowOutstanding = Math.round((doc.totalCharges - doc.paidAmount) * 100) / 100;

@@ -9,7 +9,7 @@ import {
 } from "@/models/Notification";
 import { getSettingsOrDefault } from "@/services/settingsService";
 import { CustomerModel } from "@/models/Customer";
-import type { Types } from "mongoose";
+import { Types } from "mongoose";
 
 const ACTIVE_CHANNELS: NotificationChannel[] = ["inApp"]; // push/sms/whatsapp phased in later
 
@@ -69,13 +69,55 @@ export async function markNotificationRead(
   return res.modifiedCount > 0;
 }
 
-/**
- * Owner broadcast: fan the same free-text announcement out to every ACTIVE
- * customer, one in-app Notification row per customer (each tagged with its
- * customerId so the future customer inbox picks it up). Honours the master
- * "in-app notifications" switch — when it's off, nothing is delivered.
- */
-export async function broadcastToActiveCustomers(input: {
+/** Mark every unread notification of a customer as read. Returns count marked. */
+export async function markAllNotificationsRead(
+  customerId: Types.ObjectId,
+): Promise<number> {
+  await connectDb();
+  const res = await NotificationModel.updateMany(
+    { customerId, readAt: null },
+    { $set: { readAt: new Date() } },
+  );
+  return res.modifiedCount;
+}
+
+export interface CustomerNotificationView {
+  id: string;
+  type: NotificationType;
+  message: string;
+  lang: Lang;
+  read: boolean;
+  sentAt: string;
+}
+
+/** This customer's notification feed, newest first (capped). */
+export async function listNotificationsForCustomer(
+  customerId: Types.ObjectId,
+  limit = 100,
+): Promise<CustomerNotificationView[]> {
+  await connectDb();
+  const docs = await NotificationModel.find({ customerId })
+    .sort({ sentAt: -1 })
+    .limit(limit)
+    .lean();
+  return docs.map((n) => ({
+    id: String(n._id),
+    type: n.type,
+    message: n.message,
+    lang: n.lang,
+    read: !!n.readAt,
+    sentAt: n.sentAt instanceof Date ? n.sentAt.toISOString() : String(n.sentAt),
+  }));
+}
+
+export async function unreadNotificationCount(customerId: Types.ObjectId): Promise<number> {
+  await connectDb();
+  return NotificationModel.countDocuments({ customerId, readAt: null });
+}
+
+/** Fan a free-text message out to the chosen customers (one private row each). */
+export async function sendCustomersMessage(input: {
+  customerIds: Types.ObjectId[];
   message: string;
   lang: Lang;
 }): Promise<number> {
@@ -86,13 +128,15 @@ export async function broadcastToActiveCustomers(input: {
     .catch(() => null);
   if (prefs && prefs.inApp === false) return 0;
 
-  const customers = await CustomerModel.find({ active: true }).select("_id").lean();
-  if (customers.length === 0) return 0;
+  const ids = [...new Set(input.customerIds.map((c) => c.toString()))].map(
+    (s) => new Types.ObjectId(s),
+  );
+  if (ids.length === 0) return 0;
 
   const now = new Date();
   await NotificationModel.insertMany(
-    customers.map((c) => ({
-      customerId: c._id,
+    ids.map((id) => ({
+      customerId: id,
       type: "broadcast" as const,
       message: input.message,
       lang: input.lang,
@@ -102,5 +146,26 @@ export async function broadcastToActiveCustomers(input: {
       createdAt: now,
     })),
   );
-  return customers.length;
+  return ids.length;
+}
+
+/**
+ * Owner broadcast: fan the same free-text announcement out to every ACTIVE
+ * customer, one in-app Notification row per customer (each tagged with its
+ * customerId so the customer inbox picks it up). Each row is private to its
+ * recipient — no customer ever sees who else was messaged. Honours the master
+ * "in-app notifications" switch — when it's off, nothing is delivered.
+ */
+export async function broadcastToActiveCustomers(input: {
+  message: string;
+  lang: Lang;
+}): Promise<number> {
+  await connectDb();
+  const customers = await CustomerModel.find({ active: true }).select("_id").lean();
+  if (customers.length === 0) return 0;
+  return sendCustomersMessage({
+    customerIds: customers.map((c) => c._id as Types.ObjectId),
+    message: input.message,
+    lang: input.lang,
+  });
 }

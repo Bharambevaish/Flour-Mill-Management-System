@@ -46,6 +46,23 @@ export async function verifyPassword(plain: string, hash: string): Promise<boole
 }
 
 /* ------------------------------------------------------------------ */
+/* Customer PIN brute-force protection                                */
+/* ------------------------------------------------------------------ */
+
+/** Consecutive failures that trigger a lock, then lock duration grows. */
+const PIN_MAX_FAILURES = 5;
+const PIN_LOCK_BASE_MS = 15 * 60 * 1000; // 15 minutes base lock
+
+/** A real Argon2 hash to verify against when the mobile is unknown, so an
+ * absent account takes the same time as a wrong PIN (no account enumeration
+ * via response timing). */
+let dummyPinHash: string | null = null;
+async function verifyAgainstDummy(pin: string): Promise<boolean> {
+  if (!dummyPinHash) dummyPinHash = await hashPassword("timing-equalizer-dummy-pin");
+  return verifyPassword(pin, dummyPinHash);
+}
+
+/* ------------------------------------------------------------------ */
 /* Owner (super admin) login                                          */
 /* ------------------------------------------------------------------ */
 
@@ -83,12 +100,45 @@ export async function loginCustomer(credentials: { mobile: string; pin: string }
 
   const mobile = credentials.mobile.replace(/\s+/g, "").trim();
   const customer = await CustomerModel.findOne({ mobile });
-  if (!customer || !(await verifyPassword(credentials.pin, customer.pinHash))) {
+
+  // Account-level lockout: repeated failures lock the account (progressive).
+  const now = Date.now();
+  if (customer && customer.lockedUntil && customer.lockedUntil.getTime() > now) {
+    throw new AppError(
+      429,
+      "Too many failed attempts, try again later",
+      "ACCOUNT_LOCKED",
+    );
+  }
+
+  // Timing-equalize: an unknown mobile still runs a real pin verify so the
+  // response time never reveals whether the account exists.
+  const pinOk = customer ? await verifyPassword(credentials.pin, customer.pinHash) : false;
+  if (!customer || !pinOk) {
+    if (customer) {
+      customer.failedPinAttempts = (customer.failedPinAttempts ?? 0) + 1;
+      if (customer.failedPinAttempts >= PIN_MAX_FAILURES) {
+        const rounds = Math.ceil(customer.failedPinAttempts / PIN_MAX_FAILURES);
+        customer.lockedUntil = new Date(now + PIN_LOCK_BASE_MS * rounds);
+        customer.failedPinAttempts = 0;
+      }
+      await customer.save();
+    } else {
+      await verifyAgainstDummy(credentials.pin);
+    }
     throw new AppError(401, "Invalid mobile or PIN", "INVALID_CREDENTIALS");
   }
 
   if (!customer.active) {
+    await revokeAllSessions("customer", customer._id as Types.ObjectId);
     throw new AppError(403, "Account is inactive", "ACCOUNT_INACTIVE");
+  }
+
+  // Successful login clears the failure counter and any lock.
+  if (customer.failedPinAttempts !== 0 || customer.lockedUntil) {
+    customer.failedPinAttempts = 0;
+    customer.lockedUntil = null;
+    await customer.save();
   }
 
   const session = await createSession("customer", customer._id as Types.ObjectId, ctx);
@@ -107,6 +157,7 @@ export async function createSession(
   const { raw, hash } = issueSessionToken();
   const { SESSION_TTL } = getEnv();
 
+  const now = new Date();
   await SessionModel.create({
     tokenHash: hash,
     kind,
@@ -114,7 +165,8 @@ export async function createSession(
     device: ctx.device ?? "unknown-device",
     ip: ctx.ip ?? null,
     userAgent: ctx.userAgent ?? null,
-    expiresAt: new Date(Date.now() + SESSION_TTL * 1000),
+    lastUsedAt: now,
+    expiresAt: new Date(now.getTime() + SESSION_TTL * 1000),
     revokedAt: null,
   });
 
@@ -132,14 +184,36 @@ export async function requireSession(kind: SessionKind): Promise<Types.ObjectId 
   if (!raw) throw unauthorizedError("Not signed in");
 
   await connectDb();
+  const now = new Date();
   const session = await SessionModel.findOne({
     tokenHash: hashSessionToken(raw),
     kind,
     revokedAt: null,
-    expiresAt: { $gt: new Date() },
+    expiresAt: { $gt: now },
   });
 
   if (!session) throw unauthorizedError("Session expired");
+
+  // Idle timeout: a session idle for longer than SESSION_IDLE_TTL dies even if
+  // the absolute expiry is far away. Touching it renews the idle window.
+  const { SESSION_IDLE_TTL } = getEnv();
+  const lastUsed = session.lastUsedAt?.getTime() ?? session.createdAt.getTime();
+  if (SESSION_IDLE_TTL > 0 && now.getTime() - lastUsed > SESSION_IDLE_TTL * 1000) {
+    await SessionModel.updateOne({ _id: session._id }, { $set: { revokedAt: now } });
+    throw unauthorizedError("Session idle");
+  }
+  if (now.getTime() - lastUsed > 60 * 1000) {
+    void SessionModel.updateOne({ _id: session._id }, { $set: { lastUsedAt: now } }).catch(() => {});
+  }
+
+  // A deactivated customer must lose access the instant the owner flips them off.
+  if (kind === "customer") {
+    const customer = await CustomerModel.findById(session.refId).select("active").lean();
+    if (!customer || !customer.active) {
+      await SessionModel.updateOne({ _id: session._id }, { $set: { revokedAt: now } });
+      throw unauthorizedError("Account deactivated");
+    }
+  }
 
   return session.refId;
 }
