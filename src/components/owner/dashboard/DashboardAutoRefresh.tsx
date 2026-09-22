@@ -1,0 +1,60 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+
+function useLang(): "mr" | "en" {
+  if (typeof document !== "undefined") {
+    const match = document.cookie.match(/(?:^|; )lang=([^;]*)/);
+    if (match && (match[1] === "mr" || match[1] === "en")) {
+      return match[1];
+    }
+  }
+  return "en";
+}
+
+export function DashboardAutoRefresh() {
+  const router = useRouter();
+  const lang = useLang();
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const refreshing = useRef(false);
+
+  const refresh = useCallback(() => {
+    if (refreshing.current) return;
+    refreshing.current = true;
+    try {
+      router.refresh();
+      setLastUpdated(new Date());
+    } finally {
+      refreshing.current = false;
+    }
+  }, [router]);
+
+  useEffect(() => {
+    refresh();
+    function onVisibility() {
+      if (document.visibilityState === "visible") refresh();
+    }
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [refresh]);
+
+  return (
+    <div className="flex shrink-0 items-center gap-3">
+      {lastUpdated && (
+        <span className="text-xs text-zinc-400 dark:text-zinc-500">
+          {lang === "mr"
+            ? `शेवटचे अपडेट ${lastUpdated.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`
+            : `Updated at ${lastUpdated.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`}
+        </span>
+      )}
+      <button
+        type="button"
+        onClick={refresh}
+        className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+      >
+        {lang === "mr" ? "↻ ताजे करा" : "↻ Refresh"}
+      </button>
+    </div>
+  );
+}

@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+/* Class-based dark mode: toggle `.dark` on <html>.
+   The switch lives in ThemeToggle; later it moves into a Settings tab
+   without touching this config. Default theme is "dark". */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  color-scheme: light;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans), "Noto Sans Devanagari", "Nirmala UI", "Mangal",
+    system-ui, Arial, Helvetica, sans-serif;
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Noto Sans Devanagari", "Nirmala UI", "Mangal", Arial, Helvetica, sans-serif;
+}
+
+/* Print → browser "Save as PDF". Toolbars/sidebar/theme switch carry `.no-print`. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .print-area {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+  }
+
+  @page {
+    margin: 12mm;
+  }
+}
