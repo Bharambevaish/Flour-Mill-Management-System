@@ -1,0 +1,1141 @@
+<!-- डॅशबोर्ड - Mill Owner Overview (Light Rose Theme) -->
+<!DOCTYPE html>
+
+<html class="light" lang="mr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="web_dashboard" name="shell-type" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <style>
+        @layer base {
+
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                overscroll-behavior: none;
+            }
+
+            main> :first-child {
+                margin-top: 0 !important;
+            }
+
+            main> :last-child {
+                margin-bottom: 0 !important;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#f3d5dc",
+                        "error": "#b91c1c",
+                        "surface-container": "#fef2f4",
+                        "on-error": "#ffffff",
+                        "on-secondary-container": "#7c1130",
+                        "tertiary-fixed": "#ffedd5",
+                        "primary-fixed-dim": "#fbcfe8",
+                        "on-tertiary-fixed": "#431407",
+                        "tertiary": "#c2410c",
+                        "surface-container-highest": "#fbe7eb",
+                        "primary-fixed": "#fce7f3",
+                        "secondary-fixed": "#ffe4e6",
+                        "on-primary": "#ffffff",
+                        "outline": "#9f7d85",
+                        "surface": "#faf5f7",
+                        "primary": "#9d174d",
+                        "inverse-on-surface": "#fff1f2",
+                        "surface-tint": "#be185d",
+                        "surface-bright": "#ffffff",
+                        "on-surface": "#1e1518",
+                        "secondary": "#be185d",
+                        "tertiary-container": "#ffedd5",
+                        "surface-container-low": "#ffffff",
+                        "inverse-surface": "#37242a",
+                        "surface-container-high": "#f7dbe2",
+                        "on-primary-fixed-variant": "#831843",
+                        "on-background": "#1e1518",
+                        "error-container": "#fee2e2",
+                        "secondary-container": "#fce7f3",
+                        "on-primary-container": "#500724",
+                        "surface-variant": "#f5e4e8",
+                        "on-tertiary": "#ffffff",
+                        "primary-container": "#be185d",
+                        "on-surface-variant": "#6b545a",
+                        "on-secondary": "#ffffff",
+                        "background": "#faf5f7",
+                        "surface-dim": "#ebd7dc"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "2xl": "1.25rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "gutter": "1.5rem",
+                        "space-xl": "2rem",
+                        "space-sm": "0.5rem",
+                        "space-md": "1rem",
+                        "space-xs": "0.25rem",
+                        "margin": "2rem",
+                        "space-lg": "1.5rem"
+                    },
+                    fontFamily: {
+                        "body-md": ["Plus Jakarta Sans", "Inter", "sans-serif"],
+                        "headline-md": ["Plus Jakarta Sans", "sans-serif"],
+                        "body-lg": ["Plus Jakarta Sans", "sans-serif"],
+                        "headline-sm": ["Plus Jakarta Sans", "sans-serif"],
+                        "label-lg": ["Plus Jakarta Sans", "Inter", "sans-serif"],
+                        "display-lg": ["Plus Jakarta Sans", "sans-serif"],
+                        "headline-xl": ["Plus Jakarta Sans", "sans-serif"],
+                        "title-md": ["Plus Jakarta Sans", "sans-serif"],
+                        "label-md": ["Plus Jakarta Sans", "Inter", "sans-serif"],
+                        "label-sm": ["Plus Jakarta Sans", "Inter", "sans-serif"],
+                        "headline-lg": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    boxShadow: {
+                        "soft": "0 2px 14px -2px rgba(157, 23, 77, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.03)",
+                        "elevated": "0 10px 25px -4px rgba(157, 23, 77, 0.07), 0 4px 10px -2px rgba(0, 0, 0, 0.03)",
+                        "glow-pink": "0 0 20px -3px rgba(190, 24, 93, 0.25)"
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-[#faf6f7] font-body-md text-on-surface antialiased selection:bg-rose-100 selection:text-primary">
+    <!-- LUXURIOUS FEMININE LEFT SIDEBAR -->
+    <aside
+        class="fixed left-0 top-0 h-full w-72 bg-[#ffffff] z-50 flex flex-col justify-between border-r border-[#f4e6e9] shadow-[2px_0_16px_rgba(157,23,77,0.03)]">
+        <div class="flex flex-col flex-1 min-h-0">
+            <!-- Brand Logo -->
+            <div class="px-6 py-5 flex items-center gap-3.5 border-b border-[#faedf0]">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-600 via-rose-500 to-amber-400 flex items-center justify-center shadow-glow-pink">
+                    <span class="material-symbols-outlined text-white text-[24px] font-bold drop-shadow">grain</span>
+                </div>
+                <div class="flex flex-col">
+                    <div class="font-headline-sm text-[20px] text-primary font-extrabold tracking-tight leading-tight">
+                        गिरणी प्रो</div>
+                    <div class="text-[11px] font-bold text-rose-800/70 tracking-widest uppercase mt-0.5">GRAIN CRAFT OS
+                    </div>
+                </div>
+            </div>
+            <!-- Navigation Links -->
+            <nav class="flex-1 px-3.5 py-4 space-y-1.5 overflow-y-auto">
+                <a aria-current="page"
+                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-rose-100/90 to-pink-50 text-rose-800 font-bold border border-rose-200/80 shadow-sm transition-all group"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-[20px] text-rose-700 transition-transform group-hover:scale-110">dashboard</span>
+                    <span class="text-sm font-semibold flex-1 tracking-wide">डॅशबोर्ड / Dashboard</span>
+                </a>
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[#684a53] hover:bg-rose-50/70 hover:text-rose-900 transition-all group font-medium"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-[20px] text-[#936b76] group-hover:text-rose-700 transition-transform group-hover:scale-110">groups</span>
+                    <span class="text-sm flex-1">ग्राहक / Customers</span>
+                </a>
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[#684a53] hover:bg-rose-50/70 hover:text-rose-900 transition-all group font-medium"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-[20px] text-[#936b76] group-hover:text-rose-700 transition-transform group-hover:scale-110">add_circle</span>
+                    <span class="text-sm flex-1">नवीन नोंद / New Order</span>
+                </a>
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[#684a53] hover:bg-rose-50/70 hover:text-rose-900 transition-all group font-medium"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-[20px] text-[#936b76] group-hover:text-rose-700 transition-transform group-hover:scale-110">conveyor_belt</span>
+                    <span class="text-sm flex-1">दळण रांग / Queue</span>
+                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-700">६</span>
+                </a>
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[#684a53] hover:bg-rose-50/70 hover:text-rose-900 transition-all group font-medium"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-[20px] text-[#936b76] group-hover:text-rose-700 transition-transform group-hover:scale-110">receipt_long</span>
+                    <span class="text-sm flex-1">देयके / Payments</span>
+                </a>
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[#684a53] hover:bg-rose-50/70 hover:text-rose-900 transition-all group font-medium"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-[20px] text-[#936b76] group-hover:text-rose-700 transition-transform group-hover:scale-110">account_balance_wallet</span>
+                    <span class="text-sm flex-1">बाकी / Outstanding</span>
+                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                </a>
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[#684a53] hover:bg-rose-50/70 hover:text-rose-900 transition-all group font-medium"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-[20px] text-[#936b76] group-hover:text-rose-700 transition-transform group-hover:scale-110">notifications</span>
+                    <span class="text-sm flex-1">सूचना / Alerts</span>
+                </a>
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[#684a53] hover:bg-rose-50/70 hover:text-rose-900 transition-all group font-medium"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-[20px] text-[#936b76] group-hover:text-rose-700 transition-transform group-hover:scale-110">bar_chart</span>
+                    <span class="text-sm flex-1">अहवाल / Reports</span>
+                </a>
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[#684a53] hover:bg-rose-50/70 hover:text-rose-900 transition-all group font-medium"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-[20px] text-[#936b76] group-hover:text-rose-700 transition-transform group-hover:scale-110">tune</span>
+                    <span class="text-sm flex-1">सेटिंग्ज / Settings</span>
+                </a>
+            </nav>
+        </div>
+        <!-- Operator Profile Box -->
+        <div
+            class="p-3 mx-3 mb-4 rounded-2xl bg-[#fff8fa] border border-[#f5e1e7] flex items-center justify-between shadow-soft">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="relative">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-200 to-pink-100 flex items-center justify-center text-rose-700">
+                        <span class="material-symbols-outlined text-[22px]">precision_manufacturing</span>
+                    </div>
+                    <span
+                        class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+                </div>
+                <div class="truncate">
+                    <div class="text-sm font-bold text-gray-900 truncate">राजाराम पाटील</div>
+                    <div class="text-xs text-rose-800/80 font-medium">मालक / Operator</div>
+                </div>
+            </div>
+            <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-[18px]">person</span>
+            </div>
+        </div>
+    </aside>
+    <!-- MAIN VIEWPORT CONTENT -->
+    <div class="pl-72">
+        <!-- TOP POLISHED HEADER -->
+        <header
+            class="fixed top-0 left-72 right-0 z-40 bg-[#ffffff]/90 backdrop-blur-md border-b border-[#f4e6e9] shadow-sm">
+            <div class="h-16 w-full px-8 flex items-center justify-between gap-4">
+                <!-- Live Status Pill & Shift -->
+                <div class="flex items-center gap-4">
+                    <div
+                        class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 shadow-sm">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                        </span>
+                        <span class="text-xs font-bold text-emerald-800 tracking-wide uppercase">चक्की चालू आहे • Mill
+                            Running</span>
+                    </div>
+                    <div class="hidden xl:flex items-center gap-2 text-xs text-[#7d5e67] font-medium">
+                        <span class="material-symbols-outlined text-[15px] text-rose-500">schedule</span>
+                        <span>Shift: 07:00 AM - 08:00 PM</span>
+                        <span class="text-rose-200">•</span>
+                        <span class="text-rose-800 font-semibold">Unit #01 Active</span>
+                    </div>
+                </div>
+                <!-- Quick Top Nav Actions -->
+                <div class="flex items-center gap-3">
+                    <button
+                        class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#fff5f7] hover:bg-rose-100/70 border border-[#f6dbe2] text-xs font-semibold text-rose-900 transition-colors"
+                        type="button">
+                        <span class="text-rose-700 font-bold">मराठी</span>
+                        <span class="text-rose-300">/</span>
+                        <span class="text-gray-500">EN</span>
+                    </button>
+                    <button
+                        class="px-3 py-1.5 rounded-xl bg-[#fff5f7] hover:bg-rose-100/70 border border-[#f6dbe2] text-xs font-semibold text-rose-900 flex items-center gap-1.5 transition-colors"
+                        type="button">
+                        <span class="material-symbols-outlined text-[16px] text-rose-600">dataset</span>
+                        <span>Seed Demo</span>
+                    </button>
+                    <button
+                        class="relative p-2 rounded-xl bg-[#fff5f7] hover:bg-rose-100/70 border border-[#f6dbe2] text-rose-800 transition-colors"
+                        type="button">
+                        <span class="material-symbols-outlined text-[20px]">notifications</span>
+                        <span
+                            class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white"></span>
+                    </button>
+                    <div
+                        class="w-8 h-8 rounded-full bg-gradient-to-tr from-rose-600 to-pink-500 text-white flex items-center justify-center font-bold shadow-sm text-xs">
+                        RP
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- DASHBOARD WORKSPACE -->
+        <main class="w-full pt-16 bg-[#faf6f7] min-h-screen">
+            <div class="flex flex-col w-full px-8 py-6 gap-7">
+                <!-- LUXURIOUS WARM HERO BANNER -->
+                <section
+                    class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#ffffff] via-[#fffbfb] to-[#fff3f6] border border-[#f6dbe2] shadow-elevated p-6 lg:p-7">
+                    <div
+                        class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-rose-200/35 blur-3xl pointer-events-none">
+                    </div>
+                    <div
+                        class="absolute right-1/3 -bottom-20 w-72 h-72 rounded-full bg-amber-100/40 blur-2xl pointer-events-none">
+                    </div>
+                    <div class="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+                        <!-- Welcome Info -->
+                        <div class="flex flex-col gap-2.5">
+                            <div class="flex items-center gap-2">
+                                <span
+                                    class="px-2.5 py-0.5 rounded-full bg-rose-100/80 border border-rose-200 text-xs font-bold text-rose-800 tracking-wider uppercase">
+                                    घेर / Shift 01 • Live Operations
+                                </span>
+                                <span class="text-rose-300">•</span>
+                                <span class="text-xs font-medium text-[#7d5e67] flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[15px] text-rose-600">pin_drop</span>
+                                    सांगली रोड, मुख्य शाखा
+                                </span>
+                            </div>
+                            <h1
+                                class="text-2xl lg:text-3xl text-gray-900 font-extrabold tracking-tight flex flex-wrap items-baseline gap-2.5">
+                                <span>सस्नेह नमस्कार, रमेश पाटील</span>
+                                <span class="text-base font-semibold text-rose-700">(Welcome Back, Ramesh)</span>
+                            </h1>
+                            <div class="flex flex-wrap items-center gap-2.5 pt-1">
+                                <div
+                                    class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-50/80 border border-rose-200/70 text-rose-900 shadow-sm">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse"></span>
+                                    <span class="text-xs font-bold text-rose-800">लक्ष्मी कृपा आटा चक्की</span>
+                                    <span class="text-xs text-rose-600/80 font-medium">#UNIT-01</span>
+                                </div>
+                                <div
+                                    class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#fae2e8] text-[#553b43] shadow-sm text-xs">
+                                    <span class="material-symbols-outlined text-[18px] text-rose-600">speed</span>
+                                    <span><strong class="text-gray-900 font-bold">1440</strong> RPM (संतुलित /
+                                        Normal)</span>
+                                </div>
+                                <div
+                                    class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-900 shadow-sm text-xs">
+                                    <span class="material-symbols-outlined text-[18px] text-amber-700">payments</span>
+                                    <span>आजचा गव्हाचा दर: <strong
+                                            class="text-rose-800 font-bold">₹७/किलो</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Action CTA Group -->
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button
+                                class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-rose-50 border border-[#f3d3dc] text-rose-950 text-xs font-bold shadow-soft transition-all"
+                                type="button">
+                                <span class="material-symbols-outlined text-[18px] text-rose-700">print</span>
+                                <span>दळण पावती / Slip</span>
+                            </button>
+                            <button
+                                class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-rose-50 border border-[#f3d3dc] text-rose-950 text-xs font-bold shadow-soft transition-all"
+                                type="button">
+                                <span class="material-symbols-outlined text-[18px] text-amber-600">dataset</span>
+                                <span>Seed Demo</span>
+                            </button>
+                            <button
+                                class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 via-pink-600 to-rose-700 hover:brightness-105 text-white text-xs font-bold shadow-glow-pink transition-all hover:scale-[1.02] active:scale-95"
+                                type="button">
+                                <span class="material-symbols-outlined text-[19px] font-bold">add_circle</span>
+                                <span>+ नवीन नोंद / New Order</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+                <!-- QUICK ACTION PALETTE -->
+                <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+                    <button
+                        class="flex items-center gap-3 p-3.5 rounded-2xl bg-white hover:bg-rose-50/60 border border-[#f6dbe2] transition-all text-left shadow-soft hover:shadow-elevated group">
+                        <div
+                            class="w-9 h-9 rounded-xl bg-rose-100 flex items-center justify-center text-rose-700 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-[20px]">add_task</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-xs font-bold text-gray-900 truncate">+ नवीन नोंद</span>
+                            <span class="text-[11px] text-[#7d5e67] font-medium truncate">Quick Bag Add</span>
+                        </div>
+                    </button>
+                    <button
+                        class="flex items-center gap-3 p-3.5 rounded-2xl bg-white hover:bg-rose-50/60 border border-[#f6dbe2] transition-all text-left shadow-soft hover:shadow-elevated group">
+                        <div
+                            class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center text-amber-800 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-[20px]">conveyor_belt</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-xs font-bold text-gray-900 truncate">दळण रांग (६)</span>
+                            <span class="text-[11px] text-[#7d5e67] font-medium truncate">Live Queue</span>
+                        </div>
+                    </button>
+                    <button
+                        class="flex items-center gap-3 p-3.5 rounded-2xl bg-white hover:bg-rose-50/60 border border-[#f6dbe2] transition-all text-left shadow-soft hover:shadow-elevated group">
+                        <div
+                            class="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-[20px]">currency_rupee</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-xs font-bold text-gray-900 truncate">उधारी जमा</span>
+                            <span class="text-[11px] text-[#7d5e67] font-medium truncate">Collect Dues</span>
+                        </div>
+                    </button>
+                    <button
+                        class="flex items-center gap-3 p-3.5 rounded-2xl bg-white hover:bg-rose-50/60 border border-[#f6dbe2] transition-all text-left shadow-soft hover:shadow-elevated group">
+                        <div
+                            class="w-9 h-9 rounded-xl bg-purple-100 flex items-center justify-center text-purple-800 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-[20px]">menu_book</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-xs font-bold text-gray-900 truncate">खातेवही</span>
+                            <span class="text-[11px] text-[#7d5e67] font-medium truncate">Full Ledger</span>
+                        </div>
+                    </button>
+                    <button
+                        class="flex items-center gap-3 p-3.5 rounded-2xl bg-white hover:bg-rose-50/60 border border-[#f6dbe2] transition-all text-left shadow-soft hover:shadow-elevated group">
+                        <div
+                            class="w-9 h-9 rounded-xl bg-pink-100 flex items-center justify-center text-pink-700 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-[20px]">person_add</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-xs font-bold text-gray-900 truncate">+ नवीन ग्राहक</span>
+                            <span class="text-[11px] text-[#7d5e67] font-medium truncate">Add Contact</span>
+                        </div>
+                    </button>
+                    <button
+                        class="flex items-center gap-3 p-3.5 rounded-2xl bg-white hover:bg-rose-50/60 border border-[#f6dbe2] transition-all text-left shadow-soft hover:shadow-elevated group">
+                        <div
+                            class="w-9 h-9 rounded-xl bg-rose-100/80 flex items-center justify-center text-rose-800 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-[20px]">price_change</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-xs font-bold text-gray-900 truncate">दरपत्रक</span>
+                            <span class="text-[11px] text-[#7d5e67] font-medium truncate">Price Matrix</span>
+                        </div>
+                    </button>
+                </section>
+                <!-- 8 METRIC CARDS (LUMINOUS WHITE & ROSE-TINTED PALETTE) -->
+                <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- 1. Active Customers -->
+                    <div
+                        class="p-5 rounded-2xl bg-white border border-[#f5d9e1] hover:border-rose-300 shadow-soft hover:shadow-elevated transition-all flex flex-col justify-between relative overflow-hidden group">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-[#805e68] tracking-wider uppercase">सक्रिय ग्राहक /
+                                Customers</span>
+                            <span class="w-8 h-8 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">groups</span>
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-3xl font-extrabold text-gray-900">148</div>
+                            <div class="flex items-center gap-1.5 mt-1 text-xs font-semibold text-emerald-700">
+                                <span class="material-symbols-outlined text-[16px]">trending_up</span>
+                                <span>+१२ या आठवड्यात (This week)</span>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute -right-3 -bottom-3 text-rose-100/70 group-hover:text-rose-200/80 transition-colors pointer-events-none">
+                            <span class="material-symbols-outlined text-[70px]">groups</span>
+                        </div>
+                    </div>
+                    <!-- 2. Orders Today -->
+                    <div
+                        class="p-5 rounded-2xl bg-white border border-[#f5d9e1] hover:border-rose-300 shadow-soft hover:shadow-elevated transition-all flex flex-col justify-between relative overflow-hidden group">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-[#805e68] tracking-wider uppercase">आजच्या नव्या ऑर्डर्स
+                                / Today</span>
+                            <span
+                                class="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-3xl font-extrabold text-gray-900">३४ <span
+                                    class="text-base font-medium text-gray-500">बॅग्ज</span></div>
+                            <div class="flex items-center gap-1.5 mt-1 text-xs font-semibold text-amber-800">
+                                <span class="material-symbols-outlined text-[16px]">scale</span>
+                                <span>एकूण वजन: ५१० किलो (510 kg)</span>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute -right-3 -bottom-3 text-amber-100/60 group-hover:text-amber-200/60 transition-colors pointer-events-none">
+                            <span class="material-symbols-outlined text-[70px]">shopping_bag</span>
+                        </div>
+                    </div>
+                    <!-- 3. Cash Collected -->
+                    <div
+                        class="p-5 rounded-2xl bg-white border border-[#f5d9e1] hover:border-rose-300 shadow-soft hover:shadow-elevated transition-all flex flex-col justify-between relative overflow-hidden group">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-[#805e68] tracking-wider uppercase">आजची रोकड जमा /
+                                Revenue</span>
+                            <span
+                                class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">payments</span>
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-3xl font-extrabold text-rose-800">₹ ४,८५०</div>
+                            <div class="flex items-center justify-between mt-1 text-xs text-[#70525b] font-medium">
+                                <span>रोख: <strong class="text-gray-900 font-bold">₹३,२००</strong></span>
+                                <span class="text-rose-300">•</span>
+                                <span>UPI: <strong class="text-gray-900 font-bold">₹१,६५०</strong></span>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute -right-3 -bottom-3 text-emerald-100/60 group-hover:text-emerald-200/60 transition-colors pointer-events-none">
+                            <span class="material-symbols-outlined text-[70px]">payments</span>
+                        </div>
+                    </div>
+                    <!-- 4. Pending Queue -->
+                    <div
+                        class="p-5 rounded-2xl bg-white border border-[#f5d9e1] hover:border-rose-300 shadow-soft hover:shadow-elevated transition-all flex flex-col justify-between relative overflow-hidden group">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-[#805e68] tracking-wider uppercase">प्रलंबित दळण /
+                                Queue</span>
+                            <span
+                                class="w-8 h-8 rounded-xl bg-orange-50 text-orange-700 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">pending_actions</span>
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-3xl font-extrabold text-orange-800">६ पोती <span
+                                    class="text-base font-medium text-gray-500">(१८० kg)</span></div>
+                            <div class="flex items-center gap-1.5 mt-1 text-xs font-semibold text-orange-700">
+                                <span class="material-symbols-outlined text-[16px]">schedule</span>
+                                <span>अंदाजे वेळ: ५५ मिनिटे बाकी</span>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute -right-3 -bottom-3 text-orange-100/60 group-hover:text-orange-200/60 transition-colors pointer-events-none">
+                            <span class="material-symbols-outlined text-[70px]">pending_actions</span>
+                        </div>
+                    </div>
+                    <!-- 5. Active Mills -->
+                    <div
+                        class="p-5 rounded-2xl bg-white border border-[#f5d9e1] hover:border-rose-300 shadow-soft hover:shadow-elevated transition-all flex flex-col justify-between relative overflow-hidden group">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-[#805e68] tracking-wider uppercase">चालू चक्की / Active
+                                Chakki</span>
+                            <span class="relative flex h-3 w-3">
+                                <span
+                                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-3xl font-extrabold text-gray-900">२ चक्की <span
+                                    class="text-base font-semibold text-emerald-700">सुरू</span></div>
+                            <div class="flex items-center gap-1.5 mt-1 text-xs text-[#70525b] font-medium truncate">
+                                <span class="font-semibold text-gray-800">#1: गहू</span>
+                                <span class="text-rose-200">•</span>
+                                <span class="font-semibold text-gray-800">#2: ज्वारी-बाजरी</span>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute -right-3 -bottom-3 text-rose-100/60 group-hover:text-rose-200/60 transition-colors pointer-events-none">
+                            <span class="material-symbols-outlined text-[70px]">precision_manufacturing</span>
+                        </div>
+                    </div>
+                    <!-- 6. Ready to Collect -->
+                    <div
+                        class="p-5 rounded-2xl bg-white border border-[#f5d9e1] hover:border-rose-300 shadow-soft hover:shadow-elevated transition-all flex flex-col justify-between relative overflow-hidden group">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-[#805e68] tracking-wider uppercase">तयार / Ready
+                                Bags</span>
+                            <span class="w-8 h-8 rounded-xl bg-pink-50 text-rose-700 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-3xl font-extrabold text-gray-900">१८ बॅग्ज</div>
+                            <div class="flex items-center gap-1.5 mt-1 text-xs font-semibold text-rose-700">
+                                <span class="material-symbols-outlined text-[16px]">sms</span>
+                                <span>सर्व ग्राहकांना SMS पाठवला</span>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute -right-3 -bottom-3 text-pink-100/60 group-hover:text-pink-200/60 transition-colors pointer-events-none">
+                            <span class="material-symbols-outlined text-[70px]">check_circle</span>
+                        </div>
+                    </div>
+                    <!-- 7. Total Outstanding -->
+                    <div
+                        class="p-5 rounded-2xl bg-gradient-to-br from-white to-red-50/40 border border-red-200 hover:border-red-300 shadow-soft hover:shadow-elevated transition-all flex flex-col justify-between relative overflow-hidden group">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-red-700 tracking-wider uppercase">एकूण येणे बाकी /
+                                Outstanding</span>
+                            <span class="w-8 h-8 rounded-xl bg-red-100 text-red-700 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-3xl font-extrabold text-red-600">₹ १२,४००</div>
+                            <div class="flex items-center gap-1.5 mt-1 text-xs font-semibold text-red-700">
+                                <span>१४ खात्यांवर बाकी आहे</span>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute -right-3 -bottom-3 text-red-100/70 group-hover:text-red-200/70 transition-colors pointer-events-none">
+                            <span class="material-symbols-outlined text-[70px]">account_balance_wallet</span>
+                        </div>
+                    </div>
+                    <!-- 8. Defaulting Customers -->
+                    <div
+                        class="p-5 rounded-2xl bg-white border border-[#f5d9e1] hover:border-rose-300 shadow-soft hover:shadow-elevated transition-all flex flex-col justify-between relative overflow-hidden group">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-[#805e68] tracking-wider uppercase">थकबाकीदार / Due
+                                Accounts</span>
+                            <span class="w-8 h-8 rounded-xl bg-rose-50 text-rose-800 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">person_alert</span>
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-3xl font-extrabold text-gray-900">१४ जण</div>
+                            <div class="flex items-center gap-1.5 mt-1 text-xs font-semibold text-rose-700">
+                                <span class="material-symbols-outlined text-[16px]">campaign</span>
+                                <span>५ अति-थकबाकी अलर्ट्स</span>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute -right-3 -bottom-3 text-rose-100/60 group-hover:text-rose-200/60 transition-colors pointer-events-none">
+                            <span class="material-symbols-outlined text-[70px]">person_alert</span>
+                        </div>
+                    </div>
+                </section>
+                <!-- 2-COLUMN SECTION: LIVE CHAKKI FLOOR + ATTENTION / DUES -->
+                <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- LEFT: LIVE MILL FLOOR (7 cols) -->
+                    <div class="lg:col-span-7 flex flex-col gap-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <div
+                                    class="w-7 h-7 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[20px]">precision_manufacturing</span>
+                                </div>
+                                <h2 class="text-lg text-gray-900 font-bold tracking-tight">सध्या चक्कीवर / Live Floor
+                                    Status</h2>
+                            </div>
+                            <span
+                                class="text-xs font-bold text-rose-800/80 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200/70">AUTO-REFRESH:
+                                5s</span>
+                        </div>
+                        <!-- Unit 1 -->
+                        <div
+                            class="p-5 rounded-2xl bg-white border border-[#f4d7df] shadow-soft flex flex-col gap-4 hover:shadow-elevated transition-all">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-3.5">
+                                    <div
+                                        class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-700 shadow-sm">
+                                        <span class="material-symbols-outlined text-[26px]">grain</span>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-base text-gray-900 font-bold">चक्की १ (Stone Chakki
+                                                1)</span>
+                                            <span
+                                                class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">दळण
+                                                सुरू / 78%</span>
+                                        </div>
+                                        <div class="text-xs text-[#70525b] mt-1">
+                                            ग्राहक: <strong class="text-gray-900 font-bold">तुकाराम शिंदे</strong> •
+                                            #ORD-1082 • गहू (शरबती) २५ किलो
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-base text-rose-700 font-extrabold">१९.५ / २५ kg</div>
+                                    <div class="text-xs font-medium text-gray-500">५ मिनिटे शिल्लक</div>
+                                </div>
+                            </div>
+                            <!-- Animated Progress Bar in Rose & Warm Berry -->
+                            <div
+                                class="w-full bg-rose-50 h-3 rounded-full overflow-hidden p-0.5 border border-rose-200/70">
+                                <div class="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 h-full rounded-full transition-all duration-500 shadow-sm"
+                                    style="width: 78%;"></div>
+                            </div>
+                            <div class="flex items-center justify-between pt-0.5 text-xs text-[#70525b]">
+                                <div class="flex items-center gap-1.5 font-medium">
+                                    <span class="material-symbols-outlined text-[16px] text-rose-700">tune</span>
+                                    <span>बारीक दळण (Grade 2 - Fine Chappati)</span>
+                                </div>
+                                <button
+                                    class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100/80 text-rose-900 text-xs font-bold flex items-center gap-1.5 transition-colors border border-rose-200">
+                                    <span>क्रम बदला</span>
+                                    <span class="material-symbols-outlined text-[14px]">swap_horiz</span>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Unit 2 -->
+                        <div
+                            class="p-5 rounded-2xl bg-white border border-[#f4d7df] shadow-soft flex flex-col gap-4 hover:shadow-elevated transition-all">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-3.5">
+                                    <div
+                                        class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800 shadow-sm">
+                                        <span class="material-symbols-outlined text-[26px]">scatter_plot</span>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-base text-gray-900 font-bold">चक्की २ (Stone Chakki
+                                                2)</span>
+                                            <span
+                                                class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-xs font-bold">दळण
+                                                सुरू / 45%</span>
+                                        </div>
+                                        <div class="text-xs text-[#70525b] mt-1">
+                                            ग्राहक: <strong class="text-gray-900 font-bold">सुनीता सावंत</strong> •
+                                            #ORD-1083 • बाजरी व ज्वारी १५ किलो
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-base text-amber-800 font-extrabold">६.८ / १५ kg</div>
+                                    <div class="text-xs font-medium text-gray-500">१२ मिनिटे शिल्लक</div>
+                                </div>
+                            </div>
+                            <!-- Progress Bar in Amber/Terracotta -->
+                            <div
+                                class="w-full bg-amber-50/70 h-3 rounded-full overflow-hidden p-0.5 border border-amber-200">
+                                <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 h-full rounded-full transition-all duration-500 shadow-sm"
+                                    style="width: 45%;"></div>
+                            </div>
+                            <div class="flex items-center justify-between pt-0.5 text-xs text-[#70525b]">
+                                <div class="flex items-center gap-1.5 font-medium">
+                                    <span class="material-symbols-outlined text-[16px] text-amber-700">tune</span>
+                                    <span>मध्यम दळण (Bhakri Grade)</span>
+                                </div>
+                                <button
+                                    class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100/80 text-rose-900 text-xs font-bold flex items-center gap-1.5 transition-colors border border-rose-200">
+                                    <span>क्रम बदला</span>
+                                    <span class="material-symbols-outlined text-[14px]">swap_horiz</span>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Unit 3 (Spices/Idle) -->
+                        <div
+                            class="p-4 rounded-2xl bg-white border border-[#f4d7df] shadow-soft flex items-center justify-between hover:shadow-elevated transition-all">
+                            <div class="flex items-center gap-3.5">
+                                <div
+                                    class="w-11 h-11 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-700">
+                                    <span class="material-symbols-outlined text-[22px]">soup_kitchen</span>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm text-gray-900 font-bold">चक्की ३ (मसाला / Spices
+                                            Mill)</span>
+                                        <span
+                                            class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold">रिकामी
+                                            / Idle</span>
+                                    </div>
+                                    <div class="text-xs text-[#70525b] mt-0.5">हळद, धने व मिरची दळणासाठी सज्ज</div>
+                                </div>
+                            </div>
+                            <button
+                                class="px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs font-bold flex items-center gap-1.5 transition-all border border-rose-200">
+                                <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                                <span>बॅच लोड करा</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- RIGHT: ATTENTION REQUIRED & HIGH DUES (5 cols) -->
+                    <div class="lg:col-span-5 flex flex-col gap-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <div
+                                    class="w-7 h-7 rounded-lg bg-red-100 text-red-700 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[20px]">notification_important</span>
+                                </div>
+                                <h2 class="text-lg text-gray-900 font-bold tracking-tight">लक्ष द्या / Attention
+                                    Required</h2>
+                            </div>
+                            <a class="text-xs font-bold text-rose-700 hover:text-rose-900 hover:underline" href="#">सर्व
+                                पहा (14)</a>
+                        </div>
+                        <!-- High Due Alert 1 -->
+                        <div
+                            class="p-4.5 rounded-2xl bg-white border border-rose-200/80 shadow-soft flex flex-col gap-3.5 hover:shadow-elevated transition-all">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center font-bold">
+                                        <span class="material-symbols-outlined text-[20px]">person</span>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-bold text-gray-900">गणेश देशपांडे</div>
+                                        <div class="text-xs text-rose-800/80 font-medium">४ ऑर्डर्स बाकी • महिनाभराची
+                                            बाकी</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-base font-extrabold text-red-600">₹ १,८५०</div>
+                                    <div class="text-[11px] font-bold text-red-700 uppercase tracking-wide">थकबाकी / Due
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 pt-1">
+                                <button
+                                    class="flex-1 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+                                    <span class="material-symbols-outlined text-[16px] text-emerald-600">chat</span>
+                                    <span>WhatsApp बिल</span>
+                                </button>
+                                <button
+                                    class="flex-1 py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-glow-pink">
+                                    <span class="material-symbols-outlined text-[16px]">receipt_long</span>
+                                    <span>जमा नोंद</span>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- High Due Alert 2 -->
+                        <div
+                            class="p-4.5 rounded-2xl bg-white border border-rose-200/80 shadow-soft flex flex-col gap-3.5 hover:shadow-elevated transition-all">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                                        <span class="material-symbols-outlined text-[20px]">person</span>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-bold text-gray-900">आनंदीबाई कदम</div>
+                                        <div class="text-xs text-[#70525b] font-medium">दळण २ दिवसांपासून तयार आहे</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-base font-extrabold text-gray-900">₹ ६२०</div>
+                                    <div class="text-[11px] font-bold text-amber-700 uppercase tracking-wide">पिकअप बाकी
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 pt-1">
+                                <button
+                                    class="flex-1 py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-900 border border-rose-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors">
+                                    <span class="material-symbols-outlined text-[16px] text-rose-700">call</span>
+                                    <span>कॉल करा (Call)</span>
+                                </button>
+                                <button
+                                    class="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:brightness-105 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+                                    <span class="material-symbols-outlined text-[16px]">send</span>
+                                    <span>पिकअप रीमाइंडर</span>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Moisture Sensor Alert -->
+                        <div
+                            class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 shadow-soft flex items-center gap-3.5 hover:shadow-elevated transition-all">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-amber-200/60 text-amber-900 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-[22px]">humidity_high</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs font-bold text-amber-950 truncate">गहू आर्द्रता सूचना (Moisture
+                                    Alert)</div>
+                                <div class="text-xs text-amber-900/90 font-medium truncate mt-0.5">लॉट #ORD-1087 मध्ये
+                                    १४% आर्द्रता आढळली. हळू दळा.</div>
+                            </div>
+                            <span class="material-symbols-outlined text-amber-600 text-[20px]">chevron_right</span>
+                        </div>
+                    </div>
+                </section>
+                <!-- RECENT ORDERS & LIVE LEDGER TABLE -->
+                <section class="flex flex-col gap-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-7 h-7 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">receipt_long</span>
+                            </div>
+                            <h2 class="text-lg text-gray-900 font-bold tracking-tight">अलीकडील दळण नोंदी / Recent Orders
+                            </h2>
+                            <span
+                                class="px-2.5 py-0.5 rounded-full bg-rose-100/70 border border-rose-200 text-rose-800 text-xs font-bold">आजच्या
+                                नोंदी</span>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <div class="relative">
+                                <span
+                                    class="material-symbols-outlined text-[18px] text-[#9a7883] absolute left-3.5 top-2.5">search</span>
+                                <input
+                                    class="pl-10 pr-3 py-1.5 bg-white border border-[#fae2e8] rounded-xl text-gray-900 text-xs font-medium placeholder:text-[#ab8c96] focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400 w-56 shadow-sm"
+                                    placeholder="नाव किंवा टोकन शोधा..." type="text" />
+                            </div>
+                            <button
+                                class="px-3.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 border border-[#fae2e8] text-rose-900 text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm">
+                                <span class="material-symbols-outlined text-[18px]">filter_list</span>
+                                <span>फिल्टर</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Pristine Porcelain & Rose Table Card -->
+                    <div class="overflow-x-auto rounded-2xl bg-white border border-[#f5d9e1] shadow-soft">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr
+                                    class="bg-[#fdf4f6] text-[11px] font-bold text-rose-900/80 uppercase tracking-wider border-b border-[#f5e1e7]">
+                                    <th class="py-3.5 px-4 font-extrabold">टोकन #</th>
+                                    <th class="py-3.5 px-4">ग्राहक (Customer)</th>
+                                    <th class="py-3.5 px-4">धान्याचा प्रकार</th>
+                                    <th class="py-3.5 px-4">वजन (Weight)</th>
+                                    <th class="py-3.5 px-4">दर व रक्कम</th>
+                                    <th class="py-3.5 px-4">स्थिती (Status)</th>
+                                    <th class="py-3.5 px-4">पेमेंट</th>
+                                    <th class="py-3.5 px-4 text-right">कृती (Actions)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#faeef1] text-xs text-gray-800 font-medium">
+                                <tr class="hover:bg-[#fff9fb] transition-colors">
+                                    <td class="py-4 px-4 font-mono font-bold text-rose-700">#1084</td>
+                                    <td class="py-4 px-4">
+                                        <div class="font-bold text-gray-900">मारुती जाधव</div>
+                                        <div class="text-[11px] text-gray-500">+91 98223 xxxxx</div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                class="w-6 h-6 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
+                                                <span class="material-symbols-outlined text-[16px]">grain</span>
+                                            </span>
+                                            <span class="font-semibold text-gray-900">गहू (Wheat Lokwan)</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 font-bold text-gray-900">४० किलो</td>
+                                    <td class="py-4 px-4">
+                                        <div class="font-bold text-gray-900">₹ २८०</div>
+                                        <div class="text-[11px] text-gray-500">@ ₹७ / kg</div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span
+                                            class="px-2.5 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-800 text-[11px] font-bold inline-flex items-center gap-1.5">
+                                            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                            <span>रांगेत (Queue #1)</span>
+                                        </span>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span
+                                            class="px-2 py-0.5 rounded-md bg-red-100 text-red-700 text-[11px] font-bold">बाकी
+                                            / Unpaid</span>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <button
+                                                class="p-1.5 rounded-lg hover:bg-rose-50 text-gray-500 hover:text-rose-700 transition-colors"
+                                                title="Print Slip">
+                                                <span class="material-symbols-outlined text-[18px]">print</span>
+                                            </button>
+                                            <button
+                                                class="p-1.5 rounded-lg hover:bg-rose-50 text-gray-500 hover:text-rose-700 transition-colors"
+                                                title="Start Chakki">
+                                                <span class="material-symbols-outlined text-[18px]">play_circle</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-[#fff9fb] transition-colors">
+                                    <td class="py-4 px-4 font-mono font-bold text-rose-700">#1083</td>
+                                    <td class="py-4 px-4">
+                                        <div class="font-bold text-gray-900">सुनीता सावंत</div>
+                                        <div class="text-[11px] text-gray-500">+91 94210 xxxxx</div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                class="w-6 h-6 rounded-lg bg-orange-100 text-orange-800 flex items-center justify-center">
+                                                <span class="material-symbols-outlined text-[16px]">scatter_plot</span>
+                                            </span>
+                                            <span class="font-semibold text-gray-900">ज्वारी व बाजरी</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 font-bold text-gray-900">१५ किलो</td>
+                                    <td class="py-4 px-4">
+                                        <div class="font-bold text-gray-900">₹ १२०</div>
+                                        <div class="text-[11px] text-gray-500">@ ₹८ / kg</div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span
+                                            class="px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-bold inline-flex items-center gap-1.5">
+                                            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                            <span>चक्की २ वर सुरू</span>
+                                        </span>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span
+                                            class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[11px] font-bold">रोख
+                                            प्राप्त / Cash</span>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <button
+                                                class="p-1.5 rounded-lg hover:bg-rose-50 text-gray-500 hover:text-rose-700 transition-colors"
+                                                title="Print Slip">
+                                                <span class="material-symbols-outlined text-[18px]">print</span>
+                                            </button>
+                                            <button
+                                                class="p-1.5 rounded-lg hover:bg-rose-50 text-gray-500 hover:text-rose-700 transition-colors"
+                                                title="View Order">
+                                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-[#fff9fb] transition-colors">
+                                    <td class="py-4 px-4 font-mono font-bold text-rose-700">#1082</td>
+                                    <td class="py-4 px-4">
+                                        <div class="font-bold text-gray-900">तुकाराम शिंदे</div>
+                                        <div class="text-[11px] text-gray-500">+91 97632 xxxxx</div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                class="w-6 h-6 rounded-lg bg-pink-100 text-pink-800 flex items-center justify-center">
+                                                <span class="material-symbols-outlined text-[16px]">grain</span>
+                                            </span>
+                                            <span class="font-semibold text-gray-900">गहू (शरबती)</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 font-bold text-gray-900">२५ किलो</td>
+                                    <td class="py-4 px-4">
+                                        <div class="font-bold text-gray-900">₹ १७५</div>
+                                        <div class="text-[11px] text-gray-500">@ ₹७ / kg</div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span
+                                            class="px-2.5 py-1 rounded-full bg-rose-100 border border-rose-200 text-rose-800 text-[11px] font-bold inline-flex items-center gap-1.5">
+                                            <span class="w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>
+                                            <span>चक्की १ वर सुरू</span>
+                                        </span>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span
+                                            class="px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 text-[11px] font-bold">UPI
+                                            जमा</span>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <button
+                                                class="p-1.5 rounded-lg hover:bg-rose-50 text-gray-500 hover:text-rose-700 transition-colors">
+                                                <span class="material-symbols-outlined text-[18px]">print</span>
+                                            </button>
+                                            <button
+                                                class="p-1.5 rounded-lg hover:bg-rose-50 text-gray-500 hover:text-rose-700 transition-colors">
+                                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-[#fff9fb] transition-colors">
+                                    <td class="py-4 px-4 font-mono font-bold text-rose-700">#1081</td>
+                                    <td class="py-4 px-4">
+                                        <div class="font-bold text-gray-900">आनंदीबाई कदम</div>
+                                        <div class="text-[11px] text-gray-500">+91 99221 xxxxx</div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                class="w-6 h-6 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center">
+                                                <span class="material-symbols-outlined text-[16px]">spa</span>
+                                            </span>
+                                            <span class="font-semibold text-gray-900">चना डाळ (Besan)</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 font-bold text-gray-900">१० किलो</td>
+                                    <td class="py-4 px-4">
+                                        <div class="font-bold text-gray-900">₹ १००</div>
+                                        <div class="text-[11px] text-gray-500">@ ₹१० / kg</div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span
+                                            class="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold inline-flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[14px]">done_all</span>
+                                            <span>तयार (Ready)</span>
+                                        </span>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span
+                                            class="px-2 py-0.5 rounded-md bg-red-100 text-red-700 text-[11px] font-bold">बाकी
+                                            / Unpaid</span>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <button
+                                                class="p-1.5 rounded-lg hover:bg-rose-50 text-gray-500 hover:text-rose-700 transition-colors"
+                                                title="SMS Alert">
+                                                <span class="material-symbols-outlined text-[18px]">sms</span>
+                                            </button>
+                                            <button
+                                                class="p-1.5 rounded-lg hover:bg-rose-50 text-gray-500 hover:text-rose-700 transition-colors"
+                                                title="Deliver">
+                                                <span class="material-symbols-outlined text-[18px]">check_box</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-[#fff9fb] transition-colors">
+                                    <td class="py-4 px-4 font-mono font-bold text-rose-700">#1080</td>
+                                    <td class="py-4 px-4">
+                                        <div class="font-bold text-gray-900">प्रमोद मोरे</div>
+                                        <div class="text-[11px] text-gray-500">+91 91580 xxxxx</div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                class="w-6 h-6 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
+                                                <span class="material-symbols-outlined text-[16px]">grain</span>
+                                            </span>
+                                            <span class="font-semibold text-gray-900">गहू (एमपी सिहोर)</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 font-bold text-gray-900">५० किलो</td>
+                                    <td class="py-4 px-4">
+                                        <div class="font-bold text-gray-900">₹ ३५०</div>
+                                        <div class="text-[11px] text-gray-500">@ ₹७ / kg</div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span
+                                            class="px-2.5 py-1 rounded-full bg-gray-100 border border-gray-200 text-gray-600 text-[11px] font-bold inline-flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[14px]">archive</span>
+                                            <span>वितरित (Delivered)</span>
+                                        </span>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span
+                                            class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[11px] font-bold">पूर्ण
+                                            (Paid)</span>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <button
+                                                class="p-1.5 rounded-lg hover:bg-rose-50 text-gray-500 hover:text-rose-700 transition-colors">
+                                                <span class="material-symbols-outlined text-[18px]">receipt</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const seedBtns = document.querySelectorAll('button:has(span)');
+            seedBtns.forEach(btn => {
+                if (btn.innerText.includes('Seed Demo')) {
+                    btn.addEventListener('click', () => {
+                        alert('डेमो डेटा लोड झाला आहे! (Demo data simulated successfully)');
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

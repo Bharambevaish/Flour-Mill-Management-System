@@ -29,7 +29,9 @@ export default async function SettingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <header>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">सेटिंग्स / Settings</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+          सेटिंग्स / Settings
+        </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           भाषा, चक्की प्रोफाइल, दळणाचे दर आणि सूचनांचे व्यवस्थापन
         </p>

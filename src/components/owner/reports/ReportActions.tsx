@@ -19,7 +19,7 @@ export function ReportActions({ query, lang }: { query: string; lang: Lang }) {
           key={l.section}
           href={`/api/owner/reports/export?${query}&section=${l.section}`}
           download
-          className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          className="stitch-btn-secondary text-xs sm:text-sm"
         >
           ⬇ {lang === "mr" ? l.mr : l.en} CSV
         </a>

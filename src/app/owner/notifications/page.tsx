@@ -52,7 +52,7 @@ export default async function NotificationsPage() {
   return (
     <div className="flex flex-col gap-6">
       <header>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
           {formatLang({ mr: "सूचना", en: "Notifications" }, lang)}
         </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -78,27 +78,27 @@ export default async function NotificationsPage() {
       />
 
       {recentTop.length > 0 && (
-        <section className="rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
-            <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
+        <section className="rounded-2xl border border-[var(--border-subtle)] bg-white shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="border-b border-rose-50 px-6 py-4 dark:border-zinc-800">
+            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
               {formatLang({ mr: "नुकत्याच पाठवलेल्या सूचना", en: "Recent broadcasts" }, lang)}
             </h2>
           </div>
-          <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <ul className="divide-y divide-rose-50 dark:divide-zinc-800">
             {recentTop.map((r, i) => (
-              <li key={`${r.lang}-${r.sentAt.getTime()}-${i}`} className="flex items-start justify-between gap-4 px-5 py-3">
+              <li key={`${r.lang}-${r.sentAt.getTime()}-${i}`} className="flex items-start justify-between gap-4 px-6 py-3.5 hover:bg-rose-50/20 dark:hover:bg-zinc-800/40 transition-colors">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">{r.message}</p>
+                  <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">{r.message}</p>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     {formatLang({ mr: "ग्राहक", en: "customers" }, lang)}: {r.count} · {r.lang === "mr" ? "मराठी" : "English"}
                   </p>
                 </div>
-                <span className="shrink-0 text-xs text-zinc-400">{formatAgo(r.sentAt)}</span>
+                <span className="shrink-0 text-xs font-medium text-zinc-400">{formatAgo(r.sentAt)}</span>
               </li>
             ))}
           </ul>
-          <div className="border-t border-zinc-200 px-5 py-3 dark:border-zinc-800">
-            <Link href="/owner/outstanding" className="text-sm text-emerald-600 hover:underline dark:text-emerald-400">
+          <div className="border-t border-rose-50 px-6 py-3.5 dark:border-zinc-800">
+            <Link href="/owner/outstanding" className="text-sm font-semibold text-rose-700 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-300">
               {formatLang({ mr: "उधारी विभाग पहा →", en: "View outstanding →" }, lang)}
             </Link>
           </div>

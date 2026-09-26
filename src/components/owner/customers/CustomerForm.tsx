@@ -35,8 +35,8 @@ export function CustomerForm({
   const [error, setError] = useState<string | null>(null);
 
   const inputClass =
-    "w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none focus:border-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-400";
-  const labelClass = "mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300";
+    "stitch-input text-sm";
+  const labelClass = "mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300";
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -62,14 +62,14 @@ export function CustomerForm({
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-4">
-      <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
+    <form onSubmit={submit} className="flex flex-col gap-5">
+      <h2 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
         {isEdit
           ? (lang === "mr" ? "ग्राहक माहिती बदला" : "Edit Customer Details")
           : (lang === "mr" ? "नवीन ग्राहक खाते तयार करा" : "Add New Customer")}
       </h2>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-3">
         <div>
           <label htmlFor="customer-name" className={labelClass}>
             {lang === "mr" ? "पूर्ण नाव" : "Full Name"}
@@ -119,20 +119,20 @@ export function CustomerForm({
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="text-sm font-medium text-rose-600 dark:text-rose-400">{error}</p>}
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-3">
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+          className="stitch-btn-primary text-sm"
         >
           {pending ? "..." : isEdit ? (lang === "mr" ? "जतन करा" : "Save Changes") : (lang === "mr" ? "ग्राहक तयार करा" : "Create Account")}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          className="stitch-btn-secondary text-sm"
         >
           {lang === "mr" ? "रद्द करा" : "Cancel"}
         </button>

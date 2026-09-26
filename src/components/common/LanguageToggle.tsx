@@ -21,14 +21,14 @@ export function LanguageToggle({ initialLang = "en" }: { initialLang?: "mr" | "e
   }
 
   return (
-    <div className="inline-flex items-center rounded-lg border border-zinc-200 bg-zinc-100 p-1 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="inline-flex items-center rounded-xl border border-rose-200/80 bg-rose-50/60 p-1 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
       <button
         type="button"
         onClick={() => toggleLanguage("en")}
-        className={`rounded px-2.5 py-1 text-xs font-semibold transition-colors ${
+        className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
           lang === "en"
-            ? "bg-amber-600 text-white shadow-sm"
-            : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            ? "bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-xs"
+            : "text-rose-900/70 hover:text-rose-950 dark:text-zinc-400 dark:hover:text-zinc-100"
         }`}
       >
         English
@@ -36,10 +36,10 @@ export function LanguageToggle({ initialLang = "en" }: { initialLang?: "mr" | "e
       <button
         type="button"
         onClick={() => toggleLanguage("mr")}
-        className={`rounded px-2.5 py-1 text-xs font-semibold transition-colors ${
+        className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
           lang === "mr"
-            ? "bg-amber-600 text-white shadow-sm"
-            : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            ? "bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-xs"
+            : "text-rose-900/70 hover:text-rose-950 dark:text-zinc-400 dark:hover:text-zinc-100"
         }`}
       >
         मराठी

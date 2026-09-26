@@ -6,12 +6,52 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Canonical Stitch Theme Tokens (Light Mode) */
+  --background: #faf5f7;
+  --foreground: #1e1518;
+
+  --color-primary: #9d174d;
+  --color-primary-container: #be185d;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #500724;
+  --color-secondary: #be185d;
+  --color-secondary-container: #fce7f3;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #7c1130;
+  --color-tertiary: #c2410c;
+  --color-tertiary-container: #ffedd5;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-fixed: #431407;
+
+  --color-surface: #faf5f7;
+  --color-surface-bright: #ffffff;
+  --color-surface-dim: #ebd7dc;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #ffffff;
+  --color-surface-container: #fef2f4;
+  --color-surface-container-high: #f7dbe2;
+  --color-surface-container-highest: #fbe7eb;
+  --color-surface-variant: #f5e4e8;
+  --color-on-surface: #1e1518;
+  --color-on-surface-variant: #6b545a;
+  --color-on-background: #1e1518;
+
+  --color-outline: #9f7d85;
+  --color-outline-variant: #f3d5dc;
+
+  --color-error: #b91c1c;
+  --color-error-container: #fee2e2;
+  --color-on-error: #ffffff;
+
+  --color-inverse-surface: #37242a;
+  --color-inverse-on-surface: #fff1f2;
+  --color-surface-tint: #be185d;
+
   color-scheme: light;
 }
 
-.dark {
+.dark,
+:root.dark {
   --background: #0a0a0a;
   --foreground: #ededed;
   color-scheme: dark;
@@ -20,15 +60,182 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans), "Noto Sans Devanagari", "Nirmala UI", "Mangal",
+
+  --color-primary: var(--color-primary);
+  --color-primary-container: var(--color-primary-container);
+  --color-on-primary: var(--color-on-primary);
+  --color-on-primary-container: var(--color-on-primary-container);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-container: var(--color-secondary-container);
+  --color-on-secondary: var(--color-on-secondary);
+  --color-on-secondary-container: var(--color-on-secondary-container);
+  --color-tertiary: var(--color-tertiary);
+  --color-tertiary-container: var(--color-tertiary-container);
+  --color-on-tertiary: var(--color-on-tertiary);
+  --color-on-tertiary-fixed: var(--color-on-tertiary-fixed);
+
+  --color-surface: var(--color-surface);
+  --color-surface-bright: var(--color-surface-bright);
+  --color-surface-dim: var(--color-surface-dim);
+  --color-surface-container-lowest: var(--color-surface-container-lowest);
+  --color-surface-container-low: var(--color-surface-container-low);
+  --color-surface-container: var(--color-surface-container);
+  --color-surface-container-high: var(--color-surface-container-high);
+  --color-surface-container-highest: var(--color-surface-container-highest);
+  --color-surface-variant: var(--color-surface-variant);
+  --color-on-surface: var(--color-on-surface);
+  --color-on-surface-variant: var(--color-on-surface-variant);
+  --color-on-background: var(--color-on-background);
+
+  --color-outline: var(--color-outline);
+  --color-outline-variant: var(--color-outline-variant);
+
+  --color-error: var(--color-error);
+  --color-error-container: var(--color-error-container);
+  --color-on-error: var(--color-on-error);
+
+  --color-inverse-surface: var(--color-inverse-surface);
+  --color-inverse-on-surface: var(--color-inverse-on-surface);
+  --color-surface-tint: var(--color-surface-tint);
+
+  --font-sans: var(--font-plus-jakarta), var(--font-geist-sans), "Noto Sans Devanagari", "Nirmala UI", "Mangal",
     system-ui, Arial, Helvetica, sans-serif;
   --font-mono: var(--font-geist-mono);
+
+  --shadow-soft: 0 2px 14px -2px rgba(157, 23, 77, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-elevated: 0 10px 25px -4px rgba(157, 23, 77, 0.07), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
+  --shadow-glow-pink: 0 0 20px -3px rgba(190, 24, 93, 0.25);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Noto Sans Devanagari", "Nirmala UI", "Mangal", Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* Stitch component patterns */
+.stitch-card {
+  background-color: #ffffff;
+  border-width: 1px;
+  border-color: #f6dbe2;
+  border-radius: 1rem;
+  box-shadow: 0 2px 14px -2px rgba(157, 23, 77, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.stitch-card:hover {
+  border-color: #f472b6;
+  box-shadow: 0 10px 25px -4px rgba(157, 23, 77, 0.07), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
+}
+:where(.dark, .dark *) .stitch-card {
+  background-color: #18181b;
+  border-color: #27272a;
+  box-shadow: none;
+}
+:where(.dark, .dark *) .stitch-card:hover {
+  border-color: #3f3f46;
+}
+
+.stitch-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  background-image: linear-gradient(to right, #e11d48, #db2777, #be123c);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 0 20px -3px rgba(190, 24, 93, 0.25);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.stitch-btn-primary:hover {
+  filter: brightness(1.05);
+  transform: scale(1.01);
+}
+.stitch-btn-primary:active {
+  transform: scale(0.98);
+}
+.stitch-btn-primary:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.stitch-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid #f6dbe2;
+  background-color: #ffffff;
+  color: #9d174d;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.stitch-btn-secondary:hover {
+  background-color: #fdf2f4;
+  border-color: #f472b6;
+}
+.stitch-btn-secondary:active {
+  transform: scale(0.98);
+}
+:where(.dark, .dark *) .stitch-btn-secondary {
+  background-color: #27272a;
+  border-color: #3f3f46;
+  color: #e4e4e7;
+}
+:where(.dark, .dark *) .stitch-btn-secondary:hover {
+  background-color: #3f3f46;
+}
+
+.stitch-input {
+  border-radius: 0.75rem;
+  border: 1px solid #f3d5dc;
+  background-color: rgba(254, 242, 244, 0.6);
+  color: #1e1518;
+  padding: 0.625rem 0.875rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.stitch-input::placeholder {
+  color: #9f7d85;
+  opacity: 0.7;
+}
+.stitch-input:focus {
+  background-color: #ffffff;
+  border-color: #be185d;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.18);
+}
+:where(.dark, .dark *) .stitch-input {
+  background-color: #18181b;
+  border-color: #3f3f46;
+  color: #f4f4f5;
+}
+:where(.dark, .dark *) .stitch-input:focus {
+  background-color: #18181b;
+  border-color: #71717a;
+  box-shadow: 0 0 0 3px rgba(113, 113, 122, 0.2);
+}
+
+/* Native select & option styling for light and dark modes */
+select {
+  color-scheme: light;
+}
+
+select option {
+  background-color: #ffffff;
+  color: #1e1518;
+}
+
+:where(.dark, .dark *) select,
+.dark select {
+  color-scheme: dark;
+}
+
+:where(.dark, .dark *) select option,
+.dark select option {
+  background-color: #18181b;
+  color: #f4f4f5;
 }
 
 /* Print → browser "Save as PDF". Toolbars/sidebar/theme switch carry `.no-print`. */

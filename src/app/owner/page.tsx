@@ -93,29 +93,45 @@ export default async function OwnerDashboard() {
   ];
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-7">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-            {formatLang({ mr: `स्वागत आहे, ${admin?.name}`, en: `Welcome back, ${admin?.name}` }, lang)}
+          <h1 className="text-2xl font-extrabold tracking-tight text-[#4c0519] dark:text-zinc-100">
+            {formatLang({ mr: `सस्नेह नमस्कार, ${admin?.name}`, en: `Welcome back, ${admin?.name}` }, lang)}
           </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            {formatLang({ mr: "आजचा व्यवसाय व ऑर्डर अपडेट्स", en: "Today's mill operations overview" }, lang)}
+          <p className="mt-1 text-sm font-medium text-[#6b545a] dark:text-zinc-400">
+            {formatLang({ mr: "आजचा व्यवसाय व थेट ऑपरेशन्स आढावा", en: "Today's mill operations overview & telemetry" }, lang)}
           </p>
         </div>
         <DashboardAutoRefresh />
       </header>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {stats.map((s) => (
-          <section
-            key={s.title}
-            className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
-          >
-            <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{s.title}</p>
-            <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-zinc-100">{s.value}</p>
-          </section>
-        ))}
+        {stats.map((s, idx) => {
+          const isOutstanding = idx === 6 || idx === 7;
+          const isCollected = idx === 2;
+          return (
+            <section
+              key={s.title}
+              className="stitch-card p-5"
+            >
+              <p className="text-xs font-bold uppercase tracking-wider text-[#805e68] dark:text-zinc-400">
+                {s.title}
+              </p>
+              <p
+                className={`mt-2 text-3xl font-extrabold ${
+                  isOutstanding
+                    ? "text-rose-700 dark:text-rose-400"
+                    : isCollected
+                      ? "text-emerald-800 dark:text-emerald-400"
+                      : "text-gray-900 dark:text-zinc-100"
+                }`}
+              >
+                {s.value}
+              </p>
+            </section>
+          );
+        })}
       </div>
 
       <DashboardQuickActions />
@@ -123,10 +139,10 @@ export default async function OwnerDashboard() {
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
+            <h2 className="text-lg font-bold text-[#4c0519] dark:text-zinc-100">
               {formatLang({ mr: "ग्राहकांची स्थिती (लक्ष देणे आवश्यक)", en: "Customer Status (Attention Needed)" }, lang)}
             </h2>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs font-medium text-[#6b545a] dark:text-zinc-400">
               {formatLang(
                 { mr: "कुणाची ऑर्डर प्रलंबित किंवा उधारी बाकी आहे", en: "Customers with active orders or outstanding balances" },
                 lang
@@ -138,7 +154,7 @@ export default async function OwnerDashboard() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
+        <h2 className="text-lg font-bold text-[#4c0519] dark:text-zinc-100">
           {formatLang({ mr: "सर्व ग्राहक सूची", en: "All Customers Overview" }, lang)}
         </h2>
         <CustomerStatusGrid customers={rows} lang={lang} />

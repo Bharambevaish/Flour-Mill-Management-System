@@ -44,12 +44,12 @@ export function OrderProgress({
   for (const h of order.statusHistory) at.set(h.status, h.at);
 
   return (
-    <div className="mt-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950/60">
+    <div className="mt-3 rounded-xl border border-rose-100 bg-rose-50/20 p-3.5 dark:border-zinc-800 dark:bg-zinc-950/60">
       {/* Thin 4-step bar: dot row over a filled track */}
       <div className="relative">
-        <div className="absolute left-[10%] right-[10%] top-1.5 h-0.5 rounded bg-zinc-300 dark:bg-zinc-600">
+        <div className="absolute left-[10%] right-[10%] top-1.5 h-0.5 rounded bg-rose-100 dark:bg-zinc-700">
           <div
-            className="h-full rounded bg-emerald-500 dark:bg-emerald-400"
+            className="h-full rounded bg-rose-600 dark:bg-rose-500 transition-all duration-300"
             style={{ width: `${(current / (STEPS.length - 1)) * 100}%` }}
           />
         </div>
@@ -58,10 +58,10 @@ export function OrderProgress({
             const reached = i <= current;
             const isCurrent = i === current;
             const dot = isCurrent
-              ? "bg-emerald-600 ring-4 ring-emerald-600/20 dark:bg-emerald-400 dark:ring-emerald-400/20"
+              ? "bg-rose-600 ring-4 ring-rose-600/20 dark:bg-rose-400 dark:ring-rose-400/20"
               : reached
-                ? "bg-emerald-600 dark:bg-emerald-400"
-                : "bg-zinc-300 dark:bg-zinc-600";
+                ? "bg-rose-600 dark:bg-rose-400"
+                : "bg-rose-200 dark:bg-zinc-700";
             return (
               <div key={s} className="flex flex-col items-center">
                 <span
@@ -69,9 +69,9 @@ export function OrderProgress({
                   title={mr ? STEP_LABEL[s].mr : STEP_LABEL[s].en}
                 />
                 <span
-                  className={`mt-1 text-center text-[10px] leading-tight ${
+                  className={`mt-1.5 text-center text-[10px] leading-tight ${
                     reached
-                      ? "font-medium text-zinc-700 dark:text-zinc-300"
+                      ? "font-semibold text-zinc-800 dark:text-zinc-200"
                       : "text-zinc-400 dark:text-zinc-500"
                   }`}
                 >
@@ -83,7 +83,7 @@ export function OrderProgress({
         </div>
       </div>
 
-      <div className="mt-2 flex items-center justify-between gap-2">
+      <div className="mt-3 flex items-center justify-between gap-2">
         <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
           {order.status === "collected"
             ? mr
@@ -96,7 +96,7 @@ export function OrderProgress({
         <button
           type="button"
           onClick={() => setShowTimes((v) => !v)}
-          className="text-xs font-medium text-emerald-600 hover:underline dark:text-emerald-400"
+          className="text-xs font-semibold text-rose-700 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-300"
         >
           {showTimes
             ? mr

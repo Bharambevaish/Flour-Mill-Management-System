@@ -107,9 +107,8 @@ export function NewOrderForm({
       : 0;
   const balance = Math.max(0, Math.round((batchTotal - advanceAmount) * 100) / 100);
 
-  const inputClass =
-    "w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none focus:border-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-400";
-  const labelClass = "mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300";
+  const inputClass = "stitch-input w-full";
+  const labelClass = "mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#6b545a] dark:text-zinc-300";
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -192,14 +191,14 @@ export function NewOrderForm({
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-sm font-bold text-[#4c0519] dark:text-zinc-100">
             {lang === "mr" ? "दळणाच्या नोंदी (बॅगा)" : "Milling lines (bags)"}
           </h2>
           <button
             type="button"
             onClick={addLine}
             disabled={lines.length >= MAX_LINES}
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="stitch-btn-secondary px-3 py-1.5 text-xs"
           >
             {lang === "mr" ? "+ आणखी एक बॅग" : "+ Add another bag"}
           </button>
@@ -208,7 +207,7 @@ export function NewOrderForm({
         {lines.map((line, i) => (
           <div
             key={i}
-            className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950"
+            className="rounded-2xl border border-rose-200/80 bg-rose-50/30 p-4 dark:border-zinc-800 dark:bg-zinc-950"
           >
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
               <div>
@@ -271,16 +270,16 @@ export function NewOrderForm({
               </div>
 
               <div className="flex items-end justify-between gap-2">
-                <p className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
-                  <span className="block text-xs text-zinc-500 dark:text-zinc-400">₹</span>
-                  <span className="font-semibold">{lineTotal(line).toLocaleString("en-IN")}</span>
+                <p className="flex-1 rounded-xl border border-rose-200/80 bg-white px-3 py-2 text-sm text-zinc-900 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
+                  <span className="block text-[11px] font-semibold text-[#805e68] dark:text-zinc-400">₹ एकूण</span>
+                  <span className="font-bold text-gray-900 dark:text-zinc-100">{lineTotal(line).toLocaleString("en-IN")}</span>
                 </p>
                 <button
                   type="button"
                   onClick={() => removeLine(i)}
                   disabled={lines.length <= 1}
                   aria-label={lang === "mr" ? "ओळ काढा" : "Remove line"}
-                  className="rounded-lg border border-zinc-300 px-2.5 py-2 text-sm text-zinc-500 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                  className="rounded-xl border border-rose-200 bg-white px-3 py-2.5 text-sm font-bold text-rose-600 shadow-xs transition-colors hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900 dark:text-rose-400 dark:hover:bg-zinc-800"
                 >
                   ✕
                 </button>
@@ -302,7 +301,7 @@ export function NewOrderForm({
       </div>
 
       <div className="flex flex-col gap-3">
-        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-800">
+        <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-rose-200/80 bg-rose-50/40 px-3.5 py-2.5 text-sm font-semibold text-rose-950 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
           <input
             type="checkbox"
             checked={takeAdvance}
@@ -310,7 +309,7 @@ export function NewOrderForm({
               setTakeAdvance(e.target.checked);
               if (e.target.checked && batchTotal > 0) setAdvance(String(batchTotal));
             }}
-            className="accent-zinc-900 dark:accent-zinc-100"
+            className="h-4 w-4 rounded border-rose-300 accent-[#9d174d]"
           />
           <span>{lang === "mr" ? "आगाऊ रक्कम (Advance Payment) नोंदवा" : "Record Advance Payment"}</span>
         </label>
@@ -328,57 +327,63 @@ export function NewOrderForm({
           />
         )}
 
-        <div className="grid gap-2 sm:grid-cols-3">
-          <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100">
-            <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+        <div className="grid gap-2.5 sm:grid-cols-3">
+          <div className="rounded-xl border border-rose-200/80 bg-white p-3 shadow-xs dark:border-zinc-800 dark:bg-zinc-950">
+            <span className="block text-xs font-semibold text-[#805e68] dark:text-zinc-400">
               {lang === "mr" ? "एकूण बॅगा / वजन" : "Bags / Total weight"}
             </span>
-            <span className="font-semibold">
+            <span className="mt-1 block text-base font-extrabold text-gray-900 dark:text-zinc-100">
               {validLines.length} · {Math.round(totalWeight * 100) / 100} kg
             </span>
-          </p>
-          <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100">
-            <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+          </div>
+          <div className="rounded-xl border border-rose-200/80 bg-white p-3 shadow-xs dark:border-zinc-800 dark:bg-zinc-950">
+            <span className="block text-xs font-semibold text-[#805e68] dark:text-zinc-400">
               {lang === "mr" ? "एकूण आकारणी" : "Total Charges"}
             </span>
-            <span className="font-semibold">₹ {batchTotal.toLocaleString("en-IN")}</span>
-          </p>
-          <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100">
-            <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+            <span className="mt-1 block text-base font-extrabold text-[#9d174d] dark:text-rose-400">
+              ₹ {batchTotal.toLocaleString("en-IN")}
+            </span>
+          </div>
+          <div className="rounded-xl border border-rose-200/80 bg-white p-3 shadow-xs dark:border-zinc-800 dark:bg-zinc-950">
+            <span className="block text-xs font-semibold text-[#805e68] dark:text-zinc-400">
               {lang === "mr" ? "उर्वरित बाकी" : "Balance Due"}
             </span>
-            <span className={`font-semibold ${balance > 0 ? "" : "text-emerald-600 dark:text-emerald-400"}`}>
+            <span className={`mt-1 block text-base font-extrabold ${balance > 0 ? "text-rose-700 dark:text-rose-400" : "text-emerald-700 dark:text-emerald-400"}`}>
               ₹ {balance.toLocaleString("en-IN")}
             </span>
-          </p>
+          </div>
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">
+          {error}
+        </div>
+      )}
 
       {createdNos !== null && (
-        <p className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200">
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-sm font-semibold text-emerald-900 shadow-xs dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200">
           {lang === "mr"
             ? `ऑर्डर ${createdNos.join(", #")} यशस्वीरित्या नोंदवल्या (${createdNos.length}).`
             : `Order${createdNos.length > 1 ? "s" : ""} #${createdNos.join(", #")} created (${createdNos.length}).`}
-          <Link href="/owner/queue" className="ml-2 underline underline-offset-2">
-            {lang === "mr" ? "रांग यादी पहा" : "View Queue"}
+          <Link href="/owner/queue" className="ml-2 font-bold underline underline-offset-2 hover:text-emerald-950">
+            {lang === "mr" ? "रांग यादी पहा →" : "View Queue →"}
           </Link>
-        </p>
+        </div>
       )}
 
       <div>
         <button
           type="submit"
           disabled={pending || customers.length === 0}
-          className="rounded-lg bg-zinc-900 px-5 py-2.5 font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+          className="stitch-btn-primary px-6 py-3.5 text-base"
         >
-          {pending ? "..." : lang === "mr" ? "ऑर्डर तयार करा" : "Create Order"}
+          {pending ? "..." : lang === "mr" ? "+ ऑर्डर तयार करा" : "+ Create Order"}
         </button>
         {customers.length === 0 && (
-          <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="mt-2 text-xs text-[#7d5e67] dark:text-zinc-400">
             {lang === "mr" ? "ऑर्डरसाठी प्रथम ग्राहक नोंदवा." : "Please add a customer account first."}{" "}
-            <Link href="/owner/customers" className="underline">
+            <Link href="/owner/customers" className="font-semibold text-rose-700 underline dark:text-rose-400">
               {lang === "mr" ? "ग्राहक खाती" : "Manage Customers"}
             </Link>
           </p>
