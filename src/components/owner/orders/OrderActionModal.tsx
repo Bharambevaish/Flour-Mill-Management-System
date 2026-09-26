@@ -126,22 +126,24 @@ export function OrderActionModal({
       aria-modal="true"
       aria-label="Order update"
     >
-      <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="stitch-card relative w-full max-w-md overflow-hidden p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose-200 via-rose-600 to-pink-200" />
+
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+              <span className="inline-flex items-center rounded-full border border-rose-200/80 bg-rose-50 px-2.5 py-0.5 text-xs font-bold text-rose-800 shadow-xs dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
                 {lang === "mr" ? `रांग क्र. ${order.queueNo ?? order.orderId}` : `Queue Token #${order.queueNo ?? order.orderId}`}
               </span>
-              <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+              <span className="inline-flex items-center rounded-full border border-rose-100 bg-rose-50/60 px-2 py-0.5 text-xs text-[#7d5e67] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
                 Order #{order.orderId}
               </span>
               <StatusBadge status={order.status} lang={lang} />
             </div>
-            <p className="mt-2 text-base font-semibold text-zinc-900 dark:text-zinc-100">
+            <p className="mt-2 text-base font-bold text-gray-900 dark:text-zinc-100">
               {order.customer ? order.customer.name : "—"}
             </p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs font-medium text-[#7d5e67] dark:text-zinc-400">
               {grainLabel(order.grainType, lang)} · {sizeLabel(order.requiredSize, lang)} · {order.weightKg} kg ·{" "}
               ₹{order.ratePerKg}/kg
             </p>
@@ -150,29 +152,29 @@ export function OrderActionModal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-lg p-1 text-zinc-500 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="rounded-xl p-1.5 text-rose-400 transition-colors hover:bg-rose-50 hover:text-rose-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
           >
             ✕
           </button>
         </div>
 
-        <div className="mt-4 rounded-xl border border-zinc-200 p-3 dark:border-zinc-800">
+        <div className="mt-4 rounded-2xl border border-rose-200/80 bg-rose-50/40 p-3.5 dark:border-zinc-800 dark:bg-zinc-950">
           <div className="grid grid-cols-3 gap-2 text-center">
             <div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">{lang === "mr" ? "एकूण आकारणी" : "Total Charges"}</p>
-              <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              <p className="text-[11px] font-semibold text-[#805e68] dark:text-zinc-400">{lang === "mr" ? "एकूण आकारणी" : "Total Charges"}</p>
+              <p className="mt-0.5 text-sm font-extrabold text-gray-900 dark:text-zinc-100">
                 ₹ {total.toLocaleString("en-IN")}
               </p>
             </div>
             <div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">{lang === "mr" ? "वसूल रक्कम" : "Paid Amount"}</p>
-              <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              <p className="text-[11px] font-semibold text-[#805e68] dark:text-zinc-400">{lang === "mr" ? "वसूल रक्कम" : "Paid Amount"}</p>
+              <p className="mt-0.5 text-sm font-extrabold text-emerald-700 dark:text-emerald-400">
                 ₹ {order.paidAmount.toLocaleString("en-IN")}
               </p>
             </div>
             <div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">{lang === "mr" ? "शिल्लक बाकी" : "Balance Due"}</p>
-              <p className="text-sm font-semibold text-rose-700 dark:text-rose-400">
+              <p className="text-[11px] font-semibold text-[#805e68] dark:text-zinc-400">{lang === "mr" ? "शिल्लक बाकी" : "Balance Due"}</p>
+              <p className="mt-0.5 text-sm font-extrabold text-rose-700 dark:text-rose-400">
                 ₹ {outstanding.toLocaleString("en-IN")}
               </p>
             </div>
@@ -181,17 +183,17 @@ export function OrderActionModal({
 
         {next && (
           <div className="mt-4">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <span className="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-xs text-rose-800 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
                 {order.status}
               </span>
-              <span aria-hidden="true" className="text-zinc-400">→</span>
-              <span className="rounded-md bg-amber-100 px-2 py-0.5 font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+              <span aria-hidden="true" className="text-rose-400">→</span>
+              <span className="rounded-full border border-pink-200 bg-gradient-to-r from-rose-100 to-pink-50 px-2.5 py-0.5 text-xs font-bold text-rose-800 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
                 {lang === "mr" ? next.mr : next.en}
               </span>
             </div>
             {next.to === "collected" && (
-              <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+              <p className="mt-2 text-xs font-medium text-[#7d5e67] dark:text-zinc-400">
                 {lang === "mr"
                   ? "घेतल्यावर ही ऑर्डर रांगेतून काढली जाईल; उधारी शिल्लक असल्यास खात्यात राहील."
                   : "Collected orders leave the live queue; any unpaid balance remains on account."}
@@ -201,8 +203,8 @@ export function OrderActionModal({
         )}
 
         {outstanding > 0 && (
-          <div className="mt-4 flex flex-col gap-2">
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-800">
+          <div className="mt-4 flex flex-col gap-2.5">
+            <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-rose-200/80 bg-rose-50/40 px-3 py-2 text-xs font-semibold text-rose-950 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200">
               <input
                 type="checkbox"
                 checked={recordPay}
@@ -210,7 +212,7 @@ export function OrderActionModal({
                   setRecordPay(e.target.checked);
                   if (e.target.checked) setPayAmount(String(outstanding));
                 }}
-                className="accent-zinc-900 dark:accent-zinc-100"
+                className="h-4 w-4 rounded border-rose-300 accent-[#9d174d]"
               />
               <span>{lang === "mr" ? "या टप्प्यावर जमा रक्कम नोंदवा" : "Record Payment with Status Change"}</span>
             </label>
@@ -228,9 +230,9 @@ export function OrderActionModal({
               />
             )}
 
-            <div className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 text-sm dark:bg-zinc-800/60">
-              <span className="text-zinc-600 dark:text-zinc-300">{lang === "mr" ? "नवीन शिल्लक उधारी" : "New Remaining Due"}</span>
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+            <div className="flex items-center justify-between rounded-xl border border-rose-200/80 bg-rose-50/50 px-3.5 py-2 text-xs font-semibold dark:border-zinc-800 dark:bg-zinc-950">
+              <span className="text-[#805e68] dark:text-zinc-300">{lang === "mr" ? "नवीन शिल्लक उधारी" : "New Remaining Due"}</span>
+              <span className="font-extrabold text-gray-900 dark:text-zinc-100">
                 ₹ {newOutstanding.toLocaleString("en-IN")}
               </span>
             </div>
@@ -238,19 +240,23 @@ export function OrderActionModal({
         )}
 
         {outstanding <= 0 && (
-          <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
+          <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-xs font-semibold text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-950/20 dark:text-emerald-300">
             {lang === "mr" ? "या ऑर्डरचे पैसे पूर्ण जमा झाले आहेत." : "This order is fully paid."}
           </p>
         )}
 
-        {error && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && (
+          <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 p-2.5 text-xs font-semibold text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">
+            {error}
+          </div>
+        )}
 
-        <div className="mt-4 flex items-center justify-end gap-2">
+        <div className="mt-5 flex items-center justify-end gap-2.5">
           <button
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 disabled:opacity-60 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="stitch-btn-secondary px-3.5 py-2 text-xs"
           >
             {lang === "mr" ? "रद्द करा" : "Cancel"}
           </button>
@@ -258,7 +264,7 @@ export function OrderActionModal({
             type="button"
             onClick={save}
             disabled={submitting || !next}
-            className="rounded-lg bg-zinc-900 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+            className="stitch-btn-primary px-4 py-2 text-xs"
           >
             {submitting ? "..." : (lang === "mr" ? `${next?.mr ?? ""} व सेव्ह` : `${next?.en ?? ""} & Save`)}
           </button>

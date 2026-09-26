@@ -53,9 +53,9 @@ export function OwnerLoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4">
+    <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-4">
       <div>
-        <label htmlFor="email" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="email" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#6b545a] dark:text-zinc-300">
           ईमेल / Email
         </label>
         <input
@@ -65,12 +65,13 @@ export function OwnerLoginForm() {
           autoComplete="username"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none focus:border-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-400"
+          placeholder="owner@example.com"
+          className="stitch-input w-full"
         />
       </div>
 
       <div>
-        <label htmlFor="owner-password" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="owner-password" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#6b545a] dark:text-zinc-300">
           पासवर्ड / Password
         </label>
         <input
@@ -80,13 +81,14 @@ export function OwnerLoginForm() {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none focus:border-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-400"
+          placeholder="••••••••••••"
+          className="stitch-input w-full"
         />
       </div>
 
       {step === "totp" && (
         <div>
-          <label htmlFor="totp-code" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label htmlFor="totp-code" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#6b545a] dark:text-zinc-300">
             ऑथेंटिकेटर कोड / 2FA Code
           </label>
           <input
@@ -100,23 +102,27 @@ export function OwnerLoginForm() {
             placeholder="••••••"
             value={totpCode}
             onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ""))}
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none focus:border-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-400"
+            className="stitch-input w-full text-center tracking-widest text-lg font-bold"
           />
-          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="mt-1.5 text-xs text-[#6b545a] dark:text-zinc-400">
             आपल्या ऑथेंटिकेटर अ‍ॅपमधून 6-अंकी कोड टाका / Enter the 6-digit code from your authenticator app
           </p>
         </div>
       )}
 
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">
+          {error}
+        </div>
+      )}
 
-      <div className="flex items-center gap-3">
+      <div className="mt-2 flex items-center gap-3">
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-zinc-900 px-5 py-2.5 font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+          className="stitch-btn-primary w-full py-3.5"
         >
-          {pending ? "..." : step === "totp" ? "पडताळा / Verify" : "लॉगिन / Login"}
+          {pending ? "..." : step === "totp" ? "पडताळा / Verify" : "लॉगिन करा / Sign In"}
         </button>
         {step === "totp" && (
           <button
@@ -127,9 +133,9 @@ export function OwnerLoginForm() {
               setTotpCode("");
               setError(null);
             }}
-            className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            className="stitch-btn-secondary py-3.5 px-4"
           >
-            मागे / Back
+            मागे
           </button>
         )}
       </div>

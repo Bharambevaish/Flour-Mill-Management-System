@@ -27,14 +27,14 @@ export function OwnerSidebar({ millName, lang = "en" }: { millName?: string; lan
 
   return (
     <>
-      <aside className="no-print hidden w-60 shrink-0 flex-col border-r border-zinc-200 bg-white md:flex dark:border-zinc-800 dark:bg-zinc-900">
+      <aside className="no-print hidden w-64 shrink-0 flex-col border-r border-[#f4e6e9] bg-white shadow-[2px_0_16px_rgba(157,23,77,0.03)] md:flex dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
         <Brand millName={millName} />
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+        <nav className="flex-1 space-y-1.5 overflow-y-auto px-3.5 py-4">
           {NAV_ITEMS.map((item) => (
             <SidebarLink key={item.href} item={item} active={isActive(item)} lang={lang} />
           ))}
         </nav>
-        <div className="flex flex-col gap-2 border-t border-zinc-200 p-3 dark:border-zinc-800">
+        <div className="flex flex-col gap-2.5 border-t border-[#faedf0] p-3.5 dark:border-zinc-800">
           <div className="flex justify-center">
             <LanguageToggle initialLang={lang} />
           </div>
@@ -43,11 +43,11 @@ export function OwnerSidebar({ millName, lang = "en" }: { millName?: string; lan
       </aside>
 
       {/* Mobile: top brand bar + horizontal nav */}
-      <header className="no-print sticky top-0 z-40 flex items-center justify-between border-b border-zinc-200 bg-white px-4 py-3 md:hidden dark:border-zinc-800 dark:bg-zinc-900">
+      <header className="no-print sticky top-0 z-40 flex items-center justify-between border-b border-[#f4e6e9] bg-white/95 px-4 py-3 backdrop-blur-md md:hidden dark:border-zinc-800 dark:bg-zinc-900/95">
         <Brand compact millName={millName} />
         <LogoutButton />
       </header>
-      <nav className="no-print flex gap-2 overflow-x-auto px-4 pb-4 md:hidden">
+      <nav className="no-print flex gap-2 overflow-x-auto border-b border-[#f4e6e9] bg-[#faf5f7] px-4 py-2.5 md:hidden dark:border-zinc-800 dark:bg-zinc-950">
         {NAV_ITEMS.map((item) => (
           <MobileChip key={item.href} item={item} active={isActive(item)} lang={lang} />
         ))}
@@ -64,15 +64,17 @@ function Brand({
   millName?: string;
 }) {
   return (
-    <div className={`flex items-center gap-2 ${compact ? "" : "px-5 py-5"}`}>
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-base font-bold text-white dark:bg-zinc-100 dark:text-zinc-900">
-        M
+    <div className={`flex items-center gap-3 border-b border-[#faedf0] dark:border-zinc-800 ${compact ? "border-b-0 py-1" : "px-5 py-5"}`}>
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-pink-600 via-rose-500 to-amber-400 text-lg font-bold text-white shadow-glow-pink">
+        🌾
       </span>
       <div className="min-w-0">
-        <p className="truncate text-sm font-bold text-zinc-900 dark:text-zinc-100">
+        <p className="truncate text-base font-extrabold text-[#9d174d] dark:text-zinc-100">
           {millName || "गिरणी व्यवस्थापन"}
         </p>
-        <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">Owner Console</p>
+        <p className="truncate text-[10px] font-bold uppercase tracking-widest text-rose-800/70 dark:text-zinc-400">
+          GRAIN CRAFT OS
+        </p>
       </div>
     </div>
   );
@@ -92,13 +94,13 @@ function SidebarLink({
   return (
     <Link
       href={item.href}
-      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+      className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all ${
         active
-          ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-          : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          ? "border border-rose-200/90 bg-gradient-to-r from-rose-100/90 to-pink-50 text-rose-800 shadow-xs dark:border-zinc-700 dark:bg-zinc-100 dark:text-zinc-900"
+          : "text-[#684a53] hover:bg-rose-50/70 hover:text-rose-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
       }`}
     >
-      <Icon className="h-5 w-5 shrink-0" />
+      <Icon className={`h-5 w-5 shrink-0 transition-transform ${active ? "text-rose-700 dark:text-zinc-900" : "text-[#936b76] dark:text-zinc-400"}`} />
       <span className="truncate">{label}</span>
     </Link>
   );
@@ -118,13 +120,13 @@ function MobileChip({
   return (
     <Link
       href={item.href}
-      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
         active
-          ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-          : "border-zinc-300 bg-white text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+          ? "border-rose-300 bg-gradient-to-r from-rose-100 to-pink-50 text-rose-800 shadow-xs dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+          : "border-rose-200/80 bg-white text-[#684a53] hover:bg-rose-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
       }`}
     >
-      <Icon className="h-4 w-4" />
+      <Icon className="h-3.5 w-3.5" />
       {label}
     </Link>
   );

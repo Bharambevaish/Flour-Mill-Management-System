@@ -37,22 +37,21 @@ export function PaymentEntry({
   const detected = useLang();
   const lang = langProp ?? detected;
   const title = heading ?? (lang === "mr" ? "पेमेंट नोंद" : "Payment Receipt");
-  const inputClass =
-    "w-full rounded-lg border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-zinc-400";
+  const inputClass = "stitch-input w-full";
 
   return (
-    <div className="flex flex-col gap-2.5 rounded-xl border border-zinc-200 p-3 dark:border-zinc-800">
+    <div className="flex flex-col gap-3 rounded-2xl border border-rose-200/80 bg-rose-50/40 p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">{title}</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-[#805e68] dark:text-zinc-400">{title}</p>
         {max > 0 && (
-          <p className="text-xs text-zinc-400 dark:text-zinc-500">
+          <p className="text-xs font-semibold text-rose-700 dark:text-rose-400">
             {lang === "mr" ? `जास्तीत जास्त ₹ ${max.toLocaleString("en-IN")}` : `Max allowed ₹ ${max.toLocaleString("en-IN")}`}
           </p>
         )}
       </div>
 
       <div>
-        <label className="mb-0.5 block text-xs text-zinc-500 dark:text-zinc-400">
+        <label className="mb-1 block text-xs font-semibold text-[#6b545a] dark:text-zinc-400">
           {lang === "mr" ? "रक्कम (₹)" : "Amount (₹)"}
         </label>
         <input
@@ -69,17 +68,17 @@ export function PaymentEntry({
       </div>
 
       <div>
-        <label className="mb-0.5 block text-xs text-zinc-500 dark:text-zinc-400">
+        <label className="mb-1 block text-xs font-semibold text-[#6b545a] dark:text-zinc-400">
           {lang === "mr" ? "पेमेंट पद्धत" : "Payment Method"}
         </label>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => onMethodChange("cash")}
-            className={`flex-1 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`flex-1 rounded-xl border px-3 py-2 text-xs font-bold transition-all ${
               method === "cash"
-                ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                : "border-zinc-300 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                ? "border-rose-400 bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-xs dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+                : "border-rose-200/80 bg-white text-rose-900 shadow-xs hover:bg-rose-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
             }`}
           >
             {lang === "mr" ? "रोख (Cash)" : "Cash"}
@@ -87,10 +86,10 @@ export function PaymentEntry({
           <button
             type="button"
             onClick={() => onMethodChange("upi")}
-            className={`flex-1 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`flex-1 rounded-xl border px-3 py-2 text-xs font-bold transition-all ${
               method === "upi"
-                ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                : "border-zinc-300 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                ? "border-rose-400 bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-xs dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+                : "border-rose-200/80 bg-white text-rose-900 shadow-xs hover:bg-rose-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
             }`}
           >
             UPI

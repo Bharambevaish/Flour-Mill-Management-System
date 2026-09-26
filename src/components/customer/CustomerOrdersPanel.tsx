@@ -21,8 +21,8 @@ export function CustomerOrdersPanel({
 
   if (orders.length === 0) {
     return (
-      <section className="rounded-xl border border-zinc-200 bg-white p-6 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+      <section className="rounded-2xl border border-dashed border-rose-200 bg-white/50 p-8 text-center shadow-soft dark:border-zinc-800 dark:bg-zinc-900/50">
+        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
           {mr ? "अजून कोणतीही दळण ऑर्डर नाही." : "No milling orders yet."}
         </p>
       </section>
@@ -30,27 +30,27 @@ export function CustomerOrdersPanel({
   }
 
   return (
-    <section className="flex flex-col gap-3">
+    <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
+        <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
           {mr ? "माझ्या ऑर्डर्स" : "My Milling Orders"}
         </h2>
-        <span className="text-xs text-zinc-500 dark:text-zinc-400">
+        <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
           {orders.length} {mr ? "ऑर्डर" : "order" + (orders.length === 1 ? "" : "s")}
         </span>
       </div>
 
-      <ul className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-4">
         {orders.map((o) => {
           const open = openId === o.id;
           return (
             <li
               key={o.id}
-              className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+              className="rounded-2xl border border-[var(--border-subtle)] bg-white p-5 shadow-soft transition-all hover:border-rose-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                  <span className="rounded-full border border-rose-100 bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-800 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
                     #{o.orderId}
                   </span>
                   <StatusBadge status={o.status} lang={lang} />
@@ -65,31 +65,31 @@ export function CustomerOrdersPanel({
                 </span>
               </div>
 
-              <p className="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
+              <p className="mt-2.5 text-sm font-medium text-zinc-800 dark:text-zinc-200">
                 {grainLabel(o.grainType, lang)} · {sizeLabel(o.requiredSize, lang)} · {o.weightKg} kg · ₹
                 {o.ratePerKg}/kg
               </p>
 
-              <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+              <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1.5 text-sm">
                 <span className="text-zinc-600 dark:text-zinc-400">
                   {mr ? "एकूण ₹ " : "Total ₹ "}
-                  <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                  <span className="font-bold text-zinc-900 dark:text-zinc-100">
                     {money(o.totalCharges)}
                   </span>
                 </span>
                 <span className="text-zinc-600 dark:text-zinc-400">
                   {mr ? "जमा ₹ " : "Paid ₹ "}
-                  <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400">
                     {money(o.paidAmount)}
                   </span>
                 </span>
                 {o.outstanding > 0 ? (
-                  <span className="font-semibold text-rose-700 dark:text-rose-400">
+                  <span className="font-bold text-rose-700 dark:text-rose-400">
                     {mr ? "बाकी ₹ " : "Due ₹ "}
                     {money(o.outstanding)}
                   </span>
                 ) : (
-                  <span className="font-medium text-emerald-700 dark:text-emerald-400">
+                  <span className="font-semibold text-emerald-700 dark:text-emerald-400">
                     {mr ? "पैसे पूर्ण" : "Paid in full"}
                   </span>
                 )}
@@ -100,14 +100,14 @@ export function CustomerOrdersPanel({
               <button
                 type="button"
                 onClick={() => setOpenId(open ? null : o.id)}
-                className="mt-3 text-sm font-medium text-emerald-600 hover:underline dark:text-emerald-400"
+                className="mt-3 text-sm font-semibold text-rose-700 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-300"
               >
                 {mr ? "जमा रकमेचा इतिहास" : "Payment History"} ({o.payments.length})
                 {open ? " −" : " +"}
               </button>
 
               {open && (
-                <div className="mt-2 rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950/60">
+                <div className="mt-2.5 rounded-xl border border-rose-100 bg-rose-50/20 p-3.5 dark:border-zinc-800 dark:bg-zinc-950/60">
                   {o.payments.length === 0 ? (
                     <p className="text-sm text-zinc-500 dark:text-zinc-400">
                       {mr ? "अजून कोणतीही जमा रक्कम नाही." : "No payments recorded yet."}

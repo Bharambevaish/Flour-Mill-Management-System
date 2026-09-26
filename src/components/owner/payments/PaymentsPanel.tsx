@@ -70,25 +70,27 @@ export function PaymentsPanel({
 
   if (rows.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-zinc-300 p-8 text-center text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-        {duesOnly
-          ? (lang === "mr" ? "कोणतीही उधारी शिल्लक नाही — सर्व पैसे जमा झाले आहेत." : "No outstanding dues — all accounts are fully settled.")
-          : (lang === "mr" ? "अजुन कोणतीही पेमेंट नोंद उपलब्ध नाही." : "No payment records found.")}
-      </p>
+      <div className="rounded-2xl border border-dashed border-rose-200 bg-white/50 p-12 text-center text-zinc-500 shadow-soft dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
+        <p className="text-base font-medium">
+          {duesOnly
+            ? (lang === "mr" ? "कोणतीही उधारी शिल्लक नाही — सर्व पैसे जमा झाले आहेत." : "No outstanding dues — all accounts are fully settled.")
+            : (lang === "mr" ? "अजुन कोणतीही पेमेंट नोंद उपलब्ध नाही." : "No payment records found.")}
+        </p>
+      </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-3">
       <div className="no-print flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
           {rows.length} {lang === "mr" ? "नोंदी" : "records"}
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={exportCsv}
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="stitch-btn-secondary text-xs sm:text-sm"
           >
             ⬇ {lang === "mr" ? "CSV डाउनलोड" : "Download CSV"}
           </button>
@@ -100,29 +102,29 @@ export function PaymentsPanel({
         {rows.map((order) => (
           <li
             key={order.id}
-            className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800 dark:bg-zinc-900"
+            className="flex flex-col gap-4 rounded-2xl border border-[var(--border-subtle)] bg-white p-5 shadow-soft transition-all hover:border-rose-300 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
           >
-            <div className="flex min-w-0 flex-col gap-1">
+            <div className="flex min-w-0 flex-col gap-1.5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                <span className="rounded-full border border-rose-100 bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-800 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
                   Order #{order.orderId}
                 </span>
                 <StatusBadge status={order.status} lang={lang} />
                 {order.outstanding > 0 ? (
-                  <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-800 dark:bg-rose-500/15 dark:text-rose-300">
+                  <span className="rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-semibold text-rose-800 dark:bg-rose-500/15 dark:text-rose-300">
                     {lang === "mr" ? `उधारी ₹ ${order.outstanding.toLocaleString("en-IN")}` : `Due ₹ ${order.outstanding.toLocaleString("en-IN")}`}
                   </span>
                 ) : (
-                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300">
+                  <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300">
                     {lang === "mr" ? "पैसे पूर्ण" : "Fully Paid"}
                   </span>
                 )}
               </div>
 
-              <p className="truncate text-sm font-medium text-zinc-800 dark:text-zinc-200">
+              <p className="truncate text-base font-semibold text-zinc-900 dark:text-zinc-100">
                 {order.customer ? order.customer.name : "—"}
                 {order.customer && (
-                  <span className="font-normal text-zinc-500 dark:text-zinc-400">
+                  <span className="font-normal text-sm text-zinc-500 dark:text-zinc-400">
                     {" "}
                     · {order.customer.mobile}
                   </span>
@@ -140,11 +142,13 @@ export function PaymentsPanel({
               </p>
 
               {order.payments.length > 0 && (
-                <ul className="flex flex-col gap-0.5">
+                <ul className="flex flex-col gap-1 mt-1 rounded-xl bg-zinc-50 p-2.5 dark:bg-zinc-800/40">
                   {order.payments.map((p) => (
-                    <li key={p.recordedAt} className="flex text-xs text-zinc-500 dark:text-zinc-400">
-                      <span className="mr-1 text-emerald-600 dark:text-emerald-400">✓</span>
-                      {p.method === "upi" ? "UPI" : (lang === "mr" ? "रोख" : "Cash")} ₹{p.amount.toLocaleString("en-IN")}
+                    <li key={p.recordedAt} className="flex flex-wrap items-center text-xs text-zinc-600 dark:text-zinc-400">
+                      <span className="mr-1.5 font-bold text-emerald-600 dark:text-emerald-400">✓</span>
+                      <span className="font-medium text-zinc-900 dark:text-zinc-200">
+                        {p.method === "upi" ? "UPI" : (lang === "mr" ? "रोख" : "Cash")} ₹{p.amount.toLocaleString("en-IN")}
+                      </span>
                       {p.upiTxnId && <span className="ml-1 text-zinc-400">· {p.upiTxnId}</span>}
                       <span className="ml-1 text-zinc-400">· {new Date(p.recordedAt).toLocaleString(lang === "mr" ? "mr-IN" : "en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
                     </li>
@@ -153,12 +157,12 @@ export function PaymentsPanel({
               )}
             </div>
 
-            <div className="flex shrink-0 items-center justify-between gap-4 sm:flex-col sm:items-end">
+            <div className="flex shrink-0 items-center justify-between gap-4 border-t border-rose-50 pt-3 sm:border-0 sm:pt-0 sm:flex-col sm:items-end">
               <div className="text-right">
-                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                <p className="text-base font-bold text-zinc-900 dark:text-zinc-100">
                   {lang === "mr" ? "एकूण ₹ " : "Total ₹ "}{order.totalCharges.toLocaleString("en-IN")}
                 </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
                   {lang === "mr" ? `वसूल ₹ ${order.paidAmount.toLocaleString("en-IN")}` : `Paid ₹ ${order.paidAmount.toLocaleString("en-IN")}`}
                 </p>
               </div>
@@ -166,7 +170,7 @@ export function PaymentsPanel({
                 <Link
                   href={`/print/receipt/${order.orderId}`}
                   target="_blank"
-                  className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                  className="stitch-btn-secondary text-xs sm:text-sm"
                 >
                   {lang === "mr" ? "पावती" : "Receipt"}
                 </Link>
@@ -174,7 +178,7 @@ export function PaymentsPanel({
                   <button
                     type="button"
                     onClick={() => setPayingOrder(order)}
-                    className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-amber-700 disabled:opacity-60"
+                    className="stitch-btn-primary text-xs sm:text-sm"
                   >
                     {lang === "mr" ? "पैसे स्वीकारा" : "Collect Payment"}
                   </button>

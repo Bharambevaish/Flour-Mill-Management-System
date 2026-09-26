@@ -15,9 +15,9 @@ function fmtDate(iso: string, lang: Lang): string {
 
 function Kpi({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">{label}</p>
-      <p className={`mt-1 text-xl font-bold ${accent ?? "text-zinc-900 dark:text-zinc-100"}`}>{value}</p>
+    <div className="rounded-2xl border border-[var(--border-subtle)] bg-white p-4 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
+      <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">{label}</p>
+      <p className={`mt-1.5 text-xl font-bold font-[family-name:var(--font-plus-jakarta)] ${accent ?? "text-zinc-900 dark:text-zinc-100"}`}>{value}</p>
     </div>
   );
 }
@@ -30,15 +30,15 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-      <h2 className="mb-3 text-base font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
+    <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-5 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
+      <h2 className="mb-4 text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">{title}</h2>
       {children}
     </section>
   );
 }
 
-const TH = "px-3 py-2 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400";
-const TD = "px-3 py-2 text-sm text-zinc-800 dark:text-zinc-200";
+const TH = "px-4 py-2.5 text-left text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider";
+const TD = "px-4 py-3 text-sm text-zinc-800 dark:text-zinc-200";
 
 export function ReportsSummary({ report, lang }: { report: ReportSummary; lang: Lang }) {
   const mr = lang === "mr";
@@ -143,25 +143,25 @@ export function ReportsSummary({ report, lang }: { report: ReportSummary; lang: 
       {/* Receipts in period */}
       <SectionCard title={mr ? `पावती नोंदी (${receipts.length})` : `Receipts in period (${receipts.length})`}>
         {receipts.length === 0 ? (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">{mr ? "या कालावधीत कोणतीही वसूल नोंद नाही." : "No receipts in this period."}</p>
+          <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{mr ? "या कालावधीत कोणतीही वसूल नोंद नाही." : "No receipts in this period."}</p>
         ) : (
-          <ul className="flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800/60">
+          <ul className="flex flex-col divide-y divide-rose-50 dark:divide-zinc-800/60">
             {receipts.map((r) => (
-              <li key={`${r.orderId}-${r.recordedAt}`} className="flex flex-wrap items-center justify-between gap-2 py-2">
+              <li key={`${r.orderId}-${r.recordedAt}`} className="flex flex-wrap items-center justify-between gap-2 py-3">
                 <span className="flex min-w-0 items-center gap-2">
-                  <Link href={`/print/receipt/${r.orderId}`} target="_blank" className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700">
+                  <Link href={`/print/receipt/${r.orderId}`} target="_blank" className="rounded-full border border-rose-100 bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-800 hover:bg-rose-100 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-700 transition-colors">
                     #{r.orderId}
                   </Link>
-                  <span className="truncate text-sm text-zinc-700 dark:text-zinc-300">
+                  <span className="truncate text-sm font-medium text-zinc-800 dark:text-zinc-200">
                     {r.customer}
                     {r.upiTxnId && <span className="ml-1 text-xs text-zinc-400">· {r.upiTxnId}</span>}
                   </span>
                 </span>
                 <span className="text-sm">
-                  <span className={r.method === "upi" ? "text-sky-700 dark:text-sky-400" : "text-emerald-700 dark:text-emerald-400"}>
+                  <span className={r.method === "upi" ? "font-semibold text-sky-700 dark:text-sky-400" : "font-semibold text-emerald-700 dark:text-emerald-400"}>
                     {r.method === "upi" ? "UPI" : mr ? "रोख" : "Cash"}
                   </span>
-                  <span className="ml-2 font-semibold text-zinc-900 dark:text-zinc-100">{money(r.amount)}</span>
+                  <span className="ml-2 font-bold text-zinc-900 dark:text-zinc-100">{money(r.amount)}</span>
                   <span className="ml-2 text-xs text-zinc-400">{fmtDate(r.recordedAt, lang)}</span>
                 </span>
               </li>
@@ -172,11 +172,11 @@ export function ReportsSummary({ report, lang }: { report: ReportSummary; lang: 
 
       {upiReceipts.length > 0 && (
         <SectionCard title={mr ? "UPI व्यवहार" : "UPI transactions"}>
-          <ul className="flex flex-col gap-1">
+          <ul className="flex flex-col divide-y divide-rose-50 dark:divide-zinc-800">
             {upiReceipts.map((u) => (
-              <li key={`${u.orderId}-${u.recordedAt}`} className="flex items-center justify-between text-sm text-zinc-700 dark:text-zinc-300">
-                <span>#{u.orderId} · {u.upiTxnId ?? "—"}</span>
-                <span className="font-medium">{money(u.amount)}</span>
+              <li key={`${u.orderId}-${u.recordedAt}`} className="flex items-center justify-between py-2 text-sm text-zinc-700 dark:text-zinc-300">
+                <span className="font-medium">#{u.orderId} · {u.upiTxnId ?? "—"}</span>
+                <span className="font-bold text-zinc-900 dark:text-zinc-100">{money(u.amount)}</span>
               </li>
             ))}
           </ul>

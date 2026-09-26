@@ -20,7 +20,7 @@ export default async function OutstandingPage() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
             {formatLang({ mr: "उधारी खाते", en: "Customer Outstanding Dues" }, lang)}
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -33,15 +33,15 @@ export default async function OutstandingPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/owner/payments"
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="stitch-btn-secondary text-sm"
           >
             {formatLang({ mr: "सर्व नोंदी पहा", en: "All Payments Ledger" }, lang)}
           </Link>
-          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-right dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="rounded-2xl border border-[var(--border-subtle)] bg-white px-5 py-3 shadow-soft text-right dark:border-zinc-800 dark:bg-zinc-900">
+            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
               {formatLang({ mr: "एकूण उधारी", en: "Total Outstanding" }, lang)}
             </p>
-            <p className="font-bold text-rose-700 dark:text-rose-400">₹ {dueTotal.toLocaleString("en-IN")}</p>
+            <p className="text-lg font-bold text-rose-700 dark:text-rose-400">₹ {dueTotal.toLocaleString("en-IN")}</p>
             <p className="text-xs text-zinc-400 dark:text-zinc-500">
               {dueOrders.length} {formatLang({ mr: "ऑर्डर बाकी", en: "orders pending" }, lang)}
             </p>

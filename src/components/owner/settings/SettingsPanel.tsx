@@ -42,7 +42,7 @@ function PasswordInput({
   const [visible, setVisible] = useState(false);
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+      <label htmlFor={id} className="mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
         {label}
       </label>
       <div className="relative">
@@ -52,7 +52,7 @@ function PasswordInput({
           autoComplete={autoComplete}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 pr-10 text-sm bg-white dark:border-zinc-700 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+          className="stitch-input pr-10 text-sm"
         />
         <button
           type="button"
@@ -310,19 +310,19 @@ export function SettingsPanel({
   /* ------------------------------- render ------------------------------- */
 
   const tabClass = (id: TabId) =>
-    `border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+    `border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
       activeTab === id
-        ? "border-amber-600 text-amber-600 dark:border-amber-500 dark:text-amber-500"
+        ? "border-rose-600 text-rose-700 dark:border-rose-400 dark:text-rose-400"
         : "border-transparent text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
     }`;
 
   const inputClass =
-    "w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm bg-white dark:border-zinc-700 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100";
+    "stitch-input text-sm";
 
   return (
     <div className="flex flex-col gap-6">
       {/* Navigation Tabs */}
-      <div className="flex flex-wrap border-b border-zinc-200 dark:border-zinc-800">
+      <div className="flex flex-wrap border-b border-rose-100 dark:border-zinc-800">
         <button onClick={() => setActiveTab("general")} className={tabClass("general")}>
           १. भाषा व चक्की प्रोफाइल / Profile &amp; Lang
         </button>
@@ -339,10 +339,10 @@ export function SettingsPanel({
 
       {message && (
         <div
-          className={`rounded-lg p-3 text-sm font-medium ${
+          className={`rounded-2xl border p-4 text-sm font-medium shadow-soft ${
             message.type === "success"
-              ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
-              : "bg-rose-50 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-950/50 dark:text-emerald-300"
+              : "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-500/30 dark:bg-rose-950/50 dark:text-rose-300"
           }`}
         >
           {message.text}
@@ -352,27 +352,27 @@ export function SettingsPanel({
       {/* Tab 1: General & Profile */}
       {activeTab === "general" && (
         <div className="space-y-6">
-          <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <h3 className="mb-4 text-base font-semibold text-zinc-900 dark:text-zinc-100">
+          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
+            <h3 className="mb-4 text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
               भाषा आणि देखावा / Language &amp; Display Toggle
             </h3>
             <div className="flex flex-wrap items-center gap-6">
               <div>
-                <p className="mb-1.5 text-xs text-zinc-500 dark:text-zinc-400">तुमची भाषा / Your session language</p>
+                <p className="mb-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">तुमची भाषा / Your session language</p>
                 <LanguageToggle initialLang={initialLang} />
               </div>
               <div>
-                <p className="mb-1.5 text-xs text-zinc-500 dark:text-zinc-400">थीम निवडा / Theme Toggle</p>
+                <p className="mb-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">थीम निवडा / Theme Toggle</p>
                 <ThemeToggle initialTheme={initialTheme} />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs text-zinc-500 dark:text-zinc-400">
+                <label className="mb-1.5 block text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                   मिलची डीफॉल्ट भाषा / Mill default language
                 </label>
                 <select
                   value={defaultLanguage}
                   onChange={(e) => setDefaultLanguage(e.target.value as "mr" | "en")}
-                  className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  className="stitch-input text-sm py-2 px-3"
                 >
                   <option value="mr">मराठी</option>
                   <option value="en">English</option>
@@ -381,13 +381,13 @@ export function SettingsPanel({
             </div>
           </section>
 
-          <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <h3 className="mb-4 text-base font-semibold text-zinc-900 dark:text-zinc-100">
+          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
+            <h3 className="mb-4 text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
               चक्की माहिती / Mill Profile
             </h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                   चक्कीचे नाव / Mill Name
                 </label>
                 <input
@@ -399,7 +399,7 @@ export function SettingsPanel({
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                   संपर्क मोबाईल / Contact Mobile
                 </label>
                 <input
@@ -412,7 +412,7 @@ export function SettingsPanel({
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                   चलनाचे चिन्ह / Currency Symbol
                 </label>
                 <input
@@ -425,7 +425,7 @@ export function SettingsPanel({
               </div>
 
               <div className="sm:col-span-2">
-                <label className="mb-1 block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                   पत्ता / Address
                 </label>
                 <input
@@ -443,35 +443,35 @@ export function SettingsPanel({
 
       {/* Tab 2: Milling Rates */}
       {activeTab === "rates" && (
-        <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <h3 className="mb-1 text-base font-semibold text-zinc-900 dark:text-zinc-100">
+        <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
+          <h3 className="mb-1 text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
             दळणाचे डीफॉल्ट दर ({currency} / KG)
           </h3>
           <p className="mb-4 text-xs text-zinc-500 dark:text-zinc-400">
             नवीन ऑर्डर घेताना हे दर आपोआप लागू होतील (ऑर्डर घेताना बदलता येतात)
           </p>
           {invalidRates && (
-            <p className="mb-3 text-xs font-medium text-rose-600 dark:text-rose-400">
+            <p className="mb-3 text-xs font-semibold text-rose-600 dark:text-rose-400">
               कृपया वैध दर टाका (शून्य किंवा त्याहून अधिक) / Rates must be zero or more
             </p>
           )}
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-semibold text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
+              <thead className="border-b border-rose-100 bg-rose-50/40 text-xs font-semibold text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
                 <tr>
-                  <th className="px-4 py-2.5">धान्य / Grain</th>
+                  <th className="px-4 py-3">धान्य / Grain</th>
                   {SIZES.map((s) => (
-                    <th key={s.key} className="px-4 py-2.5">
+                    <th key={s.key} className="px-4 py-3">
                       {s.mr} / {s.en} ({currency}/kg)
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              <tbody className="divide-y divide-rose-50 dark:divide-zinc-800">
                 {GRAINS.map((g) => (
-                  <tr key={g.key} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50">
-                    <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">
+                  <tr key={g.key} className="hover:bg-rose-50/20 dark:hover:bg-zinc-800/40 transition-colors">
+                    <td className="px-4 py-3 font-semibold text-zinc-900 dark:text-zinc-100">
                       {g.mr} / {g.en}
                     </td>
                     {SIZES.map((s) => (
@@ -482,7 +482,7 @@ export function SettingsPanel({
                           min="0"
                           value={rates[g.key]?.[s.key] ?? DEFAULT_RATES[g.key]?.[s.key] ?? 5}
                           onChange={(e) => handleRateChange(g.key, s.key, e.target.value)}
-                          className="w-24 rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm bg-white dark:border-zinc-700 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                          className="stitch-input w-24 px-2.5 py-1.5 text-sm"
                         />
                       </td>
                     ))}
@@ -496,12 +496,12 @@ export function SettingsPanel({
 
       {/* Tab 3: Notifications */}
       {activeTab === "notifs" && (
-        <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <h3 className="mb-4 text-base font-semibold text-zinc-900 dark:text-zinc-100">
+        <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
+          <h3 className="mb-4 text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
             सूचना चॅनेल्स / Notification Channels &amp; Integrations
           </h3>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {(
               [
                 {
@@ -534,16 +534,16 @@ export function SettingsPanel({
                 },
               ] as const
             ).map((c) => (
-              <label key={c.key} className="flex items-center justify-between rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
+              <label key={c.key} className="flex items-center justify-between rounded-xl border border-[var(--border-subtle)] p-3.5 hover:bg-rose-50/20 dark:border-zinc-800 dark:hover:bg-zinc-800/40 cursor-pointer transition-colors">
                 <div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-100">{c.title}</p>
+                  <p className="font-semibold text-zinc-900 dark:text-zinc-100">{c.title}</p>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">{c.desc}</p>
                 </div>
                 <input
                   type="checkbox"
                   checked={c.checked}
                   onChange={c.toggle}
-                  className="h-4 w-4 rounded accent-amber-600"
+                  className="h-4 w-4 rounded accent-rose-700"
                 />
               </label>
             ))}
@@ -554,8 +554,8 @@ export function SettingsPanel({
       {/* Tab 4: Security */}
       {activeTab === "security" && (
         <div className="space-y-6">
-          <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <h3 className="mb-4 text-base font-semibold text-zinc-900 dark:text-zinc-100">
+          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
+            <h3 className="mb-4 text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
               पासवर्ड बदला / Change Owner Password
             </h3>
             <div className="grid max-w-md grid-cols-1 gap-4">
@@ -581,7 +581,7 @@ export function SettingsPanel({
                 autoComplete="new-password"
               />
               {passMsg && (
-                <p className={`text-sm ${passMsg.type === "success" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+                <p className={`text-sm font-medium ${passMsg.type === "success" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                   {passMsg.text}
                 </p>
               )}
@@ -590,7 +590,7 @@ export function SettingsPanel({
                   type="button"
                   disabled={passBusy || !currentPassword || !newPassword || !confirmPassword}
                   onClick={changePassword}
-                  className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                  className="stitch-btn-primary text-sm"
                 >
                   {passBusy ? "..." : "पासवर्ड बदला / Change Password"}
                 </button>
@@ -598,10 +598,10 @@ export function SettingsPanel({
             </div>
           </section>
 
-          <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
                   टू-फॅक्टर ऑथेंटिकेशन (TOTP 2FA)
                 </h3>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -619,7 +619,7 @@ export function SettingsPanel({
               </span>
             </div>
 
-            {twoFaError && <p className="mb-3 text-sm text-rose-600 dark:text-rose-400">{twoFaError}</p>}
+            {twoFaError && <p className="mb-3 text-sm font-medium text-rose-600 dark:text-rose-400">{twoFaError}</p>}
 
             {twoFaStep === "idle" && (
               <div>
@@ -644,7 +644,7 @@ export function SettingsPanel({
                       onClick={() => {
                         void disableTotp();
                       }}
-                      className="rounded-lg border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-800 dark:text-rose-300 dark:hover:bg-rose-950/40"
+                      className="stitch-btn-secondary text-sm border-rose-300 text-rose-700 hover:bg-rose-50"
                     >
                       {twoFaBusy ? "..." : "2FA बंद करा / Disable 2FA"}
                     </button>
@@ -656,7 +656,7 @@ export function SettingsPanel({
                     onClick={() => {
                       void startTotpSetup();
                     }}
-                    className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                    className="stitch-btn-secondary text-sm"
                   >
                     {twoFaBusy ? "..." : "2FA सेट करा / Enable 2FA"}
                   </button>
@@ -669,7 +669,7 @@ export function SettingsPanel({
                 <p className="text-sm text-zinc-600 dark:text-zinc-300">
                   Google Authenticator किंवा इतर ऍपने हा QR स्कॅन करा / Scan this QR with your authenticator app:
                 </p>
-                <div className="inline-block rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800">
+                <div className="inline-block rounded-xl border border-[var(--border-subtle)] bg-white p-3 dark:border-zinc-800">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={setupInfo.qrDataUrl} alt="TOTP QR code" className="h-40 w-40" />
                 </div>
@@ -677,12 +677,12 @@ export function SettingsPanel({
                   <p className="mb-1 text-xs text-zinc-500 dark:text-zinc-400">
                     QR स्कॅन करता येत नसेल तर हा कोड लिहून ठेवा / Manual fallback secret:
                   </p>
-                  <code className="rounded bg-zinc-100 px-2 py-1 text-xs text-zinc-800 dark:bg-zinc-800 dark:text-zinc-100">
+                  <code className="rounded bg-rose-50 border border-rose-100 px-2 py-1 text-xs text-rose-900 dark:bg-zinc-800 dark:text-zinc-100">
                     {setupInfo.secret}
                   </code>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                     6-अंकी कोड / 6-digit Code
                   </label>
                   <input
@@ -703,9 +703,9 @@ export function SettingsPanel({
                     onClick={() => {
                       void confirmTotp();
                     }}
-                    className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700 disabled:opacity-50"
+                    className="stitch-btn-primary text-sm"
                   >
-                    {twoFaBusy ? "..." : "पडताळून चालू करा / Verify &amp; Enable"}
+                    {twoFaBusy ? "..." : "पडताळून चालू करा / Verify & Enable"}
                   </button>
                   <button
                     type="button"
@@ -716,7 +716,7 @@ export function SettingsPanel({
                       setTwoFaCode("");
                       setTwoFaError(null);
                     }}
-                    className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                    className="stitch-btn-secondary text-sm"
                   >
                     रद्द / Cancel
                   </button>
@@ -730,7 +730,7 @@ export function SettingsPanel({
       {/* Action Bar */}
       <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
         {invalid && (
-          <p className="text-xs font-medium text-rose-600 dark:text-rose-400">
+          <p className="text-xs font-semibold text-rose-600 dark:text-rose-400">
             कृपया मिलचे नाव आणि वैध दर तपासा / Fix the mill name or rate values first
           </p>
         )}
@@ -741,7 +741,7 @@ export function SettingsPanel({
           }}
           disabled={saving || !dirty || invalid}
           title={!dirty ? "No unsaved changes" : undefined}
-          className="rounded-lg bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-700 disabled:opacity-50"
+          className="stitch-btn-primary text-sm"
         >
           {saving ? "सेव्ह होत आहे... / Saving..." : "सेटिंग्स सेव्ह करा / Save Settings"}
         </button>

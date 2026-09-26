@@ -33,8 +33,8 @@ export function ReportRangePicker({
   const customValid = !!customFrom && !!customTo && customFrom <= customTo;
 
   return (
-    <div className="no-print flex flex-wrap items-end gap-3 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="flex flex-wrap gap-1.5">
+    <div className="no-print flex flex-wrap items-end gap-3 rounded-2xl border border-[var(--border-subtle)] bg-white p-4 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="flex flex-wrap gap-2">
         {PRESETS.map((p) => (
           <button
             key={p.key}
@@ -42,8 +42,8 @@ export function ReportRangePicker({
             onClick={() => go(`preset=${p.key}`)}
             className={
               preset === p.key
-                ? "rounded-lg bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
-                : "rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                ? "stitch-btn-primary text-xs sm:text-sm px-3.5 py-1.5"
+                : "stitch-btn-secondary text-xs sm:text-sm px-3.5 py-1.5"
             }
           >
             {lang === "mr" ? p.mr : p.en}
@@ -51,30 +51,30 @@ export function ReportRangePicker({
         ))}
       </div>
 
-      <div className="flex flex-wrap items-end gap-2 border-zinc-200 sm:border-l sm:pl-3 dark:border-zinc-700">
-        <label className="flex flex-col gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+      <div className="flex flex-wrap items-end gap-3 border-rose-100 sm:border-l sm:pl-4 dark:border-zinc-700">
+        <label className="flex flex-col gap-1 text-xs font-semibold text-zinc-600 dark:text-zinc-400">
           {lang === "mr" ? "पासून" : "From"}
           <input
             type="date"
             value={customFrom}
             onChange={(e) => setCustomFrom(e.target.value)}
-            className="rounded-lg border border-zinc-300 bg-white px-2 py-1 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+            className="stitch-input px-2.5 py-1.5 text-xs sm:text-sm"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+        <label className="flex flex-col gap-1 text-xs font-semibold text-zinc-600 dark:text-zinc-400">
           {lang === "mr" ? "पर्यंत" : "To"}
           <input
             type="date"
             value={customTo}
             onChange={(e) => setCustomTo(e.target.value)}
-            className="rounded-lg border border-zinc-300 bg-white px-2 py-1 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+            className="stitch-input px-2.5 py-1.5 text-xs sm:text-sm"
           />
         </label>
         <button
           type="button"
           disabled={!customValid}
           onClick={() => go(`preset=custom&from=${customFrom}&to=${customTo}`)}
-          className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-amber-700 disabled:opacity-50"
+          className="stitch-btn-primary text-xs sm:text-sm px-4 py-2"
         >
           {lang === "mr" ? "लागू करा" : "Apply"}
         </button>

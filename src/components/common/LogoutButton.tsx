@@ -20,7 +20,7 @@ export function LogoutButton() {
       type="button"
       onClick={logout}
       disabled={pending}
-      className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+      className="rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-900 shadow-xs transition-all hover:bg-rose-50 hover:border-rose-300 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
     >
       {pending ? "..." : "लॉगआउट / Logout"}
     </button>

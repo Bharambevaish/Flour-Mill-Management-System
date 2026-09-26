@@ -51,7 +51,7 @@ export function DashboardAutoRefresh() {
       <button
         type="button"
         onClick={refresh}
-        className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        className="stitch-btn-secondary px-3.5 py-1.5 text-xs cursor-pointer"
       >
         {lang === "mr" ? "↻ ताजे करा" : "↻ Refresh"}
       </button>

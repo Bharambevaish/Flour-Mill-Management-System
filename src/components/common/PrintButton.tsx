@@ -18,7 +18,7 @@ export function PrintButton({
       onClick={() => window.print()}
       className={
         className ??
-        "rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        "rounded-xl border border-rose-200 bg-white px-3.5 py-1.5 text-sm font-semibold text-rose-900 shadow-xs transition-all hover:bg-rose-50 hover:border-rose-300 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
       }
     >
       {label}

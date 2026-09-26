@@ -51,7 +51,7 @@ export function LoginAlert() {
   }, []);
 
   return (
-    <div className="mt-4 rounded-lg bg-amber-50 p-3 text-sm font-medium text-amber-800 dark:bg-amber-950/50 dark:text-amber-300">
+    <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-900 shadow-xs dark:border-amber-500/40 dark:bg-amber-400/10 dark:text-amber-200">
       तुमचे सत्र संपले आहे — कृपया पुन्हा लॉगिन करा. / Your session expired — please try
       logging in again.
     </div>

@@ -38,97 +38,97 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
   const settled = order.outstanding <= 0;
 
   return (
-    <div className="mx-auto min-h-screen max-w-2xl bg-zinc-100 p-4 dark:bg-zinc-950">
-      <div className="no-print mb-3 flex items-center justify-between">
+    <div className="mx-auto min-h-screen max-w-2xl bg-[var(--background)] p-4 dark:bg-zinc-950 font-sans">
+      <div className="no-print mb-4 flex items-center justify-between">
         <Link
           href="/owner/payments"
-          className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          className="stitch-btn-secondary text-sm"
         >
           ← {mr ? "मागे" : "Back"}
         </Link>
         <PrintButton label={mr ? "🖨 प्रिंट / PDF" : "🖨 Print / PDF"} />
       </div>
 
-      <article className="print-area rounded-xl border border-zinc-200 bg-white p-6 text-zinc-900 shadow-sm sm:p-8">
-        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-200 pb-4">
+      <article className="print-area rounded-2xl border border-[var(--border-subtle)] bg-white p-6 text-zinc-900 shadow-soft sm:p-8">
+        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-rose-100 pb-4">
           <div>
-            <h1 className="text-xl font-bold">{settings.millName}</h1>
+            <h1 className="text-xl font-bold tracking-tight text-zinc-900 font-[family-name:var(--font-plus-jakarta)]">{settings.millName}</h1>
             {settings.address && <p className="text-sm text-zinc-600">{settings.address}</p>}
             {settings.phone && <p className="text-sm text-zinc-600">📞 {settings.phone}</p>}
           </div>
           <div className="text-right">
-            <p className="text-lg font-semibold">{mr ? "पावती" : "Receipt"}</p>
-            <p className="text-sm text-zinc-600">Order #{order.orderId}</p>
+            <p className="text-lg font-bold text-rose-800 font-[family-name:var(--font-plus-jakarta)]">{mr ? "पावती" : "Receipt"}</p>
+            <p className="text-sm font-semibold text-zinc-700">Order #{order.orderId}</p>
             <p className="text-xs text-zinc-500">{fmt(order.createdAt, locale)}</p>
           </div>
         </header>
 
-        <section className="grid grid-cols-2 gap-4 border-b border-zinc-200 py-4 text-sm">
+        <section className="grid grid-cols-2 gap-4 border-b border-rose-100 py-4 text-sm">
           <div>
-            <p className="text-xs uppercase tracking-wide text-zinc-500">{mr ? "ग्राहक" : "Customer"}</p>
-            <p className="font-semibold">{order.customer?.name ?? "—"}</p>
-            {order.customer?.mobile && <p className="text-zinc-600">{order.customer.mobile}</p>}
+            <p className="text-xs uppercase tracking-wide text-zinc-500 font-semibold">{mr ? "ग्राहक" : "Customer"}</p>
+            <p className="font-bold text-base text-zinc-900">{order.customer?.name ?? "—"}</p>
+            {order.customer?.mobile && <p className="text-zinc-600 font-medium">{order.customer.mobile}</p>}
           </div>
           <div className="text-right">
-            <p className="text-xs uppercase tracking-wide text-zinc-500">{mr ? "स्थिती" : "Status"}</p>
-            <p className="font-semibold">{order.status}</p>
+            <p className="text-xs uppercase tracking-wide text-zinc-500 font-semibold">{mr ? "स्थिती" : "Status"}</p>
+            <p className="font-bold text-base text-rose-800">{order.status}</p>
           </div>
         </section>
 
         <section className="py-4">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-200 text-left text-xs uppercase tracking-wide text-zinc-500">
-                <th className="py-2">{mr ? "धान्य" : "Grain"}</th>
-                <th className="py-2">{mr ? "प्रकार" : "Size"}</th>
-                <th className="py-2 text-right">{mr ? "वजन" : "Weight"}</th>
-                <th className="py-2 text-right">{mr ? "दर" : "Rate"}</th>
-                <th className="py-2 text-right">{mr ? "रक्कम" : "Amount"}</th>
+              <tr className="border-b border-rose-100 text-left text-xs uppercase tracking-wide text-zinc-500 font-semibold">
+                <th className="py-2.5">{mr ? "धान्य" : "Grain"}</th>
+                <th className="py-2.5">{mr ? "प्रकार" : "Size"}</th>
+                <th className="py-2.5 text-right">{mr ? "वजन" : "Weight"}</th>
+                <th className="py-2.5 text-right">{mr ? "दर" : "Rate"}</th>
+                <th className="py-2.5 text-right">{mr ? "रक्कम" : "Amount"}</th>
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-zinc-100">
-                <td className="py-2">{grainLabel(order.grainType, lang)}</td>
-                <td className="py-2">{sizeLabel(order.requiredSize, lang)}</td>
-                <td className="py-2 text-right">{order.weightKg} kg</td>
-                <td className="py-2 text-right">{money(order.ratePerKg)}/kg</td>
-                <td className="py-2 text-right font-medium">{money(order.totalCharges)}</td>
+              <tr className="border-b border-rose-50">
+                <td className="py-2.5 font-medium">{grainLabel(order.grainType, lang)}</td>
+                <td className="py-2.5 font-medium">{sizeLabel(order.requiredSize, lang)}</td>
+                <td className="py-2.5 text-right font-medium">{order.weightKg} kg</td>
+                <td className="py-2.5 text-right font-medium">{money(order.ratePerKg)}/kg</td>
+                <td className="py-2.5 text-right font-bold text-zinc-900">{money(order.totalCharges)}</td>
               </tr>
             </tbody>
           </table>
         </section>
 
         {order.payments.length > 0 && (
-          <section className="border-t border-zinc-200 py-4">
-            <h2 className="mb-2 text-sm font-semibold">{mr ? "पेमेंट नोंदी" : "Payments"}</h2>
-            <ul className="flex flex-col gap-1 text-sm">
+          <section className="border-t border-rose-100 py-4">
+            <h2 className="mb-2 text-sm font-bold text-zinc-900 font-[family-name:var(--font-plus-jakarta)]">{mr ? "पेमेंट नोंदी" : "Payments"}</h2>
+            <ul className="flex flex-col gap-1.5 text-sm">
               {order.payments.map((p) => (
                 <li key={p.recordedAt} className="flex items-center justify-between">
                   <span className="text-zinc-600">
-                    {p.method === "upi" ? "UPI" : mr ? "रोख" : "Cash"}
+                    <span className="font-semibold text-emerald-700">✓</span> {p.method === "upi" ? "UPI" : mr ? "रोख" : "Cash"}
                     {p.upiTxnId && <span className="ml-1 text-zinc-400">· {p.upiTxnId}</span>}
                     <span className="ml-2 text-xs text-zinc-400">{fmt(p.recordedAt, locale)}</span>
                   </span>
-                  <span className="font-medium">{money(p.amount)}</span>
+                  <span className="font-bold text-zinc-900">{money(p.amount)}</span>
                 </li>
               ))}
             </ul>
           </section>
         )}
 
-        <section className="border-t border-zinc-200 pt-4">
-          <dl className="ml-auto flex w-full max-w-xs flex-col gap-1 text-sm">
+        <section className="border-t border-rose-100 pt-4">
+          <dl className="ml-auto flex w-full max-w-xs flex-col gap-1.5 text-sm">
             <div className="flex justify-between">
               <dt className="text-zinc-600">{mr ? "एकूण आकारणी" : "Total Charges"}</dt>
-              <dd className="font-medium">{money(order.totalCharges)}</dd>
+              <dd className="font-bold text-zinc-900">{money(order.totalCharges)}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-zinc-600">{mr ? "वसूल" : "Paid"}</dt>
-              <dd className="font-medium text-emerald-700">{money(order.paidAmount)}</dd>
+              <dd className="font-bold text-emerald-700">{money(order.paidAmount)}</dd>
             </div>
-            <div className="flex justify-between border-t border-zinc-200 pt-1">
-              <dt className="font-semibold">{mr ? "शिल्लक उधारी" : "Balance Due"}</dt>
-              <dd className={`font-bold ${settled ? "text-emerald-700" : "text-rose-700"}`}>
+            <div className="flex justify-between border-t border-rose-100 pt-2">
+              <dt className="font-bold text-zinc-900">{mr ? "शिल्लक उधारी" : "Balance Due"}</dt>
+              <dd className={`font-bold text-base ${settled ? "text-emerald-700" : "text-rose-700"}`}>
                 {money(order.outstanding)}
               </dd>
             </div>
