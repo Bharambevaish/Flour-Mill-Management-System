@@ -95,14 +95,23 @@ export async function apiFetch<T = Record<string, unknown>>(
   }
 
   const headers: Record<string, string> = {};
-  if (options.body !== undefined) headers["Content-Type"] = "application/json";
+  // FormData must go out raw: the browser has to append its own multipart
+  // boundary, so setting Content-Type (or stringifying) breaks the upload. The
+  // UPI QR upload is the first caller that needs this.
+  const isMultipart = typeof FormData !== "undefined" && options.body instanceof FormData;
+  if (options.body !== undefined && !isMultipart) headers["Content-Type"] = "application/json";
   if (csrfToken && MUTATING.has(method)) headers["x-csrf-token"] = csrfToken;
 
   const res = await fetch(path, {
     method,
     credentials: "same-origin",
     headers,
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    body:
+      options.body === undefined
+        ? undefined
+        : isMultipart
+          ? (options.body as FormData)
+          : JSON.stringify(options.body),
   });
 
   const payload = (await res.json().catch(() => ({}))) as T & ApiBody;

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { StatusBadge, PrintButton } from "@/components/common";
 import { downloadCsv, toCsv } from "@/lib/csv";
 import { grainLabel, sizeLabel } from "@/lib/millings";
-import type { Lang } from "@/lib/i18n/i18n";
+import { formatDateTime, type Lang } from "@/lib/i18n/format";
 import { PaymentModal } from "./PaymentModal";
 import type { OrderView } from "@/services/orderService";
 
@@ -13,11 +13,19 @@ export function PaymentsPanel({
   orders,
   lang,
   duesOnly = false,
+  cancelledOnly = false,
   customerId,
 }: {
   orders: OrderView[];
   lang: Lang;
   duesOnly?: boolean;
+  /**
+   * Cancelled-orders view (Queue page's Cancelled tab). Shows the retained
+   * payment trail plus the refund due, and hides "Collect Payment" — a
+   * cancelled order can never take another receipt, so offering the button
+   * would only produce a 400.
+   */
+  cancelledOnly?: boolean;
   customerId?: string;
 }) {
   const [payingOrder, setPayingOrder] = useState<OrderView | null>(null);
@@ -27,12 +35,19 @@ export function PaymentsPanel({
       ? orders.filter((o) => o.customer?.id === customerId)
       : [...orders];
     return scoped
-      .filter((o) => !duesOnly || o.outstanding > 0)
+      .filter((o) => (cancelledOnly ? o.status === "cancelled" : !duesOnly || o.outstanding > 0))
       .sort((a, b) => {
+        // Biggest exposure first in the dues list; most recently cancelled first
+        // in the cancelled list, since that's the one the owner is chasing.
         if (duesOnly && a.outstanding !== b.outstanding) return b.outstanding - a.outstanding;
+        if (cancelledOnly) {
+          const at = new Date(a.cancelledAt ?? a.updatedAt).getTime();
+          const bt = new Date(b.cancelledAt ?? b.updatedAt).getTime();
+          if (at !== bt) return bt - at;
+        }
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
-  }, [orders, duesOnly, customerId]);
+  }, [orders, duesOnly, cancelledOnly, customerId]);
 
   const autoOpen = useMemo(() => {
     if (!customerId) return null;
@@ -52,10 +67,17 @@ export function PaymentsPanel({
       lang === "mr" ? "एकूण (₹)" : "Total (₹)",
       lang === "mr" ? "वसूल (₹)" : "Paid (₹)",
       lang === "mr" ? "उधारी (₹)" : "Due (₹)",
+      ...(cancelledOnly
+        ? [lang === "mr" ? "परत मिळणारी रक्कम (₹)" : "Refund Due (₹)"]
+        : []),
+      ...(cancelledOnly
+        ? [lang === "mr" ? "रद्द करण्याची वेळ" : "Cancelled At"]
+        : []),
+      ...(cancelledOnly ? [lang === "mr" ? "कारण" : "Reason"] : []),
     ];
     const data = rows.map((o) => [
       o.orderId,
-      new Date(o.createdAt).toLocaleString(lang === "mr" ? "mr-IN" : "en-IN"),
+      formatDateTime(o.createdAt, lang),
       o.customer?.name ?? "",
       o.customer?.mobile ?? "",
       grainLabel(o.grainType, lang),
@@ -64,17 +86,23 @@ export function PaymentsPanel({
       o.totalCharges,
       o.paidAmount,
       o.outstanding,
+      ...(cancelledOnly
+        ? [o.refundDue, o.cancelledAt ? formatDateTime(o.cancelledAt, lang) : "", o.cancelReason ?? ""]
+        : []),
     ]);
-    downloadCsv(`flour-mill-${duesOnly ? "outstanding" : "payments"}-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(headers, data));
+    const slug = cancelledOnly ? "cancelled" : duesOnly ? "outstanding" : "payments";
+    downloadCsv(`flour-mill-${slug}-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(headers, data));
   }
 
   if (rows.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-rose-200 bg-white/50 p-12 text-center text-zinc-500 shadow-soft dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
         <p className="text-base font-medium">
-          {duesOnly
-            ? (lang === "mr" ? "कोणतीही उधारी शिल्लक नाही — सर्व पैसे जमा झाले आहेत." : "No outstanding dues — all accounts are fully settled.")
-            : (lang === "mr" ? "अजुन कोणतीही पेमेंट नोंद उपलब्ध नाही." : "No payment records found.")}
+          {cancelledOnly
+            ? (lang === "mr" ? "कोणतेही ऑर्डर रद्द केलेले नाहीत." : "No cancelled orders.")
+            : duesOnly
+              ? (lang === "mr" ? "कोणतीही उधारी शिल्लक नाही — सर्व पैसे जमा झाले आहेत." : "No outstanding dues — all accounts are fully settled.")
+              : (lang === "mr" ? "अजुन कोणतीही पेमेंट नोंद उपलब्ध नाही." : "No payment records found.")}
         </p>
       </div>
     );
@@ -110,7 +138,14 @@ export function PaymentsPanel({
                   Order #{order.orderId}
                 </span>
                 <StatusBadge status={order.status} lang={lang} />
-                {order.outstanding > 0 ? (
+                {cancelledOnly && order.refundDue > 0 && (
+                  <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">
+                    {lang === "mr"
+                      ? `परत मिळणारे ₹ ${order.refundDue.toLocaleString("en-IN")}`
+                      : `Refund due ₹ ${order.refundDue.toLocaleString("en-IN")}`}
+                  </span>
+                )}
+                {!cancelledOnly && (order.outstanding > 0 ? (
                   <span className="rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-semibold text-rose-800 dark:bg-rose-500/15 dark:text-rose-300">
                     {lang === "mr" ? `उधारी ₹ ${order.outstanding.toLocaleString("en-IN")}` : `Due ₹ ${order.outstanding.toLocaleString("en-IN")}`}
                   </span>
@@ -118,7 +153,7 @@ export function PaymentsPanel({
                   <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300">
                     {lang === "mr" ? "पैसे पूर्ण" : "Fully Paid"}
                   </span>
-                )}
+                ))}
               </div>
 
               <p className="truncate text-base font-semibold text-zinc-900 dark:text-zinc-100">
@@ -133,13 +168,21 @@ export function PaymentsPanel({
 
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
                 {grainLabel(order.grainType, lang)} · {sizeLabel(order.requiredSize, lang)} · {order.weightKg} kg ·{" "}
-                {new Date(order.createdAt).toLocaleString(lang === "mr" ? "mr-IN" : "en-IN", {
-                  day: "numeric",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {formatDateTime(order.createdAt, lang)}
               </p>
+
+              {cancelledOnly && (order.cancelledAt || order.cancelReason) && (
+                <p className="mt-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                  {order.cancelledAt && (
+                    <span>
+                      {lang === "mr" ? "रद्द: " : "Cancelled: "}
+                      {formatDateTime(order.cancelledAt, lang)}
+                    </span>
+                  )}
+                  {order.cancelledAt && order.cancelReason ? " · " : null}
+                  {order.cancelReason}
+                </p>
+              )}
 
               {order.payments.length > 0 && (
                 <ul className="flex flex-col gap-1 mt-1 rounded-xl bg-zinc-50 p-2.5 dark:bg-zinc-800/40">
@@ -150,7 +193,7 @@ export function PaymentsPanel({
                         {p.method === "upi" ? "UPI" : (lang === "mr" ? "रोख" : "Cash")} ₹{p.amount.toLocaleString("en-IN")}
                       </span>
                       {p.upiTxnId && <span className="ml-1 text-zinc-400">· {p.upiTxnId}</span>}
-                      <span className="ml-1 text-zinc-400">· {new Date(p.recordedAt).toLocaleString(lang === "mr" ? "mr-IN" : "en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                      <span className="ml-1 text-zinc-400">· {formatDateTime(p.recordedAt, lang)}</span>
                     </li>
                   ))}
                 </ul>
@@ -174,7 +217,7 @@ export function PaymentsPanel({
                 >
                   {lang === "mr" ? "पावती" : "Receipt"}
                 </Link>
-                {order.outstanding > 0 && (
+                {!cancelledOnly && order.outstanding > 0 && (
                   <button
                     type="button"
                     onClick={() => setPayingOrder(order)}

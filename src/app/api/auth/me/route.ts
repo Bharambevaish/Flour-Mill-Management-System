@@ -26,7 +26,7 @@ export const GET = () =>
     if (store.has(COOKIES.customerSession)) {
       const customerId = await requireSession("customer");
       const customer = await CustomerModel.findById(customerId)
-        .select("name mobile lang mustChangePin")
+        .select("name mobile lang")
         .lean();
       if (customer) {
         return ok({
@@ -36,7 +36,6 @@ export const GET = () =>
             name: customer.name,
             mobile: customer.mobile,
             lang: customer.lang,
-            mustChangePin: customer.mustChangePin,
           },
         });
       }

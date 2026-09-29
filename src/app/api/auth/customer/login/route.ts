@@ -14,6 +14,21 @@ export const POST = (request: Request) =>
     await verifyCsrf(request);
     const ip = clientIp(request);
 
+    // IP-only ceiling FIRST, before the body is read. The per-mobile bucket
+    // below is keyed on client-supplied input, so on its own a spray across
+    // many mobiles never touches the same bucket.
+    const ipRate = checkRate(
+      `customer-login-ip:${ip}`,
+      RATE_LIMITS.customerLoginIp.limit,
+      RATE_LIMITS.customerLoginIp.windowMs,
+    );
+    if (!ipRate.ok) {
+      return Response.json(
+        { error: { code: "RATE_LIMITED", message: "Too many attempts, try later", retryAfter: ipRate.retryAfterSeconds } },
+        { status: 429 },
+      );
+    }
+
     const body = await readBody(request);
     const parsed = customerLoginSchema.safeParse(body);
     if (!parsed.success) {

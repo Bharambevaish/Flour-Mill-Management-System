@@ -4,20 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/client";
 import { grainLabel, sizeLabel } from "@/lib/millings";
+import type { Lang } from "@/lib/i18n/i18n";
 import { StatusBadge } from "@/components/common";
 import { PaymentEntry } from "@/components/owner/payments";
 import type { OrderView } from "@/services/orderService";
 import type { OrderStatus, PaymentMethod } from "@/models/Order";
-
-function useLang(): "mr" | "en" {
-  if (typeof document !== "undefined") {
-    const match = document.cookie.match(/(?:^|; )lang=([^;]*)/);
-    if (match && (match[1] === "mr" || match[1] === "en")) {
-      return match[1];
-    }
-  }
-  return "en";
-}
 
 const NEXT_STEP: Partial<Record<OrderStatus, { mr: string; en: string; to: OrderStatus }>> = {
   pending: { mr: "दळण्यास सुरू करा", en: "Start Milling", to: "processing" },
@@ -28,12 +19,13 @@ const NEXT_STEP: Partial<Record<OrderStatus, { mr: string; en: string; to: Order
 export function OrderActionModal({
   order,
   onClose,
+  lang,
 }: {
   order: OrderView;
   onClose: () => void;
+  lang: Lang;
 }) {
   const router = useRouter();
-  const lang = useLang();
   const next = NEXT_STEP[order.status];
 
   const [recordPay, setRecordPay] = useState(false);
@@ -227,6 +219,7 @@ export function OrderActionModal({
                 onUpiTxnIdChange={setUpiTxnId}
                 max={outstanding}
                 heading={lang === "mr" ? "जमा रक्कम विवरण" : "Payment Entry"}
+                lang={lang}
               />
             )}
 

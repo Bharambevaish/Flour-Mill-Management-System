@@ -10,6 +10,12 @@
   --background: #faf5f7;
   --foreground: #1e1518;
 
+  /* Subtle hairline border. Consumed as `border-[var(--border-subtle)]`.
+     Was referenced in 26 places but never defined, so every one of those
+     borders silently fell back to the browser default. Dark mode overrides it
+     per-usage with `dark:border-zinc-800`, so only the light value is needed. */
+  --border-subtle: #f3d5dc;
+
   --color-primary: #9d174d;
   --color-primary-container: #be185d;
   --color-on-primary: #ffffff;

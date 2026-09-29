@@ -1,8 +1,9 @@
 import { toCsv, type CsvValue } from "@/lib/csv";
 import { AppError } from "@/lib/errors";
 import { handle } from "@/lib/http";
-import { getLang } from "@/lib/i18n/i18n";
+import { formatDateTime, getLang } from "@/lib/i18n/i18n";
 import { grainLabel } from "@/lib/millings";
+import { requireSession } from "@/services/authService";
 import { getReportSummary, resolveRange } from "@/services/reportService";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +36,9 @@ function buildCsv(
           mr ? "वसूल (₹)" : "Paid (₹)",
           mr ? "उधारी (₹)" : "Outstanding (₹)",
           mr ? "या कालावधीत वसूल (₹)" : "Collected in Period (₹)",
+          // Always exported (unlike the on-screen column) so a spreadsheet can
+          // be reconciled against the mill's actual cash position.
+          mr ? "परत द्यायची रक्कम (₹)" : "Refund Due (₹)",
         ],
         rows: report.customers.map((c) => [
           c.name,
@@ -44,6 +48,7 @@ function buildCsv(
           c.paid,
           c.outstanding,
           c.collectedInPeriod,
+          c.refundPending,
         ]),
       };
     case "summary":
@@ -75,7 +80,7 @@ function buildCsv(
         ],
         rows: report.receipts.map((r) => [
           r.orderId,
-          new Date(r.recordedAt).toLocaleString("en-IN"),
+          formatDateTime(r.recordedAt, lang),
           r.customer,
           r.mobile,
           r.method === "upi" ? "UPI" : mr ? "रोख" : "Cash",
@@ -89,6 +94,12 @@ function buildCsv(
 /** Owner-only CSV download: `?section=receipts|grain|customers|summary`. */
 export async function GET(request: Request) {
   return handle(async () => {
+    // Auth FIRST, before any input handling: an unauthenticated caller must not
+    // be able to tell a valid ?section= from an invalid one (which would leak
+    // the section list), and this export contains customer names, mobiles,
+    // per-customer dues and UPI transaction ids.
+    await requireSession("owner");
+
     const params = new URL(request.url).searchParams;
     const rawSection = params.get("section");
     if (rawSection && !(SECTIONS as readonly string[]).includes(rawSection)) {

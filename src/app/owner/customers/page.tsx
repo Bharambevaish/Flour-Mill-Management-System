@@ -24,7 +24,7 @@ export default async function CustomersPage() {
         </p>
       </header>
 
-      <CustomersPanel initialCustomers={customers} />
+      <CustomersPanel initialCustomers={customers} lang={lang} />
     </div>
   );
 }

@@ -3,16 +3,6 @@
 import type { Lang } from "@/lib/i18n/i18n";
 import type { PaymentMethod } from "@/models/Order";
 
-function useLang(): "mr" | "en" {
-  if (typeof document !== "undefined") {
-    const match = document.cookie.match(/(?:^|; )lang=([^;]*)/);
-    if (match && (match[1] === "mr" || match[1] === "en")) {
-      return match[1];
-    }
-  }
-  return "en";
-}
-
 export function PaymentEntry({
   amount,
   onAmountChange,
@@ -22,7 +12,7 @@ export function PaymentEntry({
   onUpiTxnIdChange,
   max,
   heading,
-  lang: langProp,
+  lang,
 }: {
   amount: string;
   onAmountChange: (value: string) => void;
@@ -32,10 +22,8 @@ export function PaymentEntry({
   onUpiTxnIdChange: (value: string) => void;
   max: number;
   heading?: string;
-  lang?: Lang;
+  lang: Lang;
 }) {
-  const detected = useLang();
-  const lang = langProp ?? detected;
   const title = heading ?? (lang === "mr" ? "पेमेंट नोंद" : "Payment Receipt");
   const inputClass = "stitch-input w-full";
 

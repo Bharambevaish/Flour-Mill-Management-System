@@ -60,6 +60,33 @@ export function resetKey(key: string): void {
 /** Standard limits */
 export const RATE_LIMITS = {
   login: { limit: 10, windowMs: 15 * 60 * 1000 }, // 10 per 15 min per key
+  /**
+   * IP-only ceiling for customer PIN logins, enforced BEFORE the body is read.
+   * The per-`mobile` bucket alone cannot stop a spray across many mobiles
+   * (each gets a fresh bucket), so this bounds total attempts from one source.
+   */
+  customerLoginIp: { limit: 40, windowMs: 15 * 60 * 1000 },
   otp: { limit: 5, windowMs: 60 * 60 * 1000 },
   generalMutation: { limit: 120, windowMs: 60 * 60 * 1000 },
 } as const;
+
+/**
+ * Owner mutations are split per area instead of sharing one bucket: a single
+ * `owner-mutation:<ip>` counter let a busy screen (e.g. working the queue) burn
+ * the whole hourly budget and lock the owner out of unrelated screens such as
+ * taking a payment.
+ */
+export const OWNER_MUTATION_AREAS = [
+  "orders",
+  "payments",
+  "customers",
+  "settings",
+  "notifications",
+] as const;
+
+export type OwnerMutationArea = (typeof OWNER_MUTATION_AREAS)[number];
+
+/** Bucket key for an owner mutation, namespaced per area. */
+export function ownerMutationKey(area: OwnerMutationArea, ip: string): string {
+  return `owner-mutation:${area}:${ip}`;
+}

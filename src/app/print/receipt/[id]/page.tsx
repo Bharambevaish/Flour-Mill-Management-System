@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PrintButton } from "@/components/common";
 import { requirePageSession } from "@/lib/auth/requirePageSession";
-import { getLang } from "@/lib/i18n/i18n";
+import { formatDateTimeFull, getLang, type Lang } from "@/lib/i18n/i18n";
 import { grainLabel, sizeLabel } from "@/lib/millings";
 import { getOrderByNumber } from "@/services/orderService";
 import { getSettingsOrDefault } from "@/services/settingsService";
@@ -11,14 +11,8 @@ export const dynamic = "force-dynamic";
 
 const money = (n: number): string => `₹ ${n.toLocaleString("en-IN")}`;
 
-function fmt(iso: string, locale: string): string {
-  return new Date(iso).toLocaleString(locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+function fmt(iso: string, lang: Lang): string {
+  return formatDateTimeFull(iso, lang);
 }
 
 /** Printable customer पावती (receipt) — open in a new tab, then Print / Save as PDF. */
@@ -33,9 +27,10 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
     getOrderByNumber(orderNumber),
     getSettingsOrDefault(),
   ]);
-  const mr = lang === "mr";
-  const locale = mr ? "mr-IN" : "en-IN";
   const settled = order.outstanding <= 0;
+  const cancelled = order.status === "cancelled";
+  const refundDue = order.refundDue;
+  const mr = lang === "mr";
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl bg-[var(--background)] p-4 dark:bg-zinc-950 font-sans">
@@ -59,7 +54,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
           <div className="text-right">
             <p className="text-lg font-bold text-rose-800 font-[family-name:var(--font-plus-jakarta)]">{mr ? "पावती" : "Receipt"}</p>
             <p className="text-sm font-semibold text-zinc-700">Order #{order.orderId}</p>
-            <p className="text-xs text-zinc-500">{fmt(order.createdAt, locale)}</p>
+            <p className="text-xs text-zinc-500">{fmt(order.createdAt, lang)}</p>
           </div>
         </header>
 
@@ -72,6 +67,11 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
           <div className="text-right">
             <p className="text-xs uppercase tracking-wide text-zinc-500 font-semibold">{mr ? "स्थिती" : "Status"}</p>
             <p className="font-bold text-base text-rose-800">{order.status}</p>
+            {cancelled && (
+              <p className="mt-1 rounded-lg border border-amber-400 bg-amber-50 px-2 py-1 text-[11px] font-bold text-amber-900">
+                {mr ? "रद्द केलेला ऑर्डर" : "CANCELLED ORDER"}
+              </p>
+            )}
           </div>
         </section>
 
@@ -107,7 +107,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
                   <span className="text-zinc-600">
                     <span className="font-semibold text-emerald-700">✓</span> {p.method === "upi" ? "UPI" : mr ? "रोख" : "Cash"}
                     {p.upiTxnId && <span className="ml-1 text-zinc-400">· {p.upiTxnId}</span>}
-                    <span className="ml-2 text-xs text-zinc-400">{fmt(p.recordedAt, locale)}</span>
+                    <span className="ml-2 text-xs text-zinc-400">{fmt(p.recordedAt, lang)}</span>
                   </span>
                   <span className="font-bold text-zinc-900">{money(p.amount)}</span>
                 </li>
@@ -126,12 +126,21 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
               <dt className="text-zinc-600">{mr ? "वसूल" : "Paid"}</dt>
               <dd className="font-bold text-emerald-700">{money(order.paidAmount)}</dd>
             </div>
-            <div className="flex justify-between border-t border-rose-100 pt-2">
-              <dt className="font-bold text-zinc-900">{mr ? "शिल्लक उधारी" : "Balance Due"}</dt>
-              <dd className={`font-bold text-base ${settled ? "text-emerald-700" : "text-rose-700"}`}>
-                {money(order.outstanding)}
-              </dd>
-            </div>
+            {cancelled ? (
+              <div className="flex justify-between border-t border-rose-100 pt-2">
+                <dt className="font-bold text-zinc-900">{mr ? "परत मिळणारी रक्कम" : "Refund Due"}</dt>
+                <dd className={`font-bold text-base ${refundDue > 0 ? "text-amber-700" : "text-zinc-500"}`}>
+                  {money(refundDue)}
+                </dd>
+              </div>
+            ) : (
+              <div className="flex justify-between border-t border-rose-100 pt-2">
+                <dt className="font-bold text-zinc-900">{mr ? "शिल्लक उधारी" : "Balance Due"}</dt>
+                <dd className={`font-bold text-base ${settled ? "text-emerald-700" : "text-rose-700"}`}>
+                  {money(order.outstanding)}
+                </dd>
+              </div>
+            )}
           </dl>
         </section>
 

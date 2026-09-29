@@ -19,6 +19,7 @@ loadEnvFile(".env.local");
 
 import mongoose from "mongoose";
 import { backfillStatusHistory } from "../src/lib/order-status-history.ts";
+import { toCsv } from "../src/lib/csv.ts";
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -74,9 +75,76 @@ async function apiText(path: string): Promise<{ status: number; contentType: str
   };
 }
 
+/**
+ * Like `api`, but sends multipart/form-data — the transport the QR upload uses.
+ * Built by hand (rather than reusing `api`) precisely so the test proves the
+ * server parses a real browser-style multipart body, boundary and all.
+ */
+async function apiUpload(
+  path: string,
+  field: string,
+  filename: string,
+  contentType: string,
+  bytes: Uint8Array,
+  method = "POST",
+): Promise<{ status: number; json: Record<string, unknown> }> {
+  const boundary = `----fmtest${Math.random().toString(36).slice(2)}`;
+  const head = new TextEncoder().encode(
+    `--${boundary}\r\n` +
+      `Content-Disposition: form-data; name="${field}"; filename="${filename}"\r\n` +
+      `Content-Type: ${contentType}\r\n\r\n`,
+  );
+  const tail = new TextEncoder().encode(`\r\n--${boundary}--\r\n`);
+  const body = new Uint8Array(head.length + bytes.length + tail.length);
+  body.set(head, 0);
+  body.set(bytes, head.length);
+  body.set(tail, head.length + bytes.length);
+
+  const res = await fetch(BASE + path, {
+    method,
+    headers: {
+      cookie: cookieHeader(),
+      "content-type": `multipart/form-data; boundary=${boundary}`,
+      "x-csrf-token": csrf,
+    },
+    body,
+  });
+  acceptSetCookie(res);
+  const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  return { status: res.status, json };
+}
+
+/** A minimal but structurally valid 2x2 PNG, used for the byte-identity check. */
+function tinyPng(): Uint8Array {
+  return new Uint8Array([
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+    0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02, 0x08, 0x02, 0x00, 0x00, 0x00, 0x28, 0xf6, 0x87,
+    0x2a, 0x00, 0x00, 0x00, 0x18, 0x49, 0x44, 0x41, 0x54, 0x28, 0xcf, 0x63, 0xf8, 0xcf, 0xc0, 0xf0,
+    0x1f, 0x00, 0x05, 0x00, 0x01, 0xff, 0x89, 0x99, 0x3d, 0x1d, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45,
+    0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
+  ]);
+}
+
 async function freshCsrf(): Promise<void> {
   const r = await api<{ csrfToken?: string }>("/api/csrf", "GET");
   if (r.json.csrfToken) csrf = r.json.csrfToken;
+}
+
+/**
+ * Like `api`, but sends NO session cookie and never touches the shared jar.
+ * Used to prove a route rejects an anonymous caller at the ROUTE boundary
+ * (not merely inside the service layer).
+ */
+async function apiAnon(path: string, method = "GET", body?: unknown): Promise<{ status: number }> {
+  const headers: Record<string, string> = {};
+  if (body !== undefined) headers["content-type"] = "application/json";
+  if (method !== "GET") headers["x-csrf-token"] = csrf;
+  const res = await fetch(BASE + path, {
+    method,
+    headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+  return { status: res.status };
 }
 
 async function login(): Promise<void> {
@@ -606,7 +674,7 @@ async function main() {
   await Notif.deleteMany({ message: portalMsg });
   await Notif.deleteMany({ customerId: { $in: [new mongoose.Types.ObjectId(aId), new mongoose.Types.ObjectId(bId)] } });
   await Aud.deleteMany({ "meta.message": portalMsg });
-  await Aud.deleteMany({ "actor.actorId": { $in: [aId, bId] } });
+  await Aud.deleteMany({ actorId: { $in: [new mongoose.Types.ObjectId(aId), new mongoose.Types.ObjectId(bId)] } });
   await Sessions.deleteMany({ refId: { $in: [new mongoose.Types.ObjectId(aId), new mongoose.Types.ObjectId(bId)] } });
   await Customer.deleteMany({ _id: { $in: [new mongoose.Types.ObjectId(aId), new mongoose.Types.ObjectId(bId)] } });
   await Aud.deleteMany({ "meta.orderId": poNum });
@@ -698,16 +766,508 @@ async function main() {
     $or: [
       { "meta.orderId": { $in: [hNum, h2.json.order?.orderId].filter(Boolean) } },
       { "meta.orderIds": { $in: h3Nums } },
-      { "actor.actorId": hDid },
+      { actorId: new mongoose.Types.ObjectId(hDid) },
     ],
   });
   await Customer.deleteOne({ _id: new mongoose.Types.ObjectId(hDid) });
   await Sessions.deleteMany({ refId: new mongoose.Types.ObjectId(hDid) });
 
+  /* --------------------------------------------------------------------- */
+  /* 22) Hardening: route-level auth, output injection, rate buckets        */
+  /* --------------------------------------------------------------------- */
+
+  // Every data GET must reject an anonymous caller AT THE ROUTE, not rely on a
+  // service-layer guard that a refactor could quietly remove. These four carry
+  // customer PII and (for the export) per-customer dues.
+  for (const p of [
+    "/api/orders",
+    "/api/customers",
+    "/api/owner/reports",
+    "/api/owner/reports/export?section=receipts",
+  ]) {
+    const anon = await apiAnon(p);
+    check(`harden: anonymous ${p.split("?")[0]} → 401`, anon.status === 401, `got ${anon.status}`);
+  }
+
+  // Guard order: an anonymous caller must not be able to tell a valid
+  // ?section= from an invalid one (that would leak the section list).
+  const anonBadSection = await apiAnon("/api/owner/reports/export?section=bogus");
+  check("harden: anonymous bad export section → 401 (not 400)", anonBadSection.status === 401, `got ${anonBadSection.status}`);
+
+  // CSV formula injection: a customer NAME beginning with '=' is free text the
+  // owner typed in, and the export is opened in Excel. It must be neutralised.
+  const evilName = "=cmd|' /c calc'!A1";
+  const evilMobile = "9" + String(testStart + 424241).padStart(10, "0").slice(-9);
+  await freshCsrf();
+  const evil = await api<{ customer?: { id: string } }>("/api/customers", "POST", { name: evilName, mobile: evilMobile, pin: "4444" });
+  const evilId = evil.json.customer?.id ?? "";
+  check("harden: formula-named customer created", evil.status === 201 && !!evilId, `got ${evil.status}`);
+
+  const csvCustomers = await apiText("/api/owner/reports/export?preset=today&section=customers");
+  check(
+    "harden: CSV neutralises a leading '=' name",
+    csvCustomers.status === 200 && !csvCustomers.text.includes(`,${evilName},`) && csvCustomers.text.includes(`'${evilName}`),
+    `status ${csvCustomers.status}`,
+  );
+  // A normal name must be byte-identical to before the guard (no stray quotes).
+  const csv2 = await apiText("/api/owner/reports/export?preset=today&section=customers");
+  const csvLines = csv2.text.replace(/^\uFEFF/, "").split("\r\n");
+  const evilLine = csvLines.find((l) => l.includes("cmd|' /c calc'")) ?? "";
+  const normalLine = csvLines.find((l) => l.startsWith(`${customer.name},`) || l.includes(`"${customer.name}"`)) ?? "";
+  check(
+    "harden: CSV leaves an ordinary customer name unprefixed",
+    normalLine !== "" && !normalLine.startsWith("'") && evilLine !== "" && evilLine.includes(`'${evilName}`),
+    `normal=${normalLine.slice(0, 40)} evil=${evilLine.slice(0, 40)}`,
+  );
+
+  // Customer search must treat regex metacharacters literally: '.*' used to
+  // match every customer (unescaped $regex). Now it can only match a literal.
+  await freshCsrf();
+  const allCust = await api<{ customers?: unknown[] }>("/api/customers", "GET");
+  const dotSearch = await api<{ customers?: { name?: string }[] }>("/api/customers?q=.%2A");
+  check(
+    "harden: search '.*' is literal, not a match-everything regex",
+    dotSearch.status === 200 && (dotSearch.json.customers?.length ?? 0) < (allCust.json.customers?.length ?? 0),
+    `matched ${dotSearch.json.customers?.length} of ${allCust.json.customers?.length}`,
+  );
+
+  // Owner mutations are bucketed per area, so a busy screen cannot starve the
+  // rest. Prove the keys are actually namespaced apart.
+  await freshCsrf();
+  const custProbe = await api<{ customer?: { id: string } }>("/api/customers", "POST", { name: "Bucket Probe", mobile: "9" + String(testStart + 515151).padStart(10, "0").slice(-9), pin: "5555" });
+  check("harden: 'customers' area bucket is live", custProbe.status === 201, `got ${custProbe.status}`);
+
+  // Logout must attribute the audit row to the person who actually signed out
+  // (the old code recorded actorId: null), and must stay idempotent so that
+  // signing out twice is a 200, not a 401.
+  const ownerDoc = await Admin.findOne({ email: OWNER_EMAIL });
+  const ownerId = String(ownerDoc?._id ?? "");
+  await freshCsrf();
+  const out1 = await api("/api/auth/logout", "POST", {});
+  const logoutAud = await Aud.find({ action: "logout", createdAt: { $gte: new Date(testStart) } })
+    .sort({ createdAt: -1 }).limit(1).toArray();
+  check("logout: first sign-out → 200", out1.status === 200, `got ${out1.status}`);
+  check(
+    "logout: audit row carries the real owner actorId",
+    logoutAud.length === 1 && String(logoutAud[0].actorId ?? "") === ownerId && logoutAud[0].actorKind === "owner",
+    JSON.stringify({ actorId: String(logoutAud[0]?.actorId ?? ""), actorKind: logoutAud[0]?.actorKind, ownerId }),
+  );
+
+  await freshCsrf();
+  const out2 = await api("/api/auth/logout", "POST", {});
+  const logoutAud2 = await Aud.find({ action: "logout", createdAt: { $gte: new Date(testStart) } })
+    .sort({ createdAt: -1 }).limit(1).toArray();
+  check("logout: signing out again is idempotent → 200", out2.status === 200, `got ${out2.status}`);
+  check(
+    "logout: no-session sign-out is audited as a system actor, not a bogus id",
+    logoutAud2.length === 1 && (logoutAud2[0].actorId ?? null) === null && logoutAud2[0].actorKind === "system",
+    JSON.stringify({ actorId: logoutAud2[0]?.actorId, actorKind: logoutAud2[0]?.actorKind }),
+  );
+
+  // The portal is behind this session now, so prove the revoke really happened.
+  const afterOut = await apiAnon("/api/orders");
+  check("logout: session really revoked → 401 on a protected GET", afterOut.status === 401, `got ${afterOut.status}`);
+
+  // Re-establish the owner session: the section above proved a sign-out revokes
+  // it, and section 23 needs to be authenticated. This is the suite's last login
+  // (9 of the 10-per-15-min bucket), so do not add another one after this point
+  // without raising RATE_LIMITS.login — the suite will 429 at the next step.
+  await login();
+
+  // cleanup this section
+  await Customer.deleteOne({ _id: new mongoose.Types.ObjectId(evilId) });
+  await Customer.deleteOne({ _id: new mongoose.Types.ObjectId(custProbe.json.customer?.id ?? "") });
+  // A genuine negative NUMBER must stay numeric, while TEXT that merely starts
+  // with a dangerous character is still prefixed. (All live money fields are
+  // >= 0, so this pins the serializer's contract directly.)
+  const negCsv = toCsv(["n", "note"], [[-5, "-5"], [12, "=1+1"]]);
+  const negLines = negCsv.replace(/^\uFEFF/, "").split("\r\n");
+  check(
+    "harden: CSV guard spares real numbers but still quotes a formula string",
+    negLines[1] === "-5,'-5" && negLines[2] === "12,'=1+1",
+    JSON.stringify(negLines.slice(1, 3)),
+  );
+
+  /* --------------------------------------------------------------------- */
+  /* 23) UPI QR storage + soft cancel with a retained payment trail          */
+  /* --------------------------------------------------------------------- */
+
+  /* --- 23a. UPI ID validation --- */
+  await freshCsrf();
+  const badUpi = await api("/api/owner/settings", "PATCH", { upiId: "not-a-upi-id" });
+  check("upi: a UPI id without '@' → 400", badUpi.status === 400, `got ${badUpi.status}`);
+
+  const goodUpi = await api("/api/owner/settings", "PATCH", { upiId: "ganeshmill@okaxis" });
+  check("upi: a well-formed UPI id is accepted", goodUpi.status === 200, `got ${goodUpi.status}`);
+
+  // Regression: the format regex must not make the field write-once. "" is the
+  // model's own default, so a strict regex would strand a UPI id the owner can
+  // no longer take down.
+  const clearUpi = await api("/api/owner/settings", "PATCH", { upiId: "   " });
+  check("upi: the UPI id can be cleared with blank", clearUpi.status === 200, `got ${clearUpi.status}`);
+  const blankUpiRow = await SettingsC.findOne({});
+  check("upi: blank really did clear the stored UPI id", blankUpiRow?.upiId === "", `"${blankUpiRow?.upiId}"`);
+  const restoreUpi = await api("/api/owner/settings", "PATCH", { upiId: "ganeshmill@okaxis" });
+  check("upi: and can be set again afterwards", restoreUpi.status === 200, `got ${restoreUpi.status}`);
+
+  /* --- 23b. QR upload: type allowlist, size cap, byte identity --- */
+  /*
+   * ISOLATION. This section writes to the SINGLE global settings document, so it
+   * must never assume it starts empty: the owner may have a real bank QR
+   * configured, and overwriting it would destroy their live payment details.
+   * Snapshot the three fields this section touches, clear them, and put the
+   * owner's originals back in the cleanup block at the end of the suite.
+   */
+  const ownerQRSnapshot = (await SettingsC.findOne({}))?.upiQr ?? null;
+  const ownerMillNameSnapshot = (await SettingsC.findOne({}))?.millName;
+  const ownerUpiIdSnapshot = (await SettingsC.findOne({}))?.upiId;
+  await freshCsrf();
+  await api("/api/owner/settings/upi-qr", "DELETE");
+  if (ownerMillNameSnapshot !== undefined) {
+    await api("/api/owner/settings", "PATCH", { millName: ownerMillNameSnapshot });
+  }
+  if (ownerUpiIdSnapshot !== undefined) {
+    await api("/api/owner/settings", "PATCH", { upiId: ownerUpiIdSnapshot });
+  }
+  check(
+    "upi: the section starts from a known-empty QR (owner's real one is snapshotted)",
+    (await SettingsC.findOne({}))?.upiQr === null || (await SettingsC.findOne({}))?.upiQr === undefined,
+    "QR still present after the reset",
+  );
+
+  const anonQrGet = await apiAnon("/api/owner/settings/upi-qr");
+  check("upi: anonymous QR fetch → 401", anonQrGet.status === 401, `got ${anonQrGet.status}`);
+
+  const svgUpload = await apiUpload("/api/owner/settings/upi-qr", "file", "qr.svg", "image/svg+xml", tinyPng());
+  check(
+    "upi: an SVG is refused (scriptable format, never a bank QR)",
+    svgUpload.status === 400,
+    `got ${svgUpload.status}`,
+  );
+
+  // Over the 1 MB cap. Never a valid PNG is fine — the size check runs first.
+  const tooBig = await apiUpload(
+    "/api/owner/settings/upi-qr",
+    "file",
+    "huge.png",
+    "image/png",
+    new Uint8Array(1024 * 1024 + 1),
+  );
+  check("upi: an image over 1 MB → 413", tooBig.status === 413, `got ${tooBig.status}`);
+
+  const beforeOk = await SettingsC.findOne({ upiQr: { $ne: null } });
+  check("upi: a rejected upload left no QR behind", !beforeOk, `found ${JSON.stringify(beforeOk?.upiQr)}`);
+
+  // The real thing: a valid PNG, then prove the stored bytes are the SAME bytes.
+  const png = tinyPng();
+  const up = await apiUpload("/api/owner/settings/upi-qr", "file", "qr.png", "image/png", png);
+  check("upi: a valid PNG uploads", up.status === 200, `got ${up.status}`);
+
+  const settingsRow = (await SettingsC.findOne({})) as
+    | (Record<string, unknown> & { upiQr?: { dataUrl?: string; contentType?: string } | null })
+    | null;
+  const qrStored = settingsRow?.upiQr ?? null;
+  const dataUrl = qrStored?.dataUrl ?? "";
+  check(
+    "upi: the QR is stored as a data: URL with the original mime",
+    dataUrl.startsWith("data:image/png;base64,") && qrStored?.contentType === "image/png",
+    `${dataUrl.slice(0, 32)} / ${qrStored?.contentType}`,
+  );
+
+  // Byte identity is the whole promise of this feature: no sharp, no resize,
+  // no re-encode. Compare the decoded bytes, not the base64 text.
+  const storedBytes = new Uint8Array(Buffer.from(dataUrl.split(",")[1] ?? "", "base64"));
+  check(
+    "upi: stored bytes are byte-identical to the upload (no re-encode)",
+    storedBytes.length === png.length && storedBytes.every((b, i) => b === png[i]),
+    `stored ${storedBytes.length}B vs uploaded ${png.length}B`,
+  );
+  check("upi: upiId and the QR coexist on the same settings doc", settingsRow?.upiId === "ganeshmill@okaxis", `${settingsRow?.upiId}`);
+
+  // And the owner-facing serve route hands back those exact bytes.
+  const served = await apiText("/api/owner/settings/upi-qr");
+  check("upi: owner QR route serves 200 + the png mime", served.status === 200 && served.contentType === "image/png", `${served.status} ${served.contentType}`);
+  check(
+    "upi: the served bytes match the upload exactly",
+    served.bytes.length === png.length && served.bytes.every((b, i) => b === png[i]),
+    `served ${served.bytes.length}B vs uploaded ${png.length}B`,
+  );
+
+  // Replacing the QR must swap the bytes, not accumulate them.
+  const png2 = tinyPng();
+  png2[30] = 0x00; // differ in the pixel data, same length
+  const up2 = await apiUpload("/api/owner/settings/upi-qr", "file", "qr2.png", "image/png", png2);
+  const served2 = await apiText("/api/owner/settings/upi-qr");
+  check(
+    "upi: re-uploading replaces the stored image",
+    up2.status === 200 && served2.bytes.every((b, i) => b === png2[i]),
+    `got ${up2.status}`,
+  );
+
+  /* --- 23b2. The CUSTOMER's save-a-copy link ----------------------------- */
+  // A customer should be able to keep the QR on the device and open it from the
+  // gallery later, so `/api/my/payment-qr?download=1` must hand back the same
+  // bytes with a Content-Disposition filename — and must stay just as
+  // authenticated as the inline preview.
+  //
+  // Uses a SELF-CONTAINED cookie jar: the shared `jar` is holding the owner
+  // session and the suite is on its last owner login, so logging a customer in
+  // through it would both evict the owner and burn a scarce login.
+  const custJar = new Map<string, string>();
+  const custFetch = async (path: string, init: RequestInit = {}) => {
+    const res = await fetch(BASE + path, {
+      ...init,
+      headers: {
+        ...(init.headers as Record<string, string> | undefined),
+        ...(custJar.size ? { cookie: [...custJar].map(([k, v]) => `${k}=${v}`).join("; ") } : {}),
+      },
+    });
+    for (const c of res.headers.getSetCookie?.() ?? []) {
+      const pair = c.split(";")[0];
+      const eq = pair.indexOf("=");
+      if (eq > 0) custJar.set(pair.slice(0, eq).trim(), pair.slice(eq + 1).trim());
+    }
+    return res;
+  };
+
+  const dlAnon = await fetch(`${BASE}/api/my/payment-qr?download=1`);
+  check("upi: anonymous QR download → 401", dlAnon.status === 401, `got ${dlAnon.status}`);
+
+  // A customer of its own: section 20 created and then DELETED its test
+  // customers, so the portal fixtures are gone by now and borrowing one of them
+  // would be testing against a 404 account.
+  await freshCsrf();
+  const dlMobile = "8" + String(testStart + 424242).padStart(10, "0").slice(-9);
+  const dlCust = await api<{ customer?: { id?: string } }>("/api/customers", "POST", {
+    name: "QR Download Test",
+    mobile: dlMobile,
+    pin: "7777",
+  });
+  const dlCustId = dlCust.json.customer?.id ?? "";
+
+  // The double-submit token is the one in the RESPONSE BODY; the cookie holds a
+  // signed form of it, and echoing that back is a 403.
+  const dlCsrfRes = await custFetch("/api/csrf");
+  const dlCsrf = ((await dlCsrfRes.json()) as { csrfToken?: string }).csrfToken ?? "";
+  const dlLogin = await custFetch("/api/auth/customer/login", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-csrf-token": dlCsrf },
+    body: JSON.stringify({ mobile: dlMobile, pin: "7777" }),
+  });
+  check("upi: customer can log in for the download flow", dlLogin.status === 200, `got ${dlLogin.status}`);
+
+  // Snapshot rather than hardcode: an earlier section owns the mill name, and
+  // this test must not depend on what that section happened to set.
+  const millNameNow = String((await SettingsC.findOne({}))?.millName ?? "mill");
+  const expectedSlug =
+    millNameNow.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40).replace(/-+$/g, "") ||
+    "mill";
+
+  const dl = await custFetch("/api/my/payment-qr?download=1");
+  const dlBytes = new Uint8Array(await dl.arrayBuffer());
+  const disposition = dl.headers.get("content-disposition") ?? "";
+  check(
+    "upi: customer download serves the same bytes as the preview",
+    dl.status === 200 &&
+      dlBytes.length === png2.length &&
+      dlBytes.every((b, i) => b === png2[i]),
+    `${dl.status} ${dlBytes.length}B vs ${png2.length}B`,
+  );
+  check(
+    "upi: the download is named from the mill + the real extension",
+    disposition === `inline; filename="${expectedSlug}-upi-qr.png"`,
+    disposition || "(no content-disposition)",
+  );
+  // The plain preview URL must NOT be an attachment, or the <img> would break.
+  const prev = await custFetch("/api/my/payment-qr");
+  check(
+    "upi: the inline preview stays inline (no attachment disposition)",
+    prev.status === 200 && !(prev.headers.get("content-disposition") ?? "").includes("attachment"),
+    prev.headers.get("content-disposition") || "(none)",
+  );
+  // Header-injection guard: the mill name is user-typed, so it must be reduced
+  // to [a-z0-9-] before it lands in a response header. The property under test is
+  // "nothing can break out of the quoted filename" — NOT "the words of the input
+  // must vanish", since a slug like `mi-ll-x-evil-1` is inert and expected.
+  await api("/api/owner/settings", "PATCH", { millName: 'Mi"ll\r\nX-Evil: 1' });
+  const evilDisp = (await custFetch("/api/my/payment-qr?download=1")).headers.get("content-disposition") ?? "";
+  check(
+    "upi: a hostile mill name cannot inject header syntax into the filename",
+    !/[\r\n]/.test(evilDisp) &&
+      /^inline; filename="[a-z0-9-]*-upi-qr\.(png|jpg|webp)"$/.test(evilDisp),
+    evilDisp || "(none)",
+  );
+  // The name itself must not have been able to close the quote and add a header.
+  check(
+    "upi: a quote in the mill name cannot break out of the filename",
+    evilDisp.split('"').length === 3,
+    `${evilDisp.split('"').length - 1} quotes in the header`,
+  );
+  await api("/api/owner/settings", "PATCH", { millName: millNameNow });
+
+  /* --- 23c. Soft cancel: history + payments survive, dues go to zero --- */
+  // Snapshot the ledger first: the test customer has pre-existing orders, so the
+  // meaningful claim is "the refund appears, and what they owe did not change".
+  const ledgerOf = async () => {
+    const r = await api<{ report?: { customers?: { id: string; refundPending: number; outstanding: number }[] } }>(
+      "/api/owner/reports?preset=30d",
+    );
+    return (r.json.report?.customers ?? []).find((c) => c.id === customerId) ?? { refundPending: 0, outstanding: 0 };
+  };
+  const ledgerBefore = await ledgerOf();
+  await freshCsrf();
+  const toCancel = await api<{ order?: { id: string; orderId: number; totalCharges: number } }>("/api/orders", "POST", {
+    customerId,
+    grainType: "jowar",
+    requiredSize: "coarse",
+    weightKg: 20,
+    ratePerKg: 10,
+    advanceAmount: 100, // partially paid → must produce a refund due
+    advanceMethod: "cash",
+  });
+  const cancelId = toCancel.json.order?.id; // document id — what the route takes
+  const cancelNo = toCancel.json.order?.orderId;
+  const cancelTotal = toCancel.json.order?.totalCharges;
+  check(
+    "cancel: test order created with a 100 advance",
+    toCancel.status === 201 && cancelTotal === 200 && !!cancelId,
+    `got ${toCancel.status} total ${cancelTotal} ${JSON.stringify(toCancel.json)}`,
+  );
+
+  const badReason = await api(`/api/orders/${cancelId}/cancel`, "POST", { reason: "x".repeat(500) });
+  check("cancel: an over-long reason → 400", badReason.status === 400, `got ${badReason.status}`);
+
+  await freshCsrf();
+  const cancelled = await api<{ order?: { status: string; refundDue: number; outstanding: number; paidAmount: number; payments: unknown[] } }>(
+    `/api/orders/${cancelId}/cancel`,
+    "POST",
+    { reason: "test cancel" },
+  );
+  check("cancel: a paid order cancels successfully", cancelled.status === 200, `got ${cancelled.status}`);
+  check(
+    "cancel: refundDue = what was paid, outstanding forced to 0",
+    cancelled.json.order?.refundDue === 100 && cancelled.json.order?.outstanding === 0 && cancelled.json.order?.paidAmount === 100,
+    JSON.stringify(cancelled.json.order),
+  );
+  check("cancel: the payment trail is retained, not erased", (cancelled.json.order?.payments?.length ?? 0) === 1, `${cancelled.json.order?.payments?.length} receipts`);
+
+  const cancelDoc = await Order.findOne({ orderId: cancelNo });
+  const hist = (cancelDoc?.statusHistory ?? []) as { status: string }[];
+  check(
+    "cancel: status=cancelled persisted and appended to statusHistory",
+    cancelDoc?.status === "cancelled" && hist[hist.length - 1]?.status === "cancelled",
+    `${cancelDoc?.status} / ${hist.map((h) => h.status).join(">")}`,
+  );
+  check("cancel: cancelledAt + reason persisted", !!cancelDoc?.cancelledAt && cancelDoc?.cancelReason === "test cancel", JSON.stringify({ at: !!cancelDoc?.cancelledAt, why: cancelDoc?.cancelReason }));
+
+  const cancelNotif = await Notif.find({ customerId: customer._id, type: "orderCancelled" }).toArray();
+  check("cancel: the customer is notified", cancelNotif.length === 1, `found ${cancelNotif.length}`);
+  const cancelAud = await Aud.find({ action: "order.cancel" }).toArray();
+  check("cancel: order.cancel is audited", cancelAud.length === 1, `found ${cancelAud.length}`);
+
+  /* --- 23d. A cancelled order is terminal and inert --- */
+  await freshCsrf();
+  const dupe = await api(`/api/orders/${cancelId}/cancel`, "POST", { reason: "again" });
+  check("cancel: cancelling twice is rejected", dupe.status >= 400, `got ${dupe.status}`);
+
+  await freshCsrf();
+  const payCancelled = await api(`/api/orders/${cancelId}/payment`, "POST", { amount: 10, method: "cash" });
+  check("cancel: no further payment can be taken", payCancelled.status >= 400, `got ${payCancelled.status}`);
+
+  await freshCsrf();
+  const moveOn = await api(`/api/orders/${cancelId}/status`, "PATCH", { status: "processing" });
+  check("cancel: it cannot be advanced back into the queue", moveOn.status >= 400, `got ${moveOn.status}`);
+
+  const afterInert = await Order.findOne({ orderId: cancelNo });
+  check(
+    "cancel: the rejected calls changed nothing",
+    afterInert?.status === "cancelled" && afterInert?.paidAmount === 100,
+    `${afterInert?.status} paid ${afterInert?.paidAmount}`,
+  );
+
+  /* --- 23e. Cancelled is excluded from money owed, not from the books --- */
+  const liveQueue = await api<{ orders?: { orderId: number; status: string }[] }>("/api/orders?excludeCollected=1");
+  check(
+    "queue: a cancelled order is out of the live queue",
+    !(liveQueue.json.orders ?? []).some((o) => o.orderId === cancelNo),
+    `queue has ${(liveQueue.json.orders ?? []).length}`,
+  );
+
+  const cancelledList = await api<{ orders?: { orderId: number; refundDue: number; payments: unknown[] }[] }>(
+    "/api/orders?status=cancelled",
+  );
+  const cancelledRow = (cancelledList.json.orders ?? []).find((o) => o.orderId === cancelNo);
+  check(
+    "queue: the Cancelled tab still lists it, payments intact",
+    !!cancelledRow && cancelledRow.refundDue === 100 && cancelledRow.payments.length === 1,
+    JSON.stringify(cancelledRow),
+  );
+
+  const ledgerAfter = await ledgerOf();
+  check(
+    "reports: the refund lands in refundPending, not in outstanding",
+    ledgerAfter.refundPending === ledgerBefore.refundPending + 100 &&
+      ledgerAfter.outstanding === ledgerBefore.outstanding,
+    `before ${JSON.stringify(ledgerBefore)} after ${JSON.stringify(ledgerAfter)}`,
+  );
+
+  // A collected order has nothing left to cancel.
+  const collected = await Order.findOne({ status: "collected", customerId: customer._id } as never);
+  if (collected) {
+    const noCancel = await api(`/api/orders/${String(collected._id)}/cancel`, "POST", {});
+    check("cancel: a collected order cannot be cancelled", noCancel.status >= 400, `got ${noCancel.status}`);
+  }
+
+  /* --- 23f. Removing the QR is idempotent --- */
+  await freshCsrf();
+  const del1 = await api("/api/owner/settings/upi-qr", "DELETE");
+  const del2 = await api("/api/owner/settings/upi-qr", "DELETE");
+  const gone = await apiText("/api/owner/settings/upi-qr");
+  check("upi: delete clears the QR, and is idempotent", del1.status === 200 && del2.status === 200 && gone.status === 404, `${del1.status}/${del2.status}/then ${gone.status}`);
+  const clearedRow = await SettingsC.findOne({});
+  check("upi: the data URL is gone from the document", !clearedRow?.upiQr, JSON.stringify(clearedRow?.upiQr));
+
+  /* --- 23g. Put the owner's own payment details back --------------------- */
+  // The delete test above necessarily leaves the mill with NO QR, which is
+  // correct for the test but wrong for a real owner. Restore exactly what was
+  // there before this section started, byte for byte, straight to the model —
+  // not through the upload route, which would re-encode nothing but would also
+  // log a misleading "uploaded by owner" audit row.
+  if (ownerQRSnapshot) {
+    await SettingsC.updateOne({}, { $set: { upiQr: ownerQRSnapshot } });
+  }
+  if (ownerMillNameSnapshot !== undefined) {
+    await SettingsC.updateOne({}, { $set: { millName: ownerMillNameSnapshot } });
+  }
+  if (ownerUpiIdSnapshot !== undefined) {
+    await SettingsC.updateOne({}, { $set: { upiId: ownerUpiIdSnapshot } });
+  }
+  const restoredRow = await SettingsC.findOne({});
+  check(
+    "upi: the owner's own QR is restored byte-for-byte after the section",
+    !ownerQRSnapshot
+      ? !restoredRow?.upiQr
+      : String(restoredRow?.upiQr?.dataUrl ?? "") === String(ownerQRSnapshot.dataUrl ?? ""),
+    ownerQRSnapshot ? `restored ${String(restoredRow?.upiQr?.dataUrl ?? "").length} chars` : "no QR to restore",
+  );
+
+  await Aud.deleteMany({ createdAt: { $gte: new Date(testStart) }, action: { $in: ["customer.create", "logout"] } });
   /* ---------- cleanup: remove every trace the test created ---------- */
+  // The customer minted for the QR-download checks.
+  if (dlCustId) {
+    const dlOid = new mongoose.Types.ObjectId(dlCustId);
+    await Sessions.deleteMany({ refId: dlOid });
+    await Notif.deleteMany({ customerId: dlOid });
+    await Aud.deleteMany({ actorId: dlOid });
+    await Aud.deleteMany({ "meta.customerId": dlOid });
+    await Customer.deleteOne({ _id: dlOid });
+  }
   await Order.deleteOne({ orderId });
+  // section 23's cancelled order (and its notification/audit rows below)
+  if (cancelNo) await Order.deleteOne({ orderId: cancelNo });
   await Notif.deleteMany({ customerId: customer._id, sentAt: { $gte: new Date(testStart) } });
   await Aud.deleteMany({ "meta.orderId": orderId });
+  await Aud.deleteMany({ action: { $in: ["order.cancel", "settings.upiQr.upload", "settings.upiQr.remove"] } });
   // settings + security audits created in sections 14–16
   await Aud.deleteMany({
     createdAt: { $gte: new Date(testStart) },

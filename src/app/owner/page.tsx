@@ -19,26 +19,55 @@ export default async function OwnerDashboard() {
     listOrders(),
   ]);
 
-  /* Per-customer aggregation */
-  type Agg = { totalCharges: number; paidAmount: number; orders: typeof orders };
+  /* Per-customer aggregation.
+   *
+   * Sums each order's OWN `outstanding` rather than re-deriving
+   * `charges - paid` from totals. That matters because `outstanding` is the
+   * single source of truth for "what does this person owe": a CANCELLED order
+   * reports 0 there and its cash shows as `refundDue`, so a voided order can
+   * never inflate the dashboard's उधारी figure. */
+  type Agg = { totalCharges: number; paidAmount: number; outstanding: number; refundDue: number; orders: typeof orders };
   const byCustomer = new Map<string, Agg>();
   for (const order of orders) {
     if (!order.customer) continue;
-    const agg = byCustomer.get(order.customer.id) ?? { totalCharges: 0, paidAmount: 0, orders: [] as typeof orders };
+    const agg = byCustomer.get(order.customer.id) ?? {
+      totalCharges: 0,
+      paidAmount: 0,
+      outstanding: 0,
+      refundDue: 0,
+      orders: [] as typeof orders,
+    };
     agg.totalCharges += order.totalCharges;
     agg.paidAmount += order.paidAmount;
+    agg.outstanding += order.outstanding;
+    agg.refundDue += order.refundDue;
     agg.orders.push(order);
     byCustomer.set(order.customer.id, agg);
   }
 
   const rows: CustomerStatusRow[] = customers.map((c) => {
-    const agg = byCustomer.get(c.id) ?? { totalCharges: 0, paidAmount: 0, orders: [] as typeof orders };
-    const outstanding = Math.max(0, Math.round((agg.totalCharges - agg.paidAmount) * 100) / 100);
+    const agg = byCustomer.get(c.id) ?? {
+      totalCharges: 0,
+      paidAmount: 0,
+      outstanding: 0,
+      refundDue: 0,
+      orders: [] as typeof orders,
+    };
+    const outstanding = Math.round(agg.outstanding * 100) / 100;
+    // Cancelled orders are not "active work" — only live queue orders are.
     const activeOrder =
-      [...agg.orders].filter((o) => o.status !== "collected").sort(
+      [...agg.orders].filter((o) => o.status !== "collected" && o.status !== "cancelled").sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       )[0] ?? null;
-    return { customer: c, orderCount: agg.orders.length, totalCharges: agg.totalCharges, paidAmount: agg.paidAmount, outstanding, activeOrder };
+    return {
+      customer: c,
+      orderCount: agg.orders.length,
+      totalCharges: agg.totalCharges,
+      paidAmount: agg.paidAmount,
+      outstanding,
+      refundDue: Math.round(agg.refundDue * 100) / 100,
+      activeOrder,
+    };
   });
 
   rows.sort((a, b) => {
@@ -52,7 +81,8 @@ export default async function OwnerDashboard() {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   const isToday = (t: string) => new Date(t).getTime() >= startOfToday.getTime();
-  const newToday = orders.filter((o) => isToday(o.createdAt)).length;
+  // Cancelled orders are void, so they don't count as new business today.
+  const newToday = orders.filter((o) => o.status !== "cancelled" && isToday(o.createdAt)).length;
   const collectedToday = orders
     .filter((o) => o.status === "collected" && isToday(o.updatedAt))
     .reduce((s, o) => s + o.totalCharges, 0);
@@ -103,7 +133,7 @@ export default async function OwnerDashboard() {
             {formatLang({ mr: "आजचा व्यवसाय व थेट ऑपरेशन्स आढावा", en: "Today's mill operations overview & telemetry" }, lang)}
           </p>
         </div>
-        <DashboardAutoRefresh />
+        <DashboardAutoRefresh lang={lang} />
       </header>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -134,7 +164,7 @@ export default async function OwnerDashboard() {
         })}
       </div>
 
-      <DashboardQuickActions />
+      <DashboardQuickActions lang={lang} />
 
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">

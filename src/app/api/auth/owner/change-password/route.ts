@@ -3,7 +3,7 @@ import { verifyCsrf } from "@/lib/csrf";
 import { AppError } from "@/lib/errors";
 import { handle, ok, readBody } from "@/lib/http";
 import { COOKIES } from "@/lib/cookies";
-import { checkRate, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkRate, ownerMutationKey, RATE_LIMITS } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/request-context";
 import { changeOwnerPasswordSchema } from "@/lib/validation";
 import { changeOwnerPassword, requireSession } from "@/services/authService";
@@ -17,7 +17,7 @@ export async function PATCH(request: Request) {
     const ip = clientIp(request);
 
     const rate = checkRate(
-      `owner-mutation:${ip}`,
+      ownerMutationKey("settings", ip),
       RATE_LIMITS.generalMutation.limit,
       RATE_LIMITS.generalMutation.windowMs,
     );

@@ -8,6 +8,200 @@ All notable changes to this project, in reverse chronological order. Format base
 - PWA + web push
 - Phase 2: SMS (MSG91) + WhatsApp (Meta)
 
+## [0.11.0] - 2026-09-29 — Customer portal redesign, UPI QR payments & order cancellation
+
+### Customer portal (mobile-first)
+- `/my` rebuilt for a phone held in one hand: a single **Total Outstanding Due**
+  card the customer can tap, the two secondary counts (active orders, unread)
+  side by side instead of three equal-weight cards, orders ABOVE notifications,
+  and generous touch targets. The root layout now exports an explicit
+  `Viewport` (zoom is still allowed).
+- `OrderProgress` (a dot-and-bar tracker) is replaced by **`OrderStatusLine`**:
+  a single line of coloured words — `रांगेत · दळण सुरू · तयार · घेतले` — with the
+  reached step bold. The per-step timestamps moved into the existing **Details**
+  expander as `OrderStatusTimes`, so the status and its history can no longer
+  disagree about what happened when.
+- `LogoutButton` takes a `lang` prop; the portal and the owner sidebar pass it
+  from the server so no client initializer reads `document.cookie`.
+
+### UPI QR payments
+- One mill-wide UPI **QR image + UPI ID** in Settings → new "५. UPI पेमेंट" tab.
+  The owner uploads a PNG/JPEG/WEBP up to 1 MB; the file is stored **verbatim**
+  as a `data:` URL and served back byte-for-byte. No `sharp`, no resize, no
+  re-encode, no filesystem upload — the test asserts byte identity on both the
+  stored document and the served response.
+- SVG is rejected (scriptable document format, never a bank QR). The size cap
+  lives in the `upi-qr` route because the app's `readBody` 64 KB JSON limit is
+  useless for a photo, so that route parses `formData()` directly.
+- `GET/POST/DELETE /api/owner/settings/upi-qr` (owner) and
+  `GET /api/my/payment-qr` (customer, session-scoped). Both serve **bytes**;
+  the dashboard JSON only carries `{ hasUpiQr, upiId }` so a page load on mobile
+  data is not carrying ~1.3 MB of base64.
+- New `PaySlideOver`, opened from the due card only, shows the QR plus a
+  copyable UPI ID and the "the mill will update your balance" note.
+- A **Download QR** button sits under the image, so a customer can keep the
+  code on the phone and open it from Photos/Gallery later instead of
+  screenshotting it. It is a plain link to `/api/my/payment-qr?download=1` — the
+  same bytes and the same session check as the preview, plus a
+  `Content-Disposition` filename of `<mill>-upi-qr.<ext>`. The mill name is
+  user-typed, so it is slugged to `[a-z0-9-]` before it reaches a header (an
+  unescaped quote or CRLF there would be response splitting). The plain preview
+  URL deliberately stays `inline` so the `<img>` keeps working.
+- `upiId` is format-checked (`name@bank`) — the customer copies it straight into
+  their UPI app, so a typo becomes a failed payment at the counter.
+- `apiFetch` learned to send `FormData` raw (it previously forced
+  `Content-Type: application/json` and stringified the body).
+
+### Order cancellation (soft)
+- `cancelled` is a new **terminal** status. Nothing is ever deleted: the order,
+  its payments and its full status history all stay. Reached from any
+  non-collected status via `POST /api/orders/[id]/cancel` (a POST, not a
+  DELETE — "delete" is the mental model that makes people expect a row to
+  vanish).
+- Money semantics: `outstanding` is forced to `0` and any amount already
+  collected is surfaced as **`refundDue`** (informational only — returning cash
+  stays a manual step the mill handles offline). Tracked in reports as
+  `refundPending`, deliberately outside `outstanding` so a voided order can
+  never inflate what a customer supposedly owes.
+- A paid order **can** be cancelled; a `collected` one cannot. Duplicate cancels,
+  further payments, edits, and forward transitions are all rejected, and the
+  customer is notified (`orderCancelled`) with an `order.cancel` audit row.
+- **Cancelled tab inside `/owner/queue`** (not a new nav item): these are not
+  work to be done but they ARE the mill's record of cash it is holding, so it
+  reuses `PaymentsPanel` with a new `cancelledOnly` mode — retained receipt
+  trail, refund figure, cancellation time and reason, CSV/print, and no
+  "Collect Payment" button. The tab header shows the total refund pending.
+- Cancelled orders drop out of the live queue, the dashboard's "new today" and
+  the report's charge/activity figures, but stay in the customer portal (badge,
+  reason, refund note) and on the printed पावती (CANCELLED banner + Refund Due).
+- Demo seed gains a fully-paid cancelled order so the refund path is visible in
+  demo data.
+
+### Fixes found while testing
+- `Settings.upiQr` was declared as a nested sub-schema, which made assigning
+  `null` fail validation and **broke every settings save** once the field
+  existed. It is now `Schema.Types.Mixed` (opaque base64 + metadata, nothing to
+  validate).
+- Client components imported `OrderStatus`/`ORDER_LIFECYCLE_STATUSES` from
+  `src/models/Order.ts`, dragging mongoose into the **browser bundle** and
+  failing the production build. The vocabulary now lives in a mongoose-free
+  `src/lib/order-status.ts`, re-exported by the model.
+- `cancelOrderSchema.reason` capped at 200 while the dialog's textarea allowed
+  280 — the UI would accept a reason the API then rejected. Both are 280.
+- **The test suite destroyed the owner's live UPI QR.** Section 23 wrote to the
+  single global settings document and asserted "a rejected upload left nothing
+  behind", which silently assumed the mill started with no QR configured. With a
+  real bank QR in place the suite overwrote it with its 2×2 test PNG and then
+  deleted it. The section now snapshots `upiQr` / `upiId` / `millName` first,
+  runs from a known-empty slate, and restores the owner's originals byte for
+  byte at the end — with an assertion that the restore actually happened.
+
+### Tests
+- `scripts/test-db-roundtrip.ts` section 23 (32 assertions): UPI id validation,
+  the anonymous-QR 401, SVG refusal, the 1 MB 413, "a rejected upload left
+  nothing behind", upload → byte identity of the stored `data:` URL and of the
+  served response, re-upload replaces, idempotent delete; and for cancellation:
+  a paid order cancels, `refundDue = paidAmount` with `outstanding = 0`, the
+  payment trail retained, `status` + `cancelledAt` + reason + a `cancelled`
+  `statusHistory` entry, the customer notified, the audit row written, duplicate
+  cancel / further payment / forward transition all rejected with the document
+  untouched, exclusion from the live queue, presence in the Cancelled list with
+  payments intact, the reports ledger delta, and a collected order refusing to
+  cancel.
+- **161 passed, 0 failed** (was 129). Self-cleaning verified independently: no
+  leaked `order.cancel` / `settings.upiQr.*` audits, no leaked orders or
+  notifications, settings document restored, orderId counter re-synced.
+- Ops note: the suite uses 9 of the 10 owner logins per 15 min per IP, so
+  restart the dev server between runs.
+
+## [0.10.2] - 2026-09-27 — Security & correctness hardening pass
+
+Thirteen verified defects fixed across auth, output handling, UI consistency and
+repo hygiene. No schema migration, no data rewrite — every change is additive
+or a pure refactor.
+
+### Security
+- **Route-level auth on the data GETs.** `GET /api/orders`, `GET /api/customers`,
+  `GET /api/owner/reports` and `GET /api/owner/reports/export` authenticated only
+  inside the service layer. They now call `requireSession("owner")` at the route
+  boundary, so a refactor that drops a service guard cannot silently open them.
+- **Export authenticates before validating.** `/api/owner/reports/export` checked
+  `?section=` first, so an anonymous caller could distinguish a valid section from
+  an invalid one and enumerate the section list. Guard now runs first.
+- **CSV formula-injection guard** (`src/lib/csv.ts`). A customer name or note
+  beginning with `= + - @` is exported verbatim and opened in Excel, where it
+  executes. Such cells are now prefixed with `'`. Numbers are passed through
+  untouched.
+- **Customer search no longer interpolates raw input into `$regex`.** A query of
+  `.*` matched every customer (and a crafted pattern could throw or be slow).
+  Input is now regex-escaped.
+- **Customer login gets an IP-only bucket checked *before* the body is read.** The
+  per-`mobile` bucket is keyed on client-supplied input, so a spray across many
+  mobiles never touched a shared counter. New `customerLoginIp` limit (40 / 15 min
+  per IP) bounds total attempts from one source.
+- **Owner mutations are rate-limited per area.** A single `owner-mutation:<ip>`
+  counter (120/hr) meant a busy queue could exhaust the whole budget and lock the
+  owner out of unrelated screens — e.g. unable to take a payment. Split into
+  `orders` / `payments` / `customers` / `settings` / `notifications` via
+  `ownerMutationKey(area, ip)`.
+- **Logout is audited with the real actor.** The audit row always recorded
+  `actorId: null`. Logout now peeks the live session first (new `peekSession`) and
+  records the owner/customer id, or `actorKind: "system"` when there was no
+  session. Logout stays idempotent — signing out twice is still a 200.
+
+### Removed
+- **Dead-end customer PIN prompt.** The portal showed "Please set a new PIN" but no
+  customer-facing PIN-change endpoint exists, so the banner could never be
+  dismissed. Removed the banner and dropped `mustChangePin` from the customer DTOs
+  (`/api/auth/me`, `/api/my/overview`). The model field and the owner's temp-PIN
+  indicator are **kept** — the owner still issues and resets PINs; this only stops
+  promising the customer an action the app does not support.
+
+### Fixed
+- **`--border-subtle` was never defined.** 26 elements across 13 files used
+  `border-[var(--border-subtle)]`; with no definition the declaration was invalid
+  and the border silently fell back to the browser default. Defined in `:root`
+  (`#f3d5dc`, matching the existing hairline); dark mode already overrode per-usage.
+- **7 hydration mismatches.** `OrderActionModal`, `QueuePanel`, `CustomerForm`,
+  `CustomersPanel`, `PaymentEntry`, `DashboardAutoRefresh` and
+  `DashboardQuickActions` each carried a private copy of a `useLang()` helper that
+  read `document.cookie` in a `useState` initializer, so SSR (always `en`) and the
+  first client render could disagree. All seven now take `lang` as a prop,
+  threaded from the server's `getLang()` / `getEffectiveLang()` — matching the
+  pattern `LanguageToggle` and `NewOrderForm` already used.
+- **Inconsistent date rendering.** The same timestamp appeared as `5 Sept, 14:30`
+  in one screen and `09/05/2026, 02:30:00 PM` in another, the CSV export hardcoded
+  `en-IN` regardless of language, the dashboard clock hardcoded `en-IN` even in
+  Marathi, and the customer list showed a date with no time. Added
+  `formatDateTime` / `formatDateTimeFull` / `localeOf` to `@/lib/i18n/format`
+  (split out of the server-only `i18n.ts`, which imports `next/headers` and
+  therefore cannot be pulled into a client component) and routed all 15 call
+  sites through them.
+- **React list keys.** The multi-line intake form keyed its bag rows by array
+  index while adding and removing rows by index, so deleting a row made React
+  reuse the previous row's DOM and the field values appeared to shift into the
+  wrong bag. Rows now carry a stable `id`.
+- **Test cleanup silently did nothing.** Two `deleteMany` filters targeted a
+  non-existent nested path (`"actor.actorId"`) while the model stores `actorId` as
+  a top-level field, so every test run leaked audit rows. Fixed, and the suite is
+  now verified self-cleaning (audit count identical before and after a run).
+
+### Changed
+- `src/models/Payment.ts` deleted. It was unreferenced, registered no collection
+  (none exists in the DB), and declared a `PaymentMethod` of `upi | cash |
+  settlement` that contradicted the real embedded `cash | upi` in `Order.ts` —
+  a live footgun for anyone who imported it.
+- `src/components/common/ComingSoon.tsx` deleted along with its barrel export;
+  every page that used it now has a real implementation.
+- `.gitignore` was a mix of ASCII and a UTF-16BE tail (with a stray NUL), which
+  tooling read as binary. Now plain UTF-8; all rules verified intact.
+
+### Tests
+`scripts/test-db-roundtrip.ts` gains section 22 (**129 assertions, up from 113**):
+route-level 401s for all four data GETs, guard ordering on the export,
+formula-injection neutralisation in real CSV output (plus the number-vs-text
+contract), literal `.*` search, and logout actor attribution/idempotency/revocation.
+
 ## [0.10.1] - 2026-09-22 — Order status timeline for customers
 
 ### Added

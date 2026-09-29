@@ -4,7 +4,7 @@ A bilingual (मराठी / English) order, payment and outstanding-dues mana
 small flour mill. The owner runs the whole business from a single console, and
 customers can log in with a PIN (their dashboard is still a stub — see below).
 
-**Current version:** `0.9.0` (see [`CHANGELOG.md`](./CHANGELOG.md)) ·
+**Current version:** `0.10.2` (see [`CHANGELOG.md`](./CHANGELOG.md)) ·
 **Master plan:** [`PLAN.md`](./PLAN.md)
 
 ---
@@ -17,7 +17,9 @@ customers can log in with a PIN (their dashboard is still a stub — see below).
 - **Customers** — create / edit, temporary PIN + forced reset, activate & deactivate
 - **New Order** — multi-line intake (one customer, up to 20 grain bags) with an
   optional cash/UPI advance; one submit creates N orders with consecutive numbers
-- **Queue** — `pending → processing → completed → collected`, strictly forward-only
+- **Queue** — `pending → processing → completed → collected`, strictly
+  forward-only, plus a **Cancelled tab** (soft-cancel history with the retained
+  receipt trail and any refund due)
 - **Payments hub** — record receipts on *any* order (including already-collected
   ones settling their उधारी), per-order receipt history, CSV + Print/PDF export
 - **Outstanding / उधारी** — who owes what, filtered per customer
@@ -27,22 +29,47 @@ customers can log in with a PIN (their dashboard is still a stub — see below).
   Print/Save-as-PDF
 - **Printable पावती** — one-page customer receipt (`/print/receipt/<orderNo>`)
 - **Settings** — mill profile, rate grid, notification preferences, security tab
-  (password change + optional TOTP 2FA)
+  (password change + optional TOTP 2FA), and **UPI payments**: one mill-wide QR
+  image (PNG/JPEG/WEBP, ≤ 1 MB, stored and served byte-for-byte with no
+  re-encoding) plus a format-checked UPI ID, shown to every customer
 
-**Customer portal** (`/my`) — *basic stub for now*
+**Customer portal** (`/my`) — secure, read-only, fully wired
 
-- PIN login, bilingual header, language toggle, logout
-- "Please set a new PIN" notice for fresh accounts (`mustChangePin`)
-- Outstanding + order list placeholders — **not yet wired to real data**
-  (planned: order/payment history and live balance)
+- PIN login (Argon2id) with progressive lockout, idle-timeout and a
+  deactivation gate; unknown mobiles return an identical 401 so accounts
+  cannot be enumerated
+- Bilingual header, language toggle, logout
+- Greeting, a **tappable "what you owe" card**, and two side-by-side counts
+  (Active Orders / Unread) — laid out for a phone first
+- **Pay panel** — opened from the due card: the mill's UPI QR and a copyable UPI
+  ID, with a note that the mill confirms the payment
+- **Notifications inbox** — tap-to-mark-read, mark-all, live unread badge
+- **Order tracker** — token, grain · size · weight · rate, a single line of
+  coloured status words (`रांगेत · दळण सुरू · तयार · घेतले`) with the reached step
+  highlighted, and an expandable Details section holding the per-step timestamps
+  and the payment history
+- Cancelled orders stay visible here with their reason and any refund due
+- Every customer endpoint is session-scoped — the customer id is never taken
+  from the URL or body, so there is no IDOR surface
+- PINs are issued and reset **by the owner**; the portal deliberately has no
+  self-service PIN change (an earlier "Please set a new PIN" banner pointed at
+  a screen that did not exist and has been removed)
 
 **Security (implemented)**
 
 - Argon2id password & PIN hashing
-- DB-backed, revocable sessions (14-day absolute expiry) · httpOnly + Secure +
-  `__Host-` + SameSite=Lax cookies
+- DB-backed, revocable sessions (14-day absolute expiry + configurable idle
+  timeout) · httpOnly + Secure + `__Host-` + SameSite=Lax cookies
+- Route-level `requireSession` on every data endpoint, so an anonymous caller
+  is rejected before any service code runs
 - Signed double-submit CSRF on every mutating route
 - Zod validation on all inputs · 64 KB body cap · Mongoose ODM (no injection)
+- Regex-escaped search input; rate limits split per area (a busy screen can't
+  lock the owner out of an unrelated one) and an IP-only ceiling on customer
+  login applied before the request body is read
+- CSV exports neutralise leading `= + - @` so a customer-supplied name can't
+  execute as a spreadsheet formula
+
 - Per-IP rate limiting (10 logins / 15 min, 120 mutations / hour)
 - Security headers: CSP, HSTS, `X-Frame-Options: DENY`, `nosniff`, Referrer &
   Permissions Policy · `X-Powered-By` disabled

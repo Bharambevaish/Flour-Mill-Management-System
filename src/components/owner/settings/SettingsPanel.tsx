@@ -81,6 +81,9 @@ interface SettingsShape {
     sms: boolean;
     whatsapp: boolean;
   };
+  upiId?: string;
+  /** Metadata only — the image bytes are served from /api/owner/settings/upi-qr. */
+  upiQr?: { contentType: string; uploadedAt: string } | null;
 }
 
 interface SettingsPanelProps {
@@ -90,7 +93,7 @@ interface SettingsPanelProps {
   initialLang?: "mr" | "en";
 }
 
-type TabId = "general" | "rates" | "notifs" | "security";
+type TabId = "general" | "rates" | "notifs" | "security" | "upi";
 
 type Notice = { text: string; type: "success" | "error" } | null;
 
@@ -118,6 +121,20 @@ export function SettingsPanel({
   const [notifs, setNotifs] = useState(
     initialSettings?.notifications || { inApp: true, webPush: true, sms: false, whatsapp: false },
   );
+  // Saved by the global Save button alongside everything else; the QR image is
+  // NOT — it goes through its own multipart endpoint (see uploadQr below).
+  const [upiId, setUpiId] = useState(initialSettings?.upiId || "");
+
+  /* ------------------------- UPI QR state ------------------------- */
+
+  const [qr, setQr] = useState<{ contentType: string; uploadedAt: string } | null>(
+    initialSettings?.upiQr ?? null,
+  );
+  const [qrBusy, setQrBusy] = useState(false);
+  const [qrError, setQrError] = useState<string | null>(null);
+  // Bumped after every upload/remove so the <img> re-fetches: the URL is stable
+  // and a stale browser copy would otherwise keep showing the old QR.
+  const [qrVersion, setQrVersion] = useState(0);
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<Notice>(null);
@@ -125,8 +142,8 @@ export function SettingsPanel({
   /* -------- derived validation + dirty tracking (one global Save) -------- */
 
   const current = useMemo(
-    () => ({ millName, phone, address, currency, defaultLanguage, rates, notifications: notifs }),
-    [millName, phone, address, currency, defaultLanguage, rates, notifs],
+    () => ({ millName, phone, address, currency, defaultLanguage, rates, notifications: notifs, upiId }),
+    [millName, phone, address, currency, defaultLanguage, rates, notifs, upiId],
   );
 
   const initial = useMemo(
@@ -140,6 +157,7 @@ export function SettingsPanel({
         ? { ...initialSettings.rates }
         : (structuredClone(DEFAULT_RATES) as Record<string, Record<string, number>>),
       notifications: initialSettings?.notifications || { inApp: true, webPush: true, sms: false, whatsapp: false },
+      upiId: initialSettings?.upiId || "",
     }),
     [initialSettings],
   );
@@ -186,6 +204,52 @@ export function SettingsPanel({
       setMessage({ text: errorMsg, type: "error" });
     } finally {
       setSaving(false);
+    }
+  }
+
+  /* ------------------------- UPI QR upload/remove ------------------------- */
+
+  async function uploadQr(file: File) {
+    setQrBusy(true);
+    setQrError(null);
+    try {
+      // The field name must be "file" — the route reads form.get("file").
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await apiFetch<{ settings?: SettingsShape }>("/api/owner/settings/upi-qr", {
+        method: "POST",
+        body: fd,
+      });
+      if (res.ok) {
+        setQr(res.data?.settings?.upiQr ?? null);
+        setQrVersion((v) => v + 1);
+      } else {
+        setQrError(res.error?.message ?? "Upload failed");
+      }
+    } catch (err: unknown) {
+      setQrError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setQrBusy(false);
+    }
+  }
+
+  async function removeQr() {
+    setQrBusy(true);
+    setQrError(null);
+    try {
+      const res = await apiFetch<{ settings?: SettingsShape }>("/api/owner/settings/upi-qr", {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setQr(res.data?.settings?.upiQr ?? null);
+        setQrVersion((v) => v + 1);
+      } else {
+        setQrError(res.error?.message ?? "Remove failed");
+      }
+    } catch (err: unknown) {
+      setQrError(err instanceof Error ? err.message : "Remove failed");
+    } finally {
+      setQrBusy(false);
     }
   }
 
@@ -334,6 +398,9 @@ export function SettingsPanel({
         </button>
         <button onClick={() => setActiveTab("security")} className={tabClass("security")}>
           ४. सुरक्षा आणि 2FA / Security
+        </button>
+        <button onClick={() => setActiveTab("upi")} className={tabClass("upi")}>
+          ५. UPI पेमेंट / UPI Payment
         </button>
       </div>
 
@@ -723,6 +790,112 @@ export function SettingsPanel({
                 </div>
               </div>
             )}
+          </section>
+        </div>
+      )}
+
+      {/* Tab 5: UPI payment — the one QR every customer sees on their portal */}
+      {activeTab === "upi" && (
+        <div className="space-y-6">
+          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
+            <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+              UPI QR कोड / UPI QR Code
+            </h3>
+            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+              हा QR सर्व ग्राहकांना दिसेल. तुमच्या बँकचा QR इथे अपलोड करा. / This one QR is shown to every
+              customer. Upload your bank&apos;s QR image here.
+            </p>
+
+            <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-start">
+              <div className="shrink-0">
+                {qr ? (
+                  // Cache-busted so a re-upload can't be masked by a cached copy.
+                  // next/image cannot optimise a session-gated API route, and the
+                  // point of this preview is to show the exact file customers get.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={qrVersion}
+                    src={`/api/owner/settings/upi-qr?v=${qrVersion}`}
+                    alt="UPI QR code"
+                    width={180}
+                    height={180}
+                    className="h-[180px] w-[180px] rounded-2xl border border-zinc-200 bg-white p-2 dark:border-zinc-800"
+                  />
+                ) : (
+                  <div className="flex h-[180px] w-[180px] flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-zinc-300 p-4 text-center dark:border-zinc-700">
+                    <span className="text-3xl text-zinc-300 dark:text-zinc-600">▦</span>
+                    <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                      QR सेट नाही / No QR set
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="min-w-0 flex-1 space-y-3">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  PNG, JPEG किंवा WEBP · कमाल १ MB · फाइल नेटवर नाही, मूळ स्वरूपात साठवली जाते /
+                  PNG, JPEG or WEBP · 1 MB max · stored as-is, never re-encoded
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <label
+                    className={`stitch-btn-primary cursor-pointer text-sm ${qrBusy ? "pointer-events-none opacity-50" : ""}`}
+                  >
+                    {qr ? "बदला / Replace" : "अपलोड करा / Upload"}
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="sr-only"
+                      disabled={qrBusy}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) void uploadQr(f);
+                        // Reset so re-picking the same file still fires onChange.
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                  {qr && (
+                    <button
+                      type="button"
+                      disabled={qrBusy}
+                      onClick={() => void removeQr()}
+                      className="stitch-btn-secondary text-sm"
+                    >
+                      काढा / Remove
+                    </button>
+                  )}
+                  {qrBusy && <span className="self-center text-sm text-zinc-500">...</span>}
+                </div>
+
+                {qr && (
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    {qr.contentType} · {new Date(qr.uploadedAt).toLocaleString("en-IN")}
+                  </p>
+                )}
+                {qrError && (
+                  <p className="text-sm font-semibold text-rose-600 dark:text-rose-400">{qrError}</p>
+                )}
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
+            <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+              UPI आयडी / UPI ID
+            </h3>
+            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+              ग्राहक UPI आयडीही कॉपी करू शकतात. / Customers can also copy this UPI ID.
+            </p>
+            <input
+              type="text"
+              value={upiId}
+              onChange={(e) => setUpiId(e.target.value)}
+              placeholder="yourname@bank"
+              className="stitch-input mt-3 text-sm"
+            />
+            <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+              वापरकर्तानावर @ असणे आवश्यक / Must contain an @ (e.g. name@okaxis)
+            </p>
           </section>
         </div>
       )}

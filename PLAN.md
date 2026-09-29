@@ -2,11 +2,14 @@
 
 > Living document. Updated as the build progresses. See `CHANGELOG.md` for the step-by-step history.
 
-## Status: **BUILD STARTED — auth + customers + orders/queue done, owner shell (sidebar) live**
+## Status: **v0.11.0 — every module in the owner IA is built and live**
+
+Payments, Outstanding, Notifications, Reports, Settings and the customer portal
+(`/my`) are all real, DB-backed features. Nothing renders "coming soon" any more.
 
 ## Navigation (owner side, Option A IA)
 Dashboard (home: stats + quick actions) + persistent sidebar: Dashboard · Customers · New Order ·
-Queue · Payments · Outstanding · Notifications · Reports · Settings. Unbuilt modules show "coming soon".
+Queue · Payments · Outstanding · Notifications · Reports · Settings. All of these are implemented.
 
 ## Ops: standard workflow
 
@@ -38,6 +41,8 @@ Feed/Flour Mill does **customer-owned-grain milling service**:
 | Payments | Paid / Partial / Credit. Outstanding auto-calc = Σ(totalCharges) − Σ(payments) per customer. |
 | Delivery vs pickup | Pickup by customer (order status → Collected). No delivery module. |
 | Tokens | No physical token; auto internal `orderId`. |
+| Order cancellation | **Soft cancel.** Nothing is ever deleted. A paid order can be cancelled: `outstanding` → 0 and the collected amount is shown as an informational `refundDue` (returning cash stays manual). `collected` orders cannot be cancelled. Shown in a Cancelled tab inside Queue. |
+| UPI payment | One mill-wide **QR image + UPI ID** in Settings, shown to every customer in a pay panel opened from their due card. Stored and served **verbatim** — no resize, no re-encode. |
 | Notifications | In-app tray (day-1) → Web Push (PWA) → SMS (MSG91) → WhatsApp (Meta). Same `notify()` service. |
 | Customer isolation | **Hard IDOR rule**: every customer route verifies ownership server-side. |
 

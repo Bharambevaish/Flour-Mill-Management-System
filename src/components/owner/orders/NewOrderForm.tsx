@@ -14,6 +14,10 @@ import type { PaymentMethod } from "@/models/Order";
 const MAX_LINES = 20;
 
 interface Line {
+  /** Stable identity for React. Lines are added AND removed by index, so
+      `key={index}` made React reuse the previous row's DOM after a delete and
+      the field values appeared to shift up into the wrong bag. */
+  id: number;
   grain: GrainKey;
   customGrain: string;
   size: SizeKey;
@@ -36,7 +40,8 @@ export function NewOrderForm({
   const rateFor = (grain: GrainKey, size: SizeKey): string =>
     String(defaultRates[grain]?.[size] ?? DEFAULT_RATES[grain][size]);
 
-  const blankLine = (): Line => ({
+  const blankLine = (id: number): Line => ({
+    id,
     grain: "maize",
     customGrain: "",
     size: "medium",
@@ -45,7 +50,12 @@ export function NewOrderForm({
   });
 
   const [customerId, setCustomerId] = useState("");
-  const [lines, setLines] = useState<Line[]>([blankLine()]);
+  // Ids are derived from the existing lines rather than a mutable counter, so
+  // nothing reads a ref during render (react-hooks/refs) and the first client
+  // render matches SSR exactly.
+  const nextLineId = (ls: Line[]): number => ls.reduce((m, l) => Math.max(m, l.id), 0) + 1;
+
+  const [lines, setLines] = useState<Line[]>(() => [blankLine(1)]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createdNos, setCreatedNos] = useState<number[] | null>(null);
@@ -73,7 +83,7 @@ export function NewOrderForm({
   }
 
   function addLine() {
-    setLines((prev) => (prev.length >= MAX_LINES ? prev : [...prev, blankLine()]));
+    setLines((prev) => (prev.length >= MAX_LINES ? prev : [...prev, blankLine(nextLineId(prev))]));
   }
 
   function removeLine(index: number) {
@@ -157,7 +167,7 @@ export function NewOrderForm({
       setCreatedNos(ids);
       router.refresh();
       setCustomerId("");
-      setLines([blankLine()]);
+      setLines([blankLine(1)]);
       setTakeAdvance(false);
       setAdvance("");
       setAdvanceMethod("cash");
@@ -206,7 +216,7 @@ export function NewOrderForm({
 
         {lines.map((line, i) => (
           <div
-            key={i}
+            key={line.id}
             className="rounded-2xl border border-rose-200/80 bg-rose-50/30 p-4 dark:border-zinc-800 dark:bg-zinc-950"
           >
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -324,6 +334,7 @@ export function NewOrderForm({
             onUpiTxnIdChange={setAdvanceUpiTxnId}
             max={batchTotal}
             heading={lang === "mr" ? "आगाऊ रक्कम विवरण" : "Advance Payment Details"}
+            lang={lang}
           />
         )}
 

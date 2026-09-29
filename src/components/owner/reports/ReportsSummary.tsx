@@ -1,16 +1,12 @@
 import Link from "next/link";
 import { grainLabel } from "@/lib/millings";
-import type { Lang } from "@/lib/i18n/i18n";
+import { formatDateTimeFull, type Lang } from "@/lib/i18n/i18n";
 import type { ReportSummary } from "@/services/reportService";
 
 const money = (n: number): string => `₹ ${n.toLocaleString("en-IN")}`;
 
 function fmtDate(iso: string, lang: Lang): string {
-  return new Date(iso).toLocaleString(lang === "mr" ? "mr-IN" : "en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  return formatDateTimeFull(iso, lang);
 }
 
 function Kpi({ label, value, accent }: { label: string; value: string; accent?: string }) {
@@ -43,6 +39,9 @@ const TD = "px-4 py-3 text-sm text-zinc-800 dark:text-zinc-200";
 export function ReportsSummary({ report, lang }: { report: ReportSummary; lang: Lang }) {
   const mr = lang === "mr";
   const { activity, byGrain, byMethod, customers, receipts, upiReceipts, range } = report;
+  // Only add the refund column when someone actually has money held against a
+  // cancelled order — an always-present all-zero column reads as noise.
+  const hasRefunds = customers.some((c) => c.refundPending > 0);
 
   return (
     <div className="flex flex-col gap-6">
@@ -110,6 +109,7 @@ export function ReportsSummary({ report, lang }: { report: ReportSummary; lang: 
                   <th className={TH}>{mr ? "वसूल" : "Paid"}</th>
                   <th className={TH}>{mr ? "उधारी" : "Outstanding"}</th>
                   <th className={TH}>{mr ? "या कालावधीत वसूल" : "Collected in period"}</th>
+                  {hasRefunds && <th className={TH}>{mr ? "परत द्यायची रक्कम" : "Refund due"}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -132,6 +132,11 @@ export function ReportsSummary({ report, lang }: { report: ReportSummary; lang: 
                       {money(c.outstanding)}
                     </td>
                     <td className={TD}>{money(c.collectedInPeriod)}</td>
+                    {hasRefunds && (
+                      <td className={`${TD} ${c.refundPending > 0 ? "font-semibold text-amber-700 dark:text-amber-400" : "text-zinc-400"}`}>
+                        {money(c.refundPending)}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

@@ -6,6 +6,7 @@ export type NotificationType =
   | "orderProcessing"
   | "orderCompleted"
   | "orderCollected"
+  | "orderCancelled"
   | "paymentReceived"
   | "paymentDue"
   | "broadcast";
@@ -15,6 +16,7 @@ export const NOTIFICATION_TYPES: NotificationType[] = [
   "orderProcessing",
   "orderCompleted",
   "orderCollected",
+  "orderCancelled",
   "paymentReceived",
   "paymentDue",
   "broadcast",

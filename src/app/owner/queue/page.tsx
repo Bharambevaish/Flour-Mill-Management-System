@@ -1,6 +1,6 @@
 import { listOrders } from "@/services/orderService";
 import { listActiveCustomers } from "@/services/customerService";
-import { QueuePanel } from "@/components/owner/orders";
+import { QueueTabs } from "@/components/owner/orders";
 import { requirePageSession } from "@/lib/auth/requirePageSession";
 import { formatLang } from "@/lib/i18n/i18n";
 import { getEffectiveLang, getSettingsRates } from "@/services/settingsService";
@@ -8,9 +8,12 @@ import { getEffectiveLang, getSettingsRates } from "@/services/settingsService";
 export const dynamic = "force-dynamic";
 
 export default async function QueuePage() {
-  const [session, orders, customers, lang, defaultRates] = await Promise.all([
+  const [session, liveOrders, cancelledOrders, customers, lang, defaultRates] = await Promise.all([
     requirePageSession("owner"),
+    // excludeCollected already drops cancelled ones too; the second call is the
+    // Cancelled tab's own dataset.
     listOrders({ excludeCollected: true }),
+    listOrders({ status: "cancelled" }),
     listActiveCustomers(),
     getEffectiveLang(),
     getSettingsRates(),
@@ -34,7 +37,13 @@ export default async function QueuePage() {
         </p>
       </header>
 
-      <QueuePanel orders={orders} customers={customers} defaultRates={defaultRates} />
+      <QueueTabs
+        liveOrders={liveOrders}
+        cancelledOrders={cancelledOrders}
+        customers={customers}
+        defaultRates={defaultRates}
+        lang={lang}
+      />
     </div>
   );
 }

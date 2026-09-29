@@ -5,6 +5,12 @@ export interface Customer {
   name: string;
   mobile: string;
   pinHash: string;
+  /**
+   * Owner-side bookkeeping only: true while the customer is still on a PIN the
+   * owner handed out. There is deliberately NO customer-facing "change your
+   * PIN" flow — the owner issues and resets PINs from the Customers screen — so
+   * this is never surfaced to the customer, only in the owner's customer list.
+   */
   mustChangePin: boolean;
   active: boolean;
   lang: Lang;

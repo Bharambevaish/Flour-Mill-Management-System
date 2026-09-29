@@ -23,6 +23,14 @@ export interface SettingsView {
   defaultLanguage: Lang;
   rates: Record<string, Record<string, number>>;
   notifications: NotificationsPrefs;
+  /**
+   * UPI payment details. `upiQr` deliberately carries METADATA ONLY — the image
+   * bytes are never inlined into a settings/API payload, because that would put
+   * up to ~1.3 MB of base64 on every dashboard load. Fetch the image from the
+   * `upi-qr` routes instead.
+   */
+  upiId: string;
+  upiQr: { contentType: string; uploadedAt: string } | null;
   updatedAt: string;
 }
 
@@ -38,6 +46,8 @@ function defaultView(): SettingsView {
       Record<string, number>
     >,
     notifications: { inApp: true, webPush: true, sms: false, whatsapp: false },
+    upiId: "",
+    upiQr: null,
     updatedAt: new Date().toISOString(),
   };
 }
@@ -120,6 +130,16 @@ export async function getSettingsOrDefault(): Promise<SettingsView> {
       sms: notifications.sms ?? false,
       whatsapp: notifications.whatsapp ?? false,
     },
+    upiId: typeof doc.upiId === "string" ? doc.upiId : "",
+    upiQr: doc.upiQr
+      ? {
+          contentType: String(doc.upiQr.contentType ?? "image/png"),
+          uploadedAt:
+            doc.upiQr.uploadedAt instanceof Date
+              ? doc.upiQr.uploadedAt.toISOString()
+              : new Date().toISOString(),
+        }
+      : null,
     updatedAt:
       doc.updatedAt instanceof Date
         ? doc.updatedAt.toISOString()
@@ -133,6 +153,97 @@ export async function getSettingsRates(): Promise<
 > {
   const settings = await getSettingsOrDefault();
   return settings.rates;
+}
+
+/* ---- UPI QR ----------------------------------------------------------- */
+
+/** Raster formats accepted for the mill's UPI QR. SVG is deliberately absent. */
+export const UPI_QR_CONTENT_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+] as const;
+
+/** 1 MB. Bank QR screenshots are a few hundred KB at most. */
+export const UPI_QR_MAX_BYTES = 1024 * 1024;
+
+export interface UpiQrBytes {
+  contentType: string;
+  /** The exact bytes the owner uploaded — never re-encoded. */
+  data: Buffer;
+}
+
+/** File extension for a stored QR, so a download isn't called `qr.bin`. */
+const QR_EXTENSION: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+};
+
+/**
+ * A safe, meaningful download filename: `<mill>-upi-qr.png`.
+ *
+ * The mill name is user-typed and may be in Marathi, contain spaces, slashes or
+ * quotes, so it is reduced to `[a-z0-9-]` and everything else is dropped — a
+ * `Content-Disposition` header is a header, and an unescaped quote or CR/LF in it
+ * would be a response-splitting vector. Falls back to `mill` when the name
+ * transliterates to nothing (e.g. a fully non-Latin name).
+ */
+export function upiQrDownloadName(
+  millName: string | undefined,
+  contentType: string,
+): string {
+  const slug = (millName ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40)
+    .replace(/-+$/g, "");
+  const ext = QR_EXTENSION[contentType] ?? "png";
+  return `${slug || "mill"}-upi-qr.${ext}`;
+}
+
+/**
+ * The stored QR, decoded back to raw bytes, or null when none is set.
+ *
+ * The DB holds a `data:<mime>;base64,…` string exactly as the owner uploaded it;
+ * this just unwraps it so a route can serve it as a real image response. No
+ * re-encoding happens on the way in or out.
+ */
+export async function getUpiQrBytes(): Promise<UpiQrBytes | null> {
+  await connectDb();
+  const doc = await SettingsModel.findOne().select("upiQr").lean();
+  const qr = doc?.upiQr;
+  if (!qr?.dataUrl) return null;
+  const match = /^data:([^;,]+);base64,([\s\S]+)$/.exec(qr.dataUrl);
+  if (!match) return null;
+  return {
+    contentType: qr.contentType || match[1],
+    data: Buffer.from(match[2], "base64"),
+  };
+}
+
+/** Store the owner's QR verbatim, replacing any previous one. */
+export async function setUpiQr(
+  dataUrl: string,
+  contentType: string,
+): Promise<void> {
+  await connectDb();
+  let settings = await SettingsModel.findOne();
+  if (!settings) settings = new SettingsModel();
+  settings.upiQr = { dataUrl, contentType, uploadedAt: new Date() };
+  settings.updatedAt = new Date();
+  await settings.save();
+}
+
+/** Remove the QR entirely. */
+export async function clearUpiQr(): Promise<void> {
+  await connectDb();
+  const settings = await SettingsModel.findOne();
+  if (!settings) return;
+  settings.upiQr = null;
+  settings.updatedAt = new Date();
+  await settings.save();
 }
 
 /**

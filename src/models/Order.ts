@@ -1,13 +1,20 @@
 import { Schema, model, models, type Model, type Types } from "mongoose";
 
-export type OrderStatus = "pending" | "processing" | "completed" | "collected";
+// Defined in a mongoose-free module so client components can use the vocabulary
+// at runtime without dragging this schema (and mongoose) into the browser bundle.
+// Imported AND re-exported here: the model needs them in local scope for the
+// schema, and most server-side callers already import from the model.
+import {
+  ORDER_STATUSES,
+  type OrderStatus,
+} from "@/lib/order-status";
 
-export const ORDER_STATUSES: OrderStatus[] = [
-  "pending",
-  "processing",
-  "completed",
-  "collected",
-];
+export {
+  ORDER_STATUSES,
+  ORDER_LIFECYCLE_STATUSES,
+  type OrderStatus,
+  type OrderLifecycleStatus,
+} from "@/lib/order-status";
 
 export type PaymentMethod = "cash" | "upi";
 
@@ -39,6 +46,10 @@ export interface Order {
   status: OrderStatus;
   /** Durable per-step timestamps — drives the customer's progress timeline. */
   statusHistory: StatusHistoryEntry[];
+  /** Set when the owner cancels. The row itself is never deleted. */
+  cancelledAt?: Date;
+  /** Optional free-text note explaining the cancellation. */
+  cancelReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -65,6 +76,8 @@ const OrderSchema = new Schema<Order>(
       default: [],
     },
     status: { type: String, enum: ORDER_STATUSES, default: "pending", index: true },
+    cancelledAt: { type: Date },
+    cancelReason: { type: String, trim: true, maxlength: 200 },
     statusHistory: {
       type: [
         {
