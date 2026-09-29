@@ -2,7 +2,7 @@ import { audit } from "@/lib/audit";
 import { verifyCsrf } from "@/lib/csrf";
 import { AppError } from "@/lib/errors";
 import { handle, ok, readBody } from "@/lib/http";
-import { checkRate, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkRate, ownerMutationKey, RATE_LIMITS } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/request-context";
 import { createCustomerSchema } from "@/lib/validation";
 import { requireSession } from "@/services/authService";
@@ -12,6 +12,8 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   return handle(async () => {
+    await requireSession("owner");
+
     const search = new URL(request.url).searchParams.get("q") ?? undefined;
     const customers = await listCustomers(search);
     return ok({ customers });
@@ -24,7 +26,7 @@ export async function POST(request: Request) {
     const ip = clientIp(request);
 
     const rate = checkRate(
-      `owner-mutation:${ip}`,
+      ownerMutationKey("customers", ip),
       RATE_LIMITS.generalMutation.limit,
       RATE_LIMITS.generalMutation.windowMs,
     );

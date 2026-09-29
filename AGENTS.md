@@ -25,7 +25,7 @@ login hardening (lockout, timing equalization, idle timeout, deactivation gate).
   `src/lib/order-status-history.ts`, filter-scoped so tests never touch live
   rows). Demo seed writes matching `statusHistory`. Status notifications per step
   already existed (section 20). Test section 21 (12 assertions) + self-cleanup.
-  **Tests now 113/113 passing.**
+  **Tests now 129/129 passing.**
 - **Secure read-only customer portal** (`0.10.0`): `/my` (was Coming Soon) is
   now a real bilingual dashboard — greeting, `mustChangePin` temp-PIN banner,
   three stat cards (Total Outstanding Due / Active Orders / Unread) and two
@@ -166,20 +166,76 @@ are version-tagged history; grep for a feature's path before trusting a tag. ***
   advance-on-create, UPI validation, over-pay rejection + no counter burn,
   recordPayment on pending/processing AND on already-collected, full-payment
   notification, single-write invariant, audit trail, cleanup. See the 0.10.0
-  entry at the top for the current suite (sections 1–21, **113 assertions**).
+  entry at the top for the current suite (sections 1–22, **129 assertions**).
 - **CHANGELOG**: new `[0.5.0]` section (Payments module: receipts + उधारी hub).
+- **Security & correctness hardening (`0.10.2`)** — 13 verified defects, no
+  schema migration. (1) `GET /api/{orders,customers}`, `/api/owner/reports` and
+  `/api/owner/reports/export` gained route-level `requireSession("owner")` —
+  they only guarded inside the service layer; export now authenticates *before*
+  `?section=` validation so an anonymous caller can't enumerate sections.
+  (2) **CSV formula-injection guard** in `src/lib/csv.ts` (leading `= + - @` are
+  prefixed with `'`; numbers untouched) — a customer name reached Excel as a
+  live formula. (3) **Customer search no longer interpolates raw input into
+  `$regex`** (`.*` matched every customer); input is escaped. (4) **Customer
+  login got an IP-only bucket checked BEFORE the body is read** — the per-mobile
+  bucket is keyed on client input, so a spray across many mobiles never touched a
+  shared counter. (5) **Owner mutations are rate-limited per area**
+  (`ownerMutationKey(area, ip)`: orders/payments/customers/settings/notifications)
+  — one shared 120/hr bucket meant a busy queue locked the owner out of taking a
+  payment. (6) **Logout audit carries the real actor** via new `peekSession` in
+  `authService` (was always `actorId: null`); still idempotent (double logout
+  = 200, `actorKind: "system"`). (7) **Removed the dead-end customer PIN banner**
+  + `mustChangePin` from `/api/auth/me` and `/api/my/overview` (no customer
+  PIN-change screen exists; the owner still issues/resets PINs, so the model
+  field and owner temp-PIN indicator are KEPT). (8) `--border-subtle` was used in
+  26 places across 13 files but **never defined** — every one of those borders
+  silently fell back to the browser default; now `#f3d5dc` in `:root`.
+  (9) **7 hydration mismatches** — `OrderActionModal`, `QueuePanel`,
+  `CustomerForm`, `CustomersPanel`, `PaymentEntry`, `DashboardAutoRefresh`,
+  `DashboardQuickActions` each had a private `useLang()` reading
+  `document.cookie` in a `useState` initializer; all take a `lang` prop now,
+  threaded from `getLang()`/`getEffectiveLang()` like `LanguageToggle` already
+  did. (10) **Date formatting unified** — new
+  `formatDateTime`/`formatDateTimeFull`/`localeOf` in `@/lib/i18n/i18n`; 15 call
+  sites routed through them (CSV export hardcoded `en-IN`, the dashboard clock
+  hardcoded `en-IN` in Marathi mode, the customer list showed no time).
+  (11) **Stable React keys** in the multi-line intake form — rows were keyed by
+  array index *and* removed by index, so deleting a row reused the wrong DOM and
+  values appeared to shift bags. (12) **Test cleanup was a silent no-op** — two
+  `deleteMany` filters used `"actor.actorId"` but the model stores `actorId` at
+  the top level, so every run leaked audit rows; the suite is now verified
+  self-cleaning (audit count identical before/after a run). (13) Docs reconciled
+  to a single source of truth (`CHANGELOG.md` = `0.10.2`; `package.json` was
+  stale at `0.1.0`, `README.md` at `0.9.0`, `PLAN.md` still claimed only
+  auth+customers+orders were built). Dead code removed:
+  `src/models/Payment.ts` (unreferenced, registered no collection, and declared a
+  `settlement` payment method contradicting `Order.ts`'s `cash|upi`) and
+  `src/components/common/ComingSoon.tsx` (no page uses it any more). `.gitignore`
+  was ASCII + a UTF-16**BE** tail with a stray NUL (tooling read it as binary) —
+  now plain UTF-8, rules verified intact. **Test section 22 (16 new assertions,
+  129 total) + self-cleanup.**
 
 # Blocked
 - None. (Note: original `payments/page.tsx` was auto-conflicted — resolved with
   chip-customer win.)
 
 # Next Move
-None pending — customer portal + status timeline verified end-to-end (113/113).
+None pending — security/correctness hardening pass verified end-to-end (129/129).
 Remaining plan (when asked): PWA/web push, broadcast SMS/WhatsApp phase 2, and
 (pre-launch) verify/fix the production CSP in `next.config.ts` (prod
 `script-src 'self'` with no nonce may break Next hydration).
 
 # Relevant Files
+- **Hardening (`0.10.2`)**: `src/lib/csv.ts` (formula guard),
+  `src/lib/rate-limit.ts` (`customerLoginIp`, `ownerMutationKey`,
+  `OWNER_MUTATION_AREAS`), `src/services/customerService.ts` (`escapeRegExp`),
+  `src/services/authService.ts` (`peekSession`),
+  `src/app/api/auth/logout/route.ts` (actor attribution),
+  `src/lib/i18n/format.ts` (`formatDateTime`/`formatDateTimeFull`/`localeOf` —
+  split out of the server-only `i18n.ts` so client components can use it),
+  `src/app/globals.css` (`--border-subtle`),
+  `src/components/owner/orders/NewOrderForm.tsx` (stable line `id`)
+
 - **Order status timeline (`0.10.1`)**: `src/components/customer/OrderProgress.tsx`,
   `src/lib/order-status-history.ts` (backfill, filter-scoped),
   `scripts/backfill-status-history.ts` (`npm run backfill-status`),
@@ -223,7 +279,7 @@ Remaining plan (when asked): PWA/web push, broadcast SMS/WhatsApp phase 2, and
   double-encode bug fixed), `src/app/owner/CustomerStatusGrid.tsx` (chip→link),
   `NewOrderForm.tsx`
 - `src/services/demoSeedService.ts` — seeded `payments[]`
-- `scripts/test-db-roundtrip.ts` (sections 1–21, **113 assertions**),
+- `scripts/test-db-roundtrip.ts` (sections 1–22, **129 assertions**),
   `src/lib/http.ts`/`audit.ts`/`notify.ts`
 - `CHANGELOG.md` ([0.10.0], [0.5.0])
 

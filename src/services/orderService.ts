@@ -21,6 +21,11 @@ import { notifyCustomer } from "@/services/notificationService";
  * Order lifecycle (owner-only):
  *
  *   pending → processing → completed → collected   (strict, forward-only)
+ *   any non-collected status → cancelled          (terminal off-ramp)
+ *
+ * Cancellation is a SOFT delete: the document, its payments and its status
+ * history are never removed, so a cancelled order stays auditable and the cash it
+ * collected keeps showing in the ledger (as a refund owed, see `toView`).
  *
  * The notification trigger IS this service: each step writes an in-app
  * notification for the customer via `notifyCustomer`. A notification failure
@@ -32,13 +37,19 @@ export const NOTIF_KEYS: Record<OrderStatus, string> = {
   processing: "notif.orderProcessing",
   completed: "notif.orderCompleted",
   collected: "notif.orderCollected",
+  cancelled: "notif.orderCancelled",
 };
 
+/**
+ * Forward-only lifecycle. `cancelled` is absent on purpose: a cancelled order
+ * has no next step, so `transitionOrder` can never move it forward again.
+ */
 const NEXT_STATUS: Record<OrderStatus, OrderStatus | null> = {
   pending: "processing",
   processing: "completed",
   completed: "collected",
   collected: null,
+  cancelled: null,
 };
 
 export interface OrderView {
@@ -54,10 +65,18 @@ export interface OrderView {
   totalCharges: number;
   paidAmount: number;
   outstanding: number;
+  /**
+   * Cash sitting on a CANCELLED order that now has to be handed back to the
+   * customer. Always 0 for a live order. Informational only — nothing in the app
+   * records a refund being given, so it stays pending until settled off-system.
+   */
+  refundDue: number;
   payments: { amount: number; method: PaymentMethod; upiTxnId?: string; recordedAt: string }[];
-  /** Per-step timestamps of the order's journey, oldest first (see OrderProgress). */
+  /** Per-step timestamps of the order's journey, oldest first. */
   statusHistory: { status: OrderStatus; at: string }[];
   status: OrderStatus;
+  cancelledAt?: string;
+  cancelReason?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -67,6 +86,11 @@ export type PaymentInput = {
   method: PaymentMethod;
   upiTxnId?: string;
 };
+
+export interface CancelOrderInput {
+  /** Optional free-text note explaining why (≤200 chars, validated by zod). */
+  reason?: string;
+}
 
 type OrderRow = {
   _id: Types.ObjectId;
@@ -81,6 +105,8 @@ type OrderRow = {
   payments: PaymentEntry[];
   status: OrderStatus;
   statusHistory?: StatusHistoryEntry[];
+  cancelledAt?: Date;
+  cancelReason?: string;
   createdAt: Date;
   updatedAt: Date;
   customer?: { _id: Types.ObjectId; name: string; mobile: string } | null;
@@ -88,6 +114,8 @@ type OrderRow = {
 
 function toView(doc: OrderRow): OrderView {
   const customer = doc.customer ?? null;
+  const isCancelled = doc.status === "cancelled";
+  const paid = doc.paidAmount ?? 0;
   return {
     id: String(doc._id),
     orderId: doc.orderId,
@@ -99,8 +127,16 @@ function toView(doc: OrderRow): OrderView {
     weightKg: doc.weightKg,
     ratePerKg: doc.ratePerKg,
     totalCharges: doc.totalCharges,
-    paidAmount: doc.paidAmount,
-    outstanding: Math.max(0, Math.round((doc.totalCharges - doc.paidAmount) * 100) / 100),
+    paidAmount: paid,
+    // A cancelled order is void, so it can NEVER contribute to what a customer
+    // supposedly owes. This one line is what keeps the Outstanding page, the
+    // payments hub and the dashboard ₹ totals honest — they all read
+    // `outstanding`. Money already received on it surfaces as `refundDue`
+    // instead, so nothing is silently lost.
+    outstanding: isCancelled
+      ? 0
+      : Math.max(0, Math.round((doc.totalCharges - paid) * 100) / 100),
+    refundDue: isCancelled ? Math.max(0, Math.round(paid * 100) / 100) : 0,
     payments: (doc.payments ?? []).map((p) => ({
       amount: p.amount,
       method: p.method,
@@ -112,6 +148,9 @@ function toView(doc: OrderRow): OrderView {
       at: h.at instanceof Date ? h.at.toISOString() : String(h.at),
     })),
     status: doc.status,
+    cancelledAt:
+      doc.cancelledAt instanceof Date ? doc.cancelledAt.toISOString() : undefined,
+    cancelReason: doc.cancelReason,
     createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : String(doc.createdAt),
     updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : String(doc.updatedAt),
   };
@@ -311,7 +350,9 @@ export async function listOrders(options: ListOrdersOptions = {}): Promise<Order
   await connectDb();
 
   const filter: Record<string, unknown> = {};
-  if (options.excludeCollected) filter.status = { $ne: "collected" };
+  // The live queue holds work still to be done: collected orders are done and
+  // cancelled ones are void, so neither belongs here.
+  if (options.excludeCollected) filter.status = { $nin: ["collected", "cancelled"] };
   if (options.status) filter.status = options.status;
 
   const sort: Record<string, 1 | -1> = options.excludeCollected
@@ -399,6 +440,9 @@ export async function updateOrder(orderId: string, input: UpdateOrderInput): Pro
   if (!doc) throw notFoundError("Order not found");
   if (doc.status === "collected") {
     throw new AppError(400, "Collected orders cannot be edited", "ORDER_LOCKED");
+  }
+  if (doc.status === "cancelled") {
+    throw new AppError(400, "Cancelled orders cannot be edited", "ORDER_LOCKED");
   }
 
   if (input.customerId && String(input.customerId) !== String(doc.customerId)) {
@@ -496,7 +540,6 @@ export async function recordPayment(
 
   applyPayment(doc, input);
   await doc.save();
-
   const nowOutstanding = Math.round((doc.totalCharges - doc.paidAmount) * 100) / 100;
   const customer = await CustomerModel.findById(doc.customerId).select("lang");
   if (customer && nowOutstanding <= 0) {
@@ -507,11 +550,70 @@ export async function recordPayment(
 }
 
 /**
+ * Soft-cancel an order: removes it from the live queue WITHOUT deleting the row.
+ *
+ * The document, its payments and its status history all survive, so the order
+ * stays fully auditable and any cash it collected is still visible — surfaced as
+ * `refundDue` on the returned view, because the money now has to go back to the
+ * customer rather than being counted as something they still owe.
+ *
+ * Reachable from any non-collected status. `collected` is rejected because the
+ * goods already changed hands, and a second cancel is rejected so the action
+ * can't be replayed.
+ *
+ * Status + cancelledAt + cancelReason + the statusHistory entry are written in
+ * ONE `doc.save()`, matching the invariant that a status change, the balance and
+ * the timeline can never disagree.
+ */
+export async function cancelOrder(
+  orderId: string,
+  input: CancelOrderInput = {},
+): Promise<OrderView> {
+  await requireSession("owner");
+  await connectDb();
+
+  const doc = await OrderModel.findById(orderId);
+  if (!doc) throw notFoundError("Order not found");
+
+  if (doc.status === "cancelled") {
+    throw new AppError(400, "Order is already cancelled", "ORDER_CANCELLED");
+  }
+  if (doc.status === "collected") {
+    throw new AppError(
+      400,
+      "Collected orders cannot be cancelled — the goods were already handed over",
+      "ORDER_LOCKED",
+    );
+  }
+
+  const reason = input.reason?.trim();
+  doc.status = "cancelled";
+  doc.cancelledAt = new Date();
+  doc.cancelReason = reason ? reason.slice(0, 200) : undefined;
+  doc.statusHistory = [...(doc.statusHistory ?? []), { status: "cancelled", at: doc.cancelledAt }];
+  await doc.save();
+
+  const customer = await CustomerModel.findById(doc.customerId).select("lang");
+  if (customer) {
+    await safelyNotify({
+      customerId: doc.customerId,
+      type: "orderCancelled",
+      messageKey: NOTIF_KEYS.cancelled,
+      lang: customer.lang,
+    });
+  }
+
+  return toView(doc.toObject() as unknown as OrderRow);
+}
+
+/**
  * Appends a payment entry to `doc` and raises its paidAmount (mutates in place;
- * caller persists). Rejects zero/negative amounts and over-payment.
+ * caller persists). Rejects zero/negative amounts, over-payment, and any
+ * payment against a cancelled order.
  */
 function applyPayment(
   doc: {
+    status: OrderStatus;
     totalCharges: number;
     paidAmount: number;
     payments: PaymentEntry[];
@@ -519,6 +621,13 @@ function applyPayment(
   payment: PaymentInput | undefined,
 ): void {
   if (!payment) return;
+  if (doc.status === "cancelled") {
+    throw new AppError(
+      400,
+      "Cancelled orders cannot take payments — refund the customer instead",
+      "ORDER_CANCELLED",
+    );
+  }
   const amount = Math.round(payment.amount * 100) / 100;
   if (!(amount > 0)) throw badRequestError("Payment amount must be positive");
   const outstanding = Math.round((doc.totalCharges - doc.paidAmount) * 100) / 100;

@@ -2,7 +2,7 @@ import { audit } from "@/lib/audit";
 import { verifyCsrf } from "@/lib/csrf";
 import { AppError } from "@/lib/errors";
 import { handle, ok, readBody } from "@/lib/http";
-import { checkRate, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkRate, ownerMutationKey, RATE_LIMITS } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/request-context";
 import { orderTransitionSchema } from "@/lib/validation";
 import { requireSession } from "@/services/authService";
@@ -19,7 +19,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     const { id } = await context.params;
 
     const rate = checkRate(
-      `owner-mutation:${ip}`,
+      ownerMutationKey("orders", ip),
       RATE_LIMITS.generalMutation.limit,
       RATE_LIMITS.generalMutation.windowMs,
     );

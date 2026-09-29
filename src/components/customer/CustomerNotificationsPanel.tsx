@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/http/client";
+import { formatDateTime } from "@/lib/i18n/format";
+import { t, type Lang } from "@/lib/i18n/dict";
 import type { CustomerNotificationView } from "@/services/notificationService";
 
 const TYPE_LABEL: Record<
@@ -13,6 +15,7 @@ const TYPE_LABEL: Record<
   orderProcessing: { mr: "दळण्यात", en: "Processing" },
   orderCompleted: { mr: "तयार", en: "Ready" },
   orderCollected: { mr: "घेतला", en: "Collected" },
+  orderCancelled: { mr: "रद्द", en: "Cancelled" },
   paymentReceived: { mr: "पेमेंट", en: "Payment" },
   paymentDue: { mr: "उधारी", en: "Due" },
   broadcast: { mr: "घोषणा", en: "Announcement" },
@@ -23,7 +26,7 @@ export function CustomerNotificationsPanel({
   lang,
 }: {
   notifications: CustomerNotificationView[];
-  lang: "mr" | "en";
+  lang: Lang;
 }) {
   const router = useRouter();
   const mr = lang === "mr";
@@ -59,7 +62,7 @@ export function CustomerNotificationsPanel({
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rose-50 px-5 py-4 dark:border-zinc-800">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
-            {mr ? "सूचना" : "Notifications"}
+            {t("cust.notifications", lang)}
           </h2>
           {unreadCount > 0 && (
             <span className="rounded-full bg-rose-600 px-2 py-0.5 text-xs font-semibold text-white shadow-xs">
@@ -74,7 +77,7 @@ export function CustomerNotificationsPanel({
             disabled={busy}
             className="stitch-btn-secondary text-xs"
           >
-            {busy ? "…" : (mr ? "सर्व वाचले म्हणून चिन्हांकित करा" : "Mark all as read")}
+            {busy ? "…" : t("cust.markAllRead", lang)}
           </button>
         )}
       </div>
@@ -87,7 +90,7 @@ export function CustomerNotificationsPanel({
 
       {notifications.length === 0 ? (
         <p className="px-5 py-10 text-center text-sm font-medium text-zinc-500 dark:text-zinc-400">
-          {mr ? "अजून कोणत्याही सूचना नाहीत." : "No notifications yet."}
+          {t("cust.notificationsEmpty", lang)}
         </p>
       ) : (
         <ul className="divide-y divide-rose-50 dark:divide-zinc-800">
@@ -115,12 +118,7 @@ export function CustomerNotificationsPanel({
                         {mr ? label.mr : label.en}
                       </span>
                       <span className="text-xs text-zinc-400">
-                        {new Date(n.sentAt).toLocaleString(mr ? "mr-IN" : "en-IN", {
-                          day: "numeric",
-                          month: "short",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {formatDateTime(n.sentAt, lang)}
                       </span>
                     </span>
                     <span

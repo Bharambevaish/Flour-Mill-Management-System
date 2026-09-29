@@ -202,9 +202,31 @@ export const settingsPatchSchema = z
     defaultLanguage: z.enum(["mr", "en"]),
     rates: settingsRatesSchema,
     notifications: settingsNotificationsSchema,
+    /**
+     * UPI handle, `name@bank`. Format-checked rather than free-form: the
+     * customer copies this straight into their UPI app, so a typo here becomes
+     * a failed payment at the counter.
+     */
+    upiId: z
+      .string()
+      .trim()
+      .max(100)
+      // Empty string means "not set" — it is the model's own default, so a
+      // non-empty regex here would let the owner *set* a UPI ID but never
+      // clear it again.
+      .refine((v) => v === "" || /^[a-zA-Z0-9._-]{2,64}@[a-zA-Z][a-zA-Z0-9]{1,32}$/.test(v), {
+        message: "Enter a UPI ID like name@bank",
+      }),
   })
   .partial()
   .refine((v) => Object.keys(v).length > 0, { message: "Nothing to update" });
+
+/** Soft-cancel an order. The row is never deleted, hence no DELETE verb. */
+export const cancelOrderSchema = z.object({
+  // 280 matches the dialog's maxLength; the two must not drift or the UI would
+  // happily accept a reason the API then rejects.
+  reason: z.string().trim().max(280).optional(),
+});
 
 /* Owner account security --------------------------------------------- */
 

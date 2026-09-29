@@ -218,6 +218,32 @@ export async function requireSession(kind: SessionKind): Promise<Types.ObjectId 
   return session.refId;
 }
 
+/**
+ * Identify the current session WITHOUT enforcing it. Used by logout, which must
+ * stay idempotent (signing out twice is not an error) yet still wants to record
+ * WHO signed out in the audit log. Returns null when there is no live session.
+ */
+export async function peekSession(
+  kind: SessionKind,
+): Promise<{ refId: Types.ObjectId; kind: SessionKind } | null> {
+  const store = await cookies();
+  const cookieName = kind === "owner" ? COOKIES.ownerSession : COOKIES.customerSession;
+  const raw = store.get(cookieName)?.value;
+  if (!raw) return null;
+
+  await connectDb();
+  const session = await SessionModel.findOne({
+    tokenHash: hashSessionToken(raw),
+    kind,
+    revokedAt: null,
+    expiresAt: { $gt: new Date() },
+  })
+    .select("refId kind")
+    .lean();
+
+  return session ? { refId: session.refId, kind } : null;
+}
+
 export async function revokeCurrentSession(kind: SessionKind): Promise<void> {
   const store = await cookies();
   const cookieName = kind === "owner" ? COOKIES.ownerSession : COOKIES.customerSession;

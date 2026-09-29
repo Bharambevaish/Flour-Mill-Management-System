@@ -3,22 +3,18 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/client";
+import { formatDateTime, type Lang } from "@/lib/i18n/format";
 import { CustomerForm } from "./CustomerForm";
 import type { CustomerView } from "@/services/customerService";
 
-function useLang(): "mr" | "en" {
-  if (typeof document !== "undefined") {
-    const match = document.cookie.match(/(?:^|; )lang=([^;]*)/);
-    if (match && (match[1] === "mr" || match[1] === "en")) {
-      return match[1];
-    }
-  }
-  return "en";
-}
-
-export function CustomersPanel({ initialCustomers }: { initialCustomers: CustomerView[] }) {
+export function CustomersPanel({
+  initialCustomers,
+  lang,
+}: {
+  initialCustomers: CustomerView[];
+  lang: Lang;
+}) {
   const router = useRouter();
-  const lang = useLang();
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<CustomerView | null>(null);
@@ -87,6 +83,7 @@ export function CustomersPanel({ initialCustomers }: { initialCustomers: Custome
             customer={editing ?? undefined}
             onDone={closeForm}
             onCancel={closeForm}
+            lang={lang}
           />
         </div>
       )}
@@ -109,7 +106,7 @@ export function CustomersPanel({ initialCustomers }: { initialCustomers: Custome
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">
                   {customer.mobile}
                   <span className="mx-1.5 text-zinc-300 dark:text-zinc-600">·</span>
-                  {new Date(customer.createdAt).toLocaleDateString(lang === "mr" ? "mr-IN" : "en-IN")}
+                  {formatDateTime(customer.createdAt, lang)}
                 </p>
               </div>
               <div className="flex items-center gap-2">

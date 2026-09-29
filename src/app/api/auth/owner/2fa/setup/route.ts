@@ -1,7 +1,7 @@
 import { audit } from "@/lib/audit";
 import { verifyCsrf } from "@/lib/csrf";
 import { handle, ok } from "@/lib/http";
-import { checkRate, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkRate, ownerMutationKey, RATE_LIMITS } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/request-context";
 import { createTotpSetup, requireSession } from "@/services/authService";
 import { getSettingsOrDefault } from "@/services/settingsService";
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     const ip = clientIp(request);
 
     const rate = checkRate(
-      `owner-mutation:${ip}`,
+      ownerMutationKey("settings", ip),
       RATE_LIMITS.generalMutation.limit,
       RATE_LIMITS.generalMutation.windowMs,
     );

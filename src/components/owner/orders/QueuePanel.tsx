@@ -4,21 +4,13 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/client";
 import { DEFAULT_RATES, grainKeyOf, grainLabel, GRAINS, sizeKeyOf, sizeLabel, SIZES, type GrainKey, type SizeKey } from "@/lib/millings";
+import { formatDateTime, type Lang } from "@/lib/i18n/format";
 import { StatusBadge } from "@/components/common";
 import { OrderActionModal } from "./OrderActionModal";
+import { CancelOrderDialog } from "./CancelOrderDialog";
 import type { CustomerView } from "@/services/customerService";
 import type { OrderView } from "@/services/orderService";
 import type { OrderStatus } from "@/models/Order";
-
-function useLang(): "mr" | "en" {
-  if (typeof document !== "undefined") {
-    const match = document.cookie.match(/(?:^|; )lang=([^;]*)/);
-    if (match && (match[1] === "mr" || match[1] === "en")) {
-      return match[1];
-    }
-  }
-  return "en";
-}
 
 const ADVANCE: Partial<Record<OrderStatus, { mr: string; en: string; to: OrderStatus }>> = {
   pending: { mr: "दळण्यास सुरू करा", en: "Start Milling", to: "processing" },
@@ -51,15 +43,18 @@ export function QueuePanel({
   orders,
   customers,
   defaultRates = DEFAULT_RATES as unknown as Record<string, Record<string, number>>,
+  lang,
 }: {
   orders: OrderView[];
   customers: CustomerView[];
   defaultRates?: Record<string, Record<string, number>>;
+  lang: Lang;
 }) {
   const router = useRouter();
-  const lang = useLang();
   const [actionId, setActionId] = useState<string | null>(null);
   const [actionOrder, setActionOrder] = useState<OrderView | null>(null);
+
+  const [cancelOrder, setCancelOrder] = useState<OrderView | null>(null);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<EditDraft | null>(null);
@@ -177,12 +172,7 @@ export function QueuePanel({
 
                 <p className="text-[11px] text-[#7d5e67] dark:text-zinc-400">
                   Order #{order.orderId} ·{" "}
-                  {new Date(order.createdAt).toLocaleString(lang === "mr" ? "mr-IN" : "en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {formatDateTime(order.createdAt, lang)}
                 </p>
               </div>
 
@@ -220,6 +210,16 @@ export function QueuePanel({
                   >
                     {isEditing ? (lang === "mr" ? "रद्द करा" : "Cancel") : (lang === "mr" ? "सुधारणा" : "Edit")}
                   </button>
+                  {!isEditing && (
+                    <button
+                      type="button"
+                      onClick={() => setCancelOrder(order)}
+                      disabled={busy || actionOrder !== null || editingId !== null}
+                      className="px-3.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-40 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                    >
+                      {lang === "mr" ? "ऑर्डर रद्द" : "Cancel order"}
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -349,7 +349,11 @@ export function QueuePanel({
       </ul>
 
       {actionOrder && (
-        <OrderActionModal order={actionOrder} onClose={() => setActionOrder(null)} />
+        <OrderActionModal order={actionOrder} onClose={() => setActionOrder(null)} lang={lang} />
+      )}
+
+      {cancelOrder && (
+        <CancelOrderDialog order={cancelOrder} onClose={() => setCancelOrder(null)} lang={lang} />
       )}
     </div>
   );

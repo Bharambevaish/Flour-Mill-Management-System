@@ -11,6 +11,8 @@ export interface CustomerStatusRow {
   totalCharges: number;
   paidAmount: number;
   outstanding: number;
+  /** Cash received on cancelled orders that still has to be handed back. */
+  refundDue: number;
   activeOrder: OrderView | null;
 }
 
@@ -35,7 +37,7 @@ export function CustomerStatusGrid({
   lang?: Lang;
 }) {
   const rows = customers.filter(
-    (r) => !showAttentionOnly || r.outstanding > 0 || r.activeOrder !== null,
+    (r) => !showAttentionOnly || r.outstanding > 0 || r.refundDue > 0 || r.activeOrder !== null,
   );
 
   if (rows.length === 0) {
@@ -50,7 +52,7 @@ export function CustomerStatusGrid({
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      {rows.map(({ customer, orderCount, totalCharges, paidAmount, outstanding, activeOrder }) => (
+      {rows.map(({ customer, orderCount, totalCharges, paidAmount, outstanding, refundDue, activeOrder }) => (
         <section
           key={customer.id}
           className="stitch-card p-5"
@@ -81,6 +83,18 @@ export function CustomerStatusGrid({
                 <span className="inline-flex items-center rounded-full border border-emerald-200/80 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 shadow-xs dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300">
                   {lang === "mr" ? "पैसे पूर्ण" : "Fully Paid"}
                 </span>
+              )}
+              {/* Zero dues plus a pending refund looks "Fully Paid" above, which is
+                  the opposite of the truth — the mill is holding their money. */}
+              {refundDue > 0 && (
+                <Link
+                  href="/owner/queue"
+                  className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 shadow-xs hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25"
+                >
+                  {lang === "mr"
+                    ? `परत द्यायचे ₹ ${refundDue.toLocaleString("en-IN")} →`
+                    : `Refund due ₹ ${refundDue.toLocaleString("en-IN")} →`}
+                </Link>
               )}
               <span className="text-xs text-[#7d5e67] dark:text-zinc-500">
                 {lang === "mr"

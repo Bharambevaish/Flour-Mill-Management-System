@@ -1,6 +1,13 @@
 import type { OrderStatus } from "@/models/Order";
 import type { Lang } from "@/lib/i18n/i18n";
 
+/**
+ * Badge palette for every order status.
+ *
+ * The first four are the forward lifecycle; `cancelled` is deliberately a muted
+ * slate rather than a red so a voided order reads as "set aside" instead of
+ * "something went wrong" — the customer should not be alarmed by a status pill.
+ */
 export const STATUS_BADGE: Record<OrderStatus, { mr: string; en: string; cls: string }> = {
   pending: {
     mr: "प्रलंबित",
@@ -21,6 +28,11 @@ export const STATUS_BADGE: Record<OrderStatus, { mr: string; en: string; cls: st
     mr: "घेतला",
     en: "Collected",
     cls: "bg-rose-50/70 text-rose-800 border border-rose-200/70 dark:bg-zinc-500/15 dark:text-zinc-300 dark:border-zinc-700",
+  },
+  cancelled: {
+    mr: "रद्द",
+    en: "Cancelled",
+    cls: "bg-zinc-100 text-zinc-600 border border-zinc-300/80 line-through dark:bg-zinc-800/60 dark:text-zinc-400 dark:border-zinc-700",
   },
 };
 

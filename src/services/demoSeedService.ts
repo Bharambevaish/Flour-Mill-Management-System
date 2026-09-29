@@ -58,6 +58,7 @@ const NOTIF_MESSAGES: Record<string, { mr: string; en: string }> = {
   orderProcessing: { mr: "तुमचा माल दळण्याची प्रक्रिया सुरू झाली आहे", en: "Your grain is being milled" },
   orderCompleted: { mr: "तुमचा माल दळून तयार आहे. कृपया घेऊन जा", en: "Your grain is ready. Please collect it" },
   orderCollected: { mr: "तुमचा माल घेतला गेला. धन्यवाद!", en: "Your grain has been collected. Thank you!" },
+  orderCancelled: { mr: "तुमचा ऑर्डर रद्द करण्यात आला आहे", en: "Your order has been cancelled" },
   broadcast: { mr: "सणासाठी चक्की उद्या बंद — दळण आधी आणा", en: "The mill is closed tomorrow for the festival — bring your grain early" },
 };
 
@@ -83,15 +84,17 @@ const SCENARIOS = [
   // Newest active is the ready order → तयार badge + पैसे पूर्ण chip.
   { mobile: "9765432100", status: "completed", grainType: "rice", requiredSize: "fine", weightKg: 10, ratePerKg: 8, paidAmount: -1, ageMin: 1440 },
   { mobile: "9765432100", status: "collected", grainType: "maize", requiredSize: "coarse", weightKg: 12, ratePerKg: 5, paidAmount: -1, ageMin: 2880 },
+  // Sharad — a fully-paid order the owner cancelled. Exercises the refund-due
+  // path in the Cancelled tab and in reports.
+  { mobile: "8888777766", status: "cancelled", grainType: "rice", requiredSize: "fine", weightKg: 25, ratePerKg: 6, paidAmount: -1, ageMin: 600, cancelReason: "गुणवत्ता न होता / Quality complaint" },
 ];
 
 const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000);
 
 function notifKeysFor(status: string): string[] {
-  return ["orderReceived", "orderProcessing", "orderCompleted", "orderCollected"].slice(
-    0,
-    STATUS_ORDER.indexOf(status) + 1,
-  );
+  const order: string[] = ["orderReceived", "orderProcessing", "orderCompleted", "orderCollected"];
+  if (status === "cancelled") return [...order.slice(0, 3), "orderCancelled"];
+  return order.slice(0, STATUS_ORDER.indexOf(status) + 1);
 }
 
 export interface DemoSeedSummary {
@@ -143,9 +146,15 @@ export async function runDemoSeed(): Promise<DemoSeedSummary> {
           ]
         : [];
     // Timeline matches the notification spread: step i happened i×5 min later.
-    const statusHistory = STATUS_ORDER.slice(0, STATUS_ORDER.indexOf(s.status) + 1).map(
+    // A cancelled order walks the same forward path, then gets cancelled as its
+    // final entry — matching what cancelOrder() actually writes.
+    const isCancelled = s.status === "cancelled";
+    const statusHistory = STATUS_ORDER.slice(0, STATUS_ORDER.indexOf("completed") + 1).map(
       (status, i) => ({ status, at: minutesAgo(s.ageMin - i * 5) }),
     );
+    if (isCancelled) {
+      statusHistory.push({ status: "cancelled", at: minutesAgo(Math.max(0, s.ageMin - 20)) });
+    }
 
     await Order.create({
       orderId,
@@ -159,6 +168,12 @@ export async function runDemoSeed(): Promise<DemoSeedSummary> {
       payments,
       statusHistory,
       status: s.status,
+      ...(isCancelled
+        ? {
+            cancelledAt: minutesAgo(Math.max(0, s.ageMin - 20)),
+            cancelReason: s.cancelReason ?? null,
+          }
+        : {}),
       createdAt: minutesAgo(s.ageMin),
       updatedAt: minutesAgo(s.ageMin),
     });
@@ -181,7 +196,11 @@ export async function runDemoSeed(): Promise<DemoSeedSummary> {
       customer: customer.name,
       status: s.status,
       detail: `${s.grainType} ${s.requiredSize} ${s.weightKg}kg`,
-      balance: s.paidAmount === -1 ? "PAID" : `due ₹${Math.round((totalCharges - s.paidAmount) * 100) / 100}`,
+      balance: isCancelled
+        ? `refund ₹${Math.round(paidAmount * 100) / 100}`
+        : s.paidAmount === -1
+          ? "PAID"
+          : `due ₹${Math.round((totalCharges - s.paidAmount) * 100) / 100}`,
     });
   }
 

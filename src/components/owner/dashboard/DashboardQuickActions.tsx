@@ -3,20 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { CustomerForm } from "@/components/owner/customers";
+import type { Lang } from "@/lib/i18n/i18n";
 
-function useLang(): "mr" | "en" {
-  if (typeof document !== "undefined") {
-    const match = document.cookie.match(/(?:^|; )lang=([^;]*)/);
-    if (match && (match[1] === "mr" || match[1] === "en")) {
-      return match[1];
-    }
-  }
-  return "en";
-}
-
-export function DashboardQuickActions() {
+export function DashboardQuickActions({ lang }: { lang: Lang }) {
   const [formOpen, setFormOpen] = useState(false);
-  const lang = useLang();
 
   return (
     <section>
@@ -59,7 +49,7 @@ export function DashboardQuickActions() {
 
       {formOpen && (
         <div className="stitch-card mt-4 p-5">
-          <CustomerForm onDone={() => setFormOpen(false)} onCancel={() => setFormOpen(false)} />
+          <CustomerForm onDone={() => setFormOpen(false)} onCancel={() => setFormOpen(false)} lang={lang} />
         </div>
       )}
     </section>

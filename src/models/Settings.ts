@@ -13,6 +13,18 @@ export interface ISettings {
     sms: boolean;
     whatsapp: boolean;
   };
+  /** Plain-text UPI handle shown alongside the QR (e.g. "ganeshmill@okaxis"). */
+  upiId: string;
+  /**
+   * The mill's single UPI QR, stored VERBATIM as a data URL. Nothing decodes,
+   * resizes or re-encodes it — the bytes the owner uploaded are the bytes that
+   * reach the customer. Only raster formats are accepted (see `upi-qr` route).
+   */
+  upiQr: {
+    dataUrl: string;
+    contentType: string;
+    uploadedAt: Date;
+  } | null;
   updatedAt: Date;
 }
 
@@ -42,6 +54,12 @@ const SettingsSchema = new Schema<ISettings>(
       sms: { type: Boolean, default: false },
       whatsapp: { type: Boolean, default: false },
     },
+    upiId: { type: String, default: "", trim: true, maxlength: 100 },
+    // Mixed, NOT a nested sub-schema: a sub-schema makes `upiQr: null` fail
+    // validation (the child paths are then "required but missing"), which broke
+    // EVERY settings save once the field existed. The value is opaque base64
+    // plus metadata we never query on, so there is nothing to validate.
+    upiQr: { type: Schema.Types.Mixed, default: null },
     updatedAt: { type: Date, default: Date.now },
   },
   { timestamps: true }

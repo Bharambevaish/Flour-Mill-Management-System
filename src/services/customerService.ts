@@ -46,6 +46,16 @@ export interface CreateCustomerInput {
   pin: string;
 }
 
+/**
+ * Escape regex metacharacters so a search term is matched literally.
+ * Without this, `?q=.*` matches every customer and a crafted pattern can be
+ * used to burn CPU against the whole collection on an unanchored, unescaped
+ * `$regex`.
+ */
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export async function listCustomers(search?: string): Promise<CustomerView[]> {
   await requireSession("owner");
   await connectDb();
@@ -54,8 +64,11 @@ export async function listCustomers(search?: string): Promise<CustomerView[]> {
   const filter = q
     ? {
         $or: [
-          { name: { $regex: q, $options: "i" } },
-          { mobile: { $regex: q, $options: "i" } },
+          // Unanchored substring match on the name (a partial name is expected).
+          { name: { $regex: escapeRegExp(q), $options: "i" } },
+          // Mobile is a fixed 10-digit field, so anchor it: "98" must not match
+          // every mobile containing "98" somewhere.
+          { mobile: { $regex: `^${escapeRegExp(q)}`, $options: "i" } },
         ],
       }
     : {};

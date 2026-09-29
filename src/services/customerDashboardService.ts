@@ -15,13 +15,13 @@ import {
   unreadNotificationCount,
   type CustomerNotificationView,
 } from "@/services/notificationService";
+import { getSettingsOrDefault } from "@/services/settingsService";
 
 export interface CustomerDashboardView {
   customer: {
     id: string;
     name: string;
     mobile: string;
-    mustChangePin: boolean;
     lang: Lang;
   };
   outstandingTotal: number;
@@ -29,6 +29,15 @@ export interface CustomerDashboardView {
   orders: OrderView[];
   notifications: CustomerNotificationView[];
   unreadCount: number;
+  /**
+   * How to pay. `hasUpiQr` is a flag rather than the image itself so the
+   * dashboard payload stays small — the QR is fetched on demand from
+   * `GET /api/my/payment-qr` only once the customer opens the pay panel.
+   */
+  payment: {
+    hasUpiQr: boolean;
+    upiId: string;
+  };
 }
 
 /**
@@ -43,14 +52,15 @@ export async function getCustomerDashboard(
   await connectDb();
 
   const customer = await CustomerModel.findById(customerId)
-    .select("name mobile mustChangePin lang active")
+    .select("name mobile lang active")
     .lean();
   if (!customer || !customer.active) throw unauthorizedError("Not signed in");
 
-  const [orders, notifications, unreadCount] = await Promise.all([
+  const [orders, notifications, unreadCount, settings] = await Promise.all([
     getOrdersForCustomer(customerId),
     listNotificationsForCustomer(customerId as Types.ObjectId),
     unreadNotificationCount(customerId as Types.ObjectId),
+    getSettingsOrDefault(),
   ]);
 
   return {
@@ -58,14 +68,21 @@ export async function getCustomerDashboard(
       id: String(customer._id),
       name: customer.name,
       mobile: customer.mobile,
-      mustChangePin: customer.mustChangePin,
       lang: customer.lang,
     },
     outstandingTotal:
       Math.round(orders.reduce((s, o) => s + o.outstanding, 0) * 100) / 100,
-    activeOrderCount: orders.filter((o) => o.status !== "collected").length,
+    // Cancelled orders are void, so they are neither active work nor something
+    // the customer still owes. They stay in `orders` (with a Cancelled badge) so
+    // the record is visible, but they don't inflate this count.
+    activeOrderCount: orders.filter((o) => o.status !== "collected" && o.status !== "cancelled")
+      .length,
     orders,
     notifications,
     unreadCount,
+    payment: {
+      hasUpiQr: settings.upiQr !== null,
+      upiId: settings.upiId,
+    },
   };
 }

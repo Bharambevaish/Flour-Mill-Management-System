@@ -38,14 +38,14 @@ export function OwnerSidebar({ millName, lang = "en" }: { millName?: string; lan
           <div className="flex justify-center">
             <LanguageToggle initialLang={lang} />
           </div>
-          <LogoutButton />
+          <LogoutButton lang={lang} />
         </div>
       </aside>
 
       {/* Mobile: top brand bar + horizontal nav */}
       <header className="no-print sticky top-0 z-40 flex items-center justify-between border-b border-[#f4e6e9] bg-white/95 px-4 py-3 backdrop-blur-md md:hidden dark:border-zinc-800 dark:bg-zinc-900/95">
         <Brand compact millName={millName} />
-        <LogoutButton />
+        <LogoutButton lang={lang} />
       </header>
       <nav className="no-print flex gap-2 overflow-x-auto border-b border-[#f4e6e9] bg-[#faf5f7] px-4 py-2.5 md:hidden dark:border-zinc-800 dark:bg-zinc-950">
         {NAV_ITEMS.map((item) => (

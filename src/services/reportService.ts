@@ -50,6 +50,12 @@ export interface CustomerLedgerRow {
   paid: number;
   outstanding: number;
   collectedInPeriod: number;
+  /**
+   * Cash received on orders that were later CANCELLED — money that has to go
+   * back to this customer. Tracked outside `outstanding` so a voided order can
+   * never inflate what they supposedly owe, while the refund stays visible.
+   */
+  refundPending: number;
 }
 
 export interface ReceiptRow {
@@ -172,8 +178,11 @@ export async function getReportSummary(range: ReportRange): Promise<ReportSummar
 
   const rows = orders as unknown as LeanOrder[];
 
-  /* ----- activity: orders created within the range ----- */
-  const created = rows.filter((o) => inRange(o.createdAt));
+  /* ----- activity: orders created within the range -----
+   * Cancelled orders are excluded from every volume/charge figure: they were
+   * void, so their weight and charges are not revenue. Their RECEIPTS are still
+   * counted below (real cash came in) and any balance is reported as a refund. */
+  const created = rows.filter((o) => inRange(o.createdAt) && o.status !== "cancelled");
   const activity = {
     ordersCreated: created.length,
     weightKg: round2(created.reduce((s, o) => s + (o.weightKg ?? 0), 0)),
@@ -248,23 +257,41 @@ export async function getReportSummary(range: ReportRange): Promise<ReportSummar
       paid: 0,
       outstanding: 0,
       collectedInPeriod: 0,
+      refundPending: 0,
     });
   }
+  const emptyEntry = (cust: { id: string; name: string; mobile: string }): CustomerLedgerRow => ({
+    id: cust.id,
+    name: cust.name,
+    mobile: cust.mobile,
+    orders: 0,
+    totalCharges: 0,
+    paid: 0,
+    outstanding: 0,
+    collectedInPeriod: 0,
+    refundPending: 0,
+  });
+
   for (const o of rows) {
     const cust = customerOf(o);
     if (!cust) continue;
-    const entry =
-      ledger.get(cust.id) ??
-      {
-        id: cust.id,
-        name: cust.name,
-        mobile: cust.mobile,
-        orders: 0,
-        totalCharges: 0,
-        paid: 0,
-        outstanding: 0,
-        collectedInPeriod: 0,
-      };
+    const entry = ledger.get(cust.id) ?? emptyEntry(cust);
+
+    // A cancelled order contributes NO charges and NO due — but its receipts are
+    // real cash, and anything still on it is owed back rather than billed. The
+    // `continue` here is deliberate: skipping the row entirely would also skip
+    // its payments and understate what the mill actually collected.
+    if (o.status === "cancelled") {
+      for (const p of o.payments ?? []) {
+        if (inRange(p.recordedAt)) {
+          entry.collectedInPeriod = round2(entry.collectedInPeriod + (p.amount ?? 0));
+        }
+      }
+      entry.refundPending = round2(entry.refundPending + (o.paidAmount ?? 0));
+      ledger.set(cust.id, entry);
+      continue;
+    }
+
     entry.orders += 1;
     entry.totalCharges = round2(entry.totalCharges + (o.totalCharges ?? 0));
     entry.paid = round2(entry.paid + (o.paidAmount ?? 0));

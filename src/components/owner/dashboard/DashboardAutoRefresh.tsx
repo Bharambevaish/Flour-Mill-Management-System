@@ -2,20 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { localeOf, type Lang } from "@/lib/i18n/format";
 
-function useLang(): "mr" | "en" {
-  if (typeof document !== "undefined") {
-    const match = document.cookie.match(/(?:^|; )lang=([^;]*)/);
-    if (match && (match[1] === "mr" || match[1] === "en")) {
-      return match[1];
-    }
-  }
-  return "en";
-}
-
-export function DashboardAutoRefresh() {
+export function DashboardAutoRefresh({ lang }: { lang: Lang }) {
   const router = useRouter();
-  const lang = useLang();
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const refreshing = useRef(false);
 
@@ -44,8 +34,8 @@ export function DashboardAutoRefresh() {
       {lastUpdated && (
         <span className="text-xs text-zinc-400 dark:text-zinc-500">
           {lang === "mr"
-            ? `शेवटचे अपडेट ${lastUpdated.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`
-            : `Updated at ${lastUpdated.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`}
+            ? `शेवटचे अपडेट ${lastUpdated.toLocaleTimeString(localeOf(lang), { hour: "2-digit", minute: "2-digit" })}`
+            : `Updated at ${lastUpdated.toLocaleTimeString(localeOf(lang), { hour: "2-digit", minute: "2-digit" })}`}
         </span>
       )}
       <button

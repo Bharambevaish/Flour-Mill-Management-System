@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/client";
 import { grainLabel, sizeLabel } from "@/lib/millings";
-import type { Lang } from "@/lib/i18n/i18n";
+import { formatDateTime, type Lang } from "@/lib/i18n/format";
 import { StatusBadge } from "@/components/common";
 import { PaymentEntry } from "./PaymentEntry";
 import type { OrderView } from "@/services/orderService";
@@ -145,12 +145,7 @@ export function PaymentModal({
                   </span>
                   <span className="font-semibold text-rose-900 dark:text-rose-300">
                     + ₹{p.amount.toLocaleString("en-IN")} ·{" "}
-                    {new Date(p.recordedAt).toLocaleString(lang === "mr" ? "mr-IN" : "en-IN", {
-                      day: "numeric",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {formatDateTime(p.recordedAt, lang)}
                   </span>
                 </li>
               ))}
