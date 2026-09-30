@@ -109,13 +109,20 @@ Customer: PIN login · Dashboard (outstanding + must-change-PIN banner) · Order
 ## 8. Notification roadmap
 
 1. In-app tray (day 1) — entry, processing, completed, paymentReceived, paymentDue
-2. Web Push (free) — via PWA service worker
+2. Web Push (free) — needs a PWA service worker. The manifest/icons half is
+   already live (`0.12.0`); a service worker is deliberately NOT shipped yet, so
+   nothing authenticated is cached on a shared phone. Add it with this step.
 3. SMS (MSG91) — needs DLT/sender-ID (~1-2 days approval)
 4. WhatsApp (Meta Cloud API / WATI) — templates required
 
 ## 9. Tech dependencies
 
-`next` · `react` · `typescript` · `mongoose` · `argon2` · `zod` · `jose` · `otplib` · `qrcode` · `helmet`(if express route) · `express-rate-limit`(if express) · `cookie` · `next-pwa` or `vite-...`(later)
+`next` · `react` · `typescript` · `mongoose` · `argon2` · `zod` · `jose` · `otplib` · `qrcode` · `helmet`(if express route) · `express-rate-limit`(if express) · `cookie` · `sharp`(already vendored by Next — used by `npm run icons`)
+
+PWA: the app is already installable via `app/manifest.ts` + `public/icons/*`
+(shipped `0.12.0`). No `next-pwa` wrapper — installability needs only a valid
+manifest and HTTPS, and a service worker is deliberately deferred to the web-push
+step so authenticated content is never cached on a shared phone.
 
 ## 10. Build order (done so far marked)
 

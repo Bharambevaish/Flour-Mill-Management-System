@@ -48,3 +48,6 @@ next-env.d.ts
 FeedMill-Agreement.pdf
 FlourMill-requirements_fromclient.pdf
 SOFTWARE DEVELOPMENT-Agreementword.docx
+
+# local DB dumps (scripts/… or manual mongodump output) — never commit
+backups/

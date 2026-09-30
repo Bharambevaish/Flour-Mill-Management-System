@@ -22,6 +22,35 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "गिरणी व्यवस्थापन | Flour Mill Management",
   description: "Feed mill order, payment and outstanding management — आपल्या मालाची स्थिती तपासा",
+
+  /**
+   * The manifest itself lives in `app/manifest.ts`; adding a `manifest` field
+   * here would be ignored, because the file convention always takes precedence.
+   *
+   * These are the icons the BROWSER chrome uses (favicon / tab, and the iOS
+   * home screen), pointing at the same generated files the manifest declares so
+   * there is a single source of truth for the brand mark. `app/favicon.ico` was
+   * removed — it was Next.js's stock logo, so customers saw the Next.js logo in
+   * their tab.
+   */
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+
+  /**
+   * Makes iOS Safari's "Add to Home Screen" produce a real app: its own icon,
+   * the given title, no browser chrome. `capable` is the legacy spelling the
+   * current types still expect (not `capabilities`).
+   */
+  appleWebApp: {
+    capable: true,
+    title: "Girani",
+    statusBarStyle: "default",
+  },
 };
 
 /**

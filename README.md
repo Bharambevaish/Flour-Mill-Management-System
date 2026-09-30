@@ -2,9 +2,10 @@
 
 A bilingual (मराठी / English) order, payment and outstanding-dues manager for a
 small flour mill. The owner runs the whole business from a single console, and
-customers can log in with a PIN (their dashboard is still a stub — see below).
+customers log in with a PIN to a mobile-first portal that is **installable as an
+app** on Android (and iOS) — see [Install as an app](#install-as-an-app).
 
-**Current version:** `0.10.2` (see [`CHANGELOG.md`](./CHANGELOG.md)) ·
+**Current version:** `0.12.0` (see [`CHANGELOG.md`](./CHANGELOG.md)) ·
 **Master plan:** [`PLAN.md`](./PLAN.md)
 
 ---
@@ -158,6 +159,7 @@ See [`.env.example`](./.env.example). `.env*` is git-ignored — never commit re
 | `npm test` | Full DB round-trip test (see notes below) |
 | `npm run seed` | Create/refresh the owner account from `.env.local` |
 | `npm run seed:demo` | Seed demo orders/customers |
+| `npm run icons` | Regenerate the PWA icon set in `public/icons/` from `scripts/generate-icons.mjs` |
 | `npm run mongo` / `npm run mongo:stop` | Start / stop the local MongoDB daemon |
 
 ---
@@ -242,11 +244,12 @@ scripts/
 
 | Symptom | Fix |
 |---|---|
+| Android never offers "Install app" | Android requires **HTTPS** (`localhost` is exempt). A phone on a LAN `http://` address will never see it — use `cloudflared tunnel --url http://localhost:3000` or a real HTTPS deploy. Also check `curl localhost:3000/manifest.webmanifest` returns JSON. |
 | Dev server crashes with an error overlay during/after a build | **Never run `npm run build` while `npm run dev` is up** — both write `.next`. Stop the dev server, build, then restart it. |
 | `429 Too many attempts` at login | The in-memory rate bucket is full. Restart the dev server (`npm run dev`) to clear it. |
 | Redirected to login with the "session expired" banner right after enabling 2FA or changing the password | Expected — both actions revoke your other sessions by design. Log in again. |
 | `Error: connect ECONNREFUSED 127.0.0.1:27017` | Start MongoDB: `npm run mongo` |
-| Blank page / CSP violations in a **production** build | The CSP in `next.config.ts` is production-only and currently lacks a nonce — see `CHANGELOG.md` / issues before going public. |
+| Blank page / CSP violations in a **production** build | Fixed in `0.12.0` — the policy now allows the inline RSC bootstrap. Rebuild before debugging. |
 | Cookies keep you "signed out" between modes | Set `AUTH_COOKIE_SECURE` explicitly if you mix `next dev` and `next start` across different protocols. |
 
 ---
@@ -257,8 +260,31 @@ scripts/
 - [ ] Point `MONGODB_URI` at a backed-up cloud database
 - [ ] Set `NEXT_PUBLIC_APP_URL` to your `https://` domain
 - [ ] Enable owner 2FA from **Settings → Security**
-- [ ] Verify the production CSP doesn't block hydration (see Troubleshooting)
+- [x] Verify the production CSP doesn't block hydration (done in `0.12.0`)
+- [ ] Confirm "Install app" appears on a real Android phone over HTTPS
 - [ ] Harden auth: customer PIN lockout, trusted-proxy IP, enforced PIN change
+
+---
+
+## Install as an app
+
+The customer portal is a web app manifest, so on **Android** a customer opens
+`/my` in Chrome and uses the browser menu → **Install app** / **Add to home
+screen**. It installs as a standalone window titled **Girani** with the mill's
+wheat-ear icon — no browser address bar.
+
+Scope is the customer portal only (`/my`, which includes `/my/login`). The owner
+console is not part of the installed app.
+
+Requirements and caveats:
+
+- **HTTPS is mandatory** outside `localhost`. On a LAN `http://` address Android
+  silently never shows the prompt.
+- There is deliberately **no service worker**, so the app needs a connection.
+  That is also what keeps one customer's data from being cached on a shared
+  phone. Web push is the remaining piece that needs one.
+- To test on a phone without deploying: `cloudflared tunnel --url http://localhost:3000`.
+- iOS: Safari → Share → **Add to Home Screen**.
 
 ---
 
@@ -268,9 +294,9 @@ See [`CHANGELOG.md`](./CHANGELOG.md) for what's shipped. Planned next:
 
 - Customer dashboard with **real data** (orders, payments, live balance) +
   notifications **inbox** (mark-read API/UI already exist)
-- PWA installable + web push
+- **Web push** — the app is now installable (manifest + icons ship in `0.12.0`);
+  push notifications need a service worker, which is the remaining piece
 - SMS (MSG91) / WhatsApp (Meta) — phase 2
-- Security hardening tier (see PLAN.md §6)
 
 ## License
 
