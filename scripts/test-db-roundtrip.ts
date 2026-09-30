@@ -1251,6 +1251,74 @@ async function main() {
     ownerQRSnapshot ? `restored ${String(restoredRow?.upiQr?.dataUrl ?? "").length} chars` : "no QR to restore",
   );
 
+  /* --- 24. Installable customer app: the web app manifest ------------------ */
+  // Read-only section (GETs only), so it needs no cleanup and touches no DB.
+  //
+  // A manifest pointing at a missing or wrong-sized icon is the classic reason a
+  // browser silently never offers "Install app" — no error, the prompt just
+  // never appears. So every declared icon is fetched and its REAL pixel
+  // dimensions parsed, rather than trusting the declared `sizes` string.
+  const manifestGet = await fetch(`${BASE}/manifest.webmanifest`, {
+    headers: { accept: "application/manifest+json" },
+  });
+  const manifestType = manifestGet.headers.get("content-type") ?? "";
+  const manifestText = await manifestGet.text();
+
+  // Fetched with NO session cookie on purpose. The browser asks for the manifest
+  // before the customer has necessarily signed in, so gating it behind a session
+  // would break installation with no visible symptom.
+  check("pwa: the manifest is public (no session cookie needed)", manifestGet.status === 200, `got ${manifestGet.status}`);
+  check("pwa: served as application/manifest+json", /application\/manifest\+json/.test(manifestType), manifestType);
+
+  type ManifestIcon = { src: string; sizes: string; type: string; purpose?: string };
+  let mf: {
+    name?: string; short_name?: string; start_url?: string; scope?: string;
+    display?: string; theme_color?: string; background_color?: string; icons?: ManifestIcon[];
+  } = {};
+  try {
+    mf = JSON.parse(manifestText);
+  } catch {
+    /* left as {} so the assertions below report the real failure */
+  }
+
+  check("pwa: parses as JSON and names the app", !!mf.name && !!mf.short_name, JSON.stringify({ name: mf.name, short_name: mf.short_name }));
+  check("pwa: short_name fits Android's ~12-char label budget", (mf.short_name ?? "").length <= 12, `"${mf.short_name}" = ${(mf.short_name ?? "").length} chars`);
+  check("pwa: opens the customer portal, scoped to /my", mf.start_url === "/my" && mf.scope === "/my", `start_url=${mf.start_url} scope=${mf.scope}`);
+  check("pwa: standalone display hides browser chrome", mf.display === "standalone", String(mf.display));
+  check("pwa: theme + background colours are set", !!mf.theme_color && !!mf.background_color, `${mf.theme_color} / ${mf.background_color}`);
+
+  // Chromium wants a 192 and a 512; maskable is what survives Android's mask.
+  const declaredSizes = (mf.icons ?? []).map((i) => i.sizes);
+  check("pwa: declares the 192x192 and 512x512 icons Chromium requires", declaredSizes.includes("192x192") && declaredSizes.includes("512x512"), declaredSizes.join(", ") || "none");
+  check("pwa: declares a maskable icon for Android's adaptive mask", (mf.icons ?? []).some((i) => i.purpose === "maskable"), JSON.stringify((mf.icons ?? []).map((i) => i.purpose)));
+
+  /** PNG width/height live in the IHDR chunk at bytes 16..23, big-endian. */
+  function pngSize(bytes: Uint8Array): { w: number; h: number; png: boolean } {
+    const SIG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+    if (bytes.length < 24 || !SIG.every((b, i) => bytes[i] === b)) return { w: 0, h: 0, png: false };
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    return { w: view.getUint32(16), h: view.getUint32(20), png: true };
+  }
+
+  for (const icon of mf.icons ?? []) {
+    const res = await fetch(`${BASE}${icon.src}`);
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    const dim = pngSize(bytes);
+    const want = icon.sizes.split("x").map(Number);
+    check(
+      `pwa: ${icon.src} exists and really is ${icon.sizes}`,
+      res.status === 200 && dim.png && dim.w === want[0] && dim.h === want[1] &&
+        (res.headers.get("content-type") ?? "").includes("image/png"),
+      `${res.status} ${res.headers.get("content-type")} ${dim.w}x${dim.h}, ${bytes.length} bytes`,
+    );
+  }
+
+  // A manifest nobody links is invisible to the browser, so confirm the document
+  // actually references it — this is what the framework emits for app/manifest.ts.
+  const loginHtml = await (await fetch(`${BASE}/my/login`)).text();
+  check("pwa: the portal links the manifest", /rel="manifest"/.test(loginHtml), /rel="manifest"/.test(loginHtml) ? "" : "no rel=\"manifest\" in /my/login HTML");
+  check("pwa: the apple-touch-icon is declared (iOS home screen)", /apple-touch-icon/.test(loginHtml), /apple-touch-icon/.test(loginHtml) ? "" : "no apple-touch-icon in /my/login HTML");
+
   await Aud.deleteMany({ createdAt: { $gte: new Date(testStart) }, action: { $in: ["customer.create", "logout"] } });
   /* ---------- cleanup: remove every trace the test created ---------- */
   // The customer minted for the QR-download checks.

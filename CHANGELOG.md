@@ -5,8 +5,65 @@ All notable changes to this project, in reverse chronological order. Format base
 ## [Unreleased]
 
 ### Next milestones (planned)
-- PWA + web push
+- Web push (needs a service worker — see the PWA note in `0.12.0`)
 - Phase 2: SMS (MSG91) + WhatsApp (Meta)
+
+## [0.12.0] - 2026-09-30 — Installable customer app (PWA manifest) & production CSP fix
+
+### Installable Android app
+- New `src/app/manifest.ts` (root of `app/`, served at `/manifest.webmanifest`,
+  prerendered **static** — no DB read). Customers can now "Add to home screen" /
+  "Install app" the portal and get a standalone app window instead of a browser
+  tab. `name` `गिरणी व्यवस्थापन | Flour Mill`, `short_name` **Girani** (kept
+  short and Latin — Android prints this under the icon and truncates past ~12
+  chars), `display: standalone`, `orientation: portrait`,
+  `theme_color`/`background_color` `#faf5f7` to match the portal surface.
+- **Scoped to the customer portal only**: `start_url`/`scope` are `/my`, and
+  `id: "/my"` so a reinstall updates the existing app instead of adding a second
+  copy. `/my` contains `/my/login`, so a customer whose session expires gets the
+  login screen *inside* the app rather than being ejected to a browser tab. The
+  owner console is untouched.
+- **No service worker, deliberately.** Next 16's PWA guide gives Chrome's install
+  criteria as just a valid manifest + HTTPS, so there is nothing to gain from
+  caching — and a cache is a liability on a shared family phone, where stale
+  content could show one customer's orders to another.
+- New `scripts/generate-icons.mjs` + `npm run icons`: a wheat-ear mark on the
+  mill's rose ramp (`#f43f5e`→`#be123c`), rasterised via the `sharp` that Next
+  already vendors, into `public/icons/` — `icon-192.png`, `icon-512.png`,
+  `icon-maskable-512.png` (glyph at 0.66 so Android's launcher mask cannot clip
+  it) and `apple-touch-icon.png`. Idempotent; PNGs are committed so no build
+  step needs `sharp`.
+- `layout.tsx` gains `appleWebApp` (iOS "Add to Home Screen" gets the app name
+  and drops Safari chrome) and `icons` pointing at the same files. No
+  `metadata.manifest` field — the file convention always overrides it.
+- **`src/app/favicon.ico` deleted.** It was Next.js's stock logo, so customers
+  saw the Next.js logo in their browser tab; it is now the mill's mark.
+- Test **section 24** (14 assertions). It asserts the manifest is served
+  anonymously, as `application/manifest+json`, that `scope`/`start_url`/`display`
+  are right, that the required 192 + 512 icons and a maskable one are declared —
+  and it **fetches each icon and parses its real PNG IHDR dimensions**. A
+  manifest pointing at a missing or wrong-sized icon is the classic reason a
+  browser silently never offers "Install app" (no error, the prompt just never
+  appears), and that failure is invisible until someone tries on a real phone.
+  Suite: **187 assertions, all passing**.
+
+### Fixed: production CSP blocked hydration (app-breaking)
+- The production policy was `script-src 'self'` with no `'unsafe-inline'`, but
+  Next ships the RSC payload as inline `<script>` blocks **with no nonce**. Every
+  one of them was blocked, the payload never arrived, and pages rendered as dead
+  HTML with zero interactivity. Confirmed in the build output, not assumed.
+- Now `script-src 'self' 'unsafe-inline'`, matching the no-nonce pattern in the
+  bundled Next 16 CSP guide, plus an explicit `manifest-src 'self'`. The
+  hardened alternative is a per-request nonce, which costs all static rendering;
+  noted in the config so the trade-off is explicit rather than accidental.
+- Verified by booting the production server, reading the emitted policy, and
+  matching it against the actual inline scripts in the served HTML.
+
+### Deployment note
+- Android only offers "Install app" over **HTTPS**. `localhost` is exempt, so it
+  works in Chrome on the dev machine, but a customer's phone on a LAN `http://`
+  address will never see the prompt. Test with a tunnel
+  (`cloudflared tunnel --url http://localhost:3000`) or a real HTTPS deploy.
 
 ## [0.11.0] - 2026-09-29 — Customer portal redesign, UPI QR payments & order cancellation
 
