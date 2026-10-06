@@ -26,7 +26,7 @@ export default async function CustomerLoginPage({
             ग्राहक लॉगिन
           </h1>
           <p className="mt-1 text-sm font-medium text-[#6b545a] dark:text-zinc-400">
-            Customer Self-Service Portal
+            Feed and Flour Management — Customer Portal
           </p>
         </div>
 

@@ -21,12 +21,12 @@ export default function manifest(): MetadataRoute.Manifest {
     // installing a second, differently-keyed copy.
     id: "/my",
 
-    name: "गिरणी व्यवस्थापन | Flour Mill",
+    name: "Feed and Flour Management",
     // Android prints this under the home-screen icon and truncates past ~12
     // characters. Kept short and Latin so every launcher renders it identically.
-    short_name: "Girani",
+    short_name: "Feed & Flour",
     description:
-      "मालाची स्थिती, पेमेंट आणि उधारी तपासा — order status, payments and outstanding, updated by the mill.",
+      "Feed and Flour Management — order status, payments and outstanding, updated by the mill.",
 
     lang: "mr",
     dir: "ltr",

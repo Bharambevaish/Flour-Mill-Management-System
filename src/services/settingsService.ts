@@ -36,7 +36,7 @@ export interface SettingsView {
 
 function defaultView(): SettingsView {
   return {
-    millName: "श्री गणेश फिड मील (Flour Mill)",
+    millName: "Feed and Flour Management",
     phone: "",
     address: "",
     currency: "₹",
