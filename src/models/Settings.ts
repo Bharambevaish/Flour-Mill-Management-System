@@ -30,7 +30,7 @@ export interface ISettings {
 
 const SettingsSchema = new Schema<ISettings>(
   {
-    millName: { type: String, default: "श्री गणेश फिड मील (Flour Mill)" },
+    millName: { type: String, default: "Feed and Flour Management" },
     phone: { type: String, default: "" },
     address: { type: String, default: "" },
     currency: { type: String, default: "₹" },

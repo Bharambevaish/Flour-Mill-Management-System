@@ -58,22 +58,21 @@ export function OwnerSidebar({ millName, lang = "en" }: { millName?: string; lan
 
 function Brand({
   compact = false,
-  millName,
 }: {
   compact?: boolean;
   millName?: string;
 }) {
   return (
-    <div className={`flex items-center gap-3 border-b border-[#faedf0] dark:border-zinc-800 ${compact ? "border-b-0 py-1" : "px-5 py-5"}`}>
+    <div className={`flex items-center gap-3 border-b border-[#faedf0] dark:border-zinc-800 ${compact ? "border-b-0 py-1" : "px-5 py-4"}`}>
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-pink-600 via-rose-500 to-amber-400 text-lg font-bold text-white shadow-glow-pink">
         🌾
       </span>
-      <div className="min-w-0">
-        <p className="truncate text-base font-extrabold text-[#9d174d] dark:text-zinc-100">
-          {millName || "गिरणी व्यवस्थापन"}
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] sm:text-sm font-extrabold leading-tight text-[#9d174d] dark:text-zinc-100">
+          Feed and Flour Management
         </p>
-        <p className="truncate text-[10px] font-bold uppercase tracking-widest text-rose-800/70 dark:text-zinc-400">
-          GRAIN CRAFT OS
+        <p className="mt-0.5 truncate text-[10px] font-bold uppercase tracking-wider text-rose-800/70 dark:text-zinc-400">
+          ENTERPRISE MILL OS
         </p>
       </div>
     </div>

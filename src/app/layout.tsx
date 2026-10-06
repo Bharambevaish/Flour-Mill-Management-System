@@ -20,8 +20,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "गिरणी व्यवस्थापन | Flour Mill Management",
-  description: "Feed mill order, payment and outstanding management — आपल्या मालाची स्थिती तपासा",
+  title: "Feed and Flour Management",
+  description: "Feed and Flour Management — आपल्या मालाची स्थिती तपासा",
 
   /**
    * The manifest itself lives in `app/manifest.ts`; adding a `manifest` field
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
    */
   appleWebApp: {
     capable: true,
-    title: "Girani",
+    title: "Feed and Flour Management",
     statusBarStyle: "default",
   },
 };

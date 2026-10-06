@@ -26,7 +26,7 @@ export default async function LoginPage({
             मालक लॉगिन
           </h1>
           <p className="mt-1 text-sm font-medium text-[#6b545a] dark:text-zinc-400">
-            Mill Owner Console Login
+            Feed and Flour Management — Owner Login
           </p>
         </div>
 
