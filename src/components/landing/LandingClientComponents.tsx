@@ -17,6 +17,7 @@ export function LandingNavLanguageToggle({ initialLang = "en" }: { initialLang?:
     <div className="bg-rose-50/80 p-0.5 rounded-lg border border-rose-200/60 flex items-center text-[11px] sm:text-xs font-semibold shrink-0 dark:bg-zinc-800 dark:border-zinc-700">
       <button
         type="button"
+        suppressHydrationWarning
         onClick={() => toggleLanguage("mr")}
         className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded transition-colors ${
           lang === "mr"
@@ -28,6 +29,7 @@ export function LandingNavLanguageToggle({ initialLang = "en" }: { initialLang?:
       </button>
       <button
         type="button"
+        suppressHydrationWarning
         onClick={() => toggleLanguage("en")}
         className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded transition-colors ${
           lang === "en"
@@ -65,6 +67,7 @@ export function CustomerTrackForm() {
         </div>
         <input
           id="track-input"
+          suppressHydrationWarning
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full pl-9 pr-3 py-2.5 bg-white text-xs sm:text-sm rounded-xl border border-rose-200 focus:border-berry-600 focus:ring-1 focus:ring-berry-600 transition outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500"
@@ -74,6 +77,7 @@ export function CustomerTrackForm() {
       </div>
       <button
         type="submit"
+        suppressHydrationWarning
         className="bg-berry-800 hover:bg-berry-900 text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5 shrink-0 shadow-sm active:scale-95 cursor-pointer"
       >
         <span>Search</span>

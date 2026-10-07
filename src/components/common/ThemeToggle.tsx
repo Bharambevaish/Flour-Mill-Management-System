@@ -28,6 +28,7 @@ export function ThemeToggle({ initialTheme }: { initialTheme?: Theme }) {
   return (
     <button
       type="button"
+      suppressHydrationWarning
       onClick={toggle}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "लाईट मोड / Light mode" : "डार्क मोड / Dark mode"}

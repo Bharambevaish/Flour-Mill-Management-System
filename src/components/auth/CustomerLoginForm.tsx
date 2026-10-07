@@ -54,6 +54,7 @@ export function CustomerLoginForm() {
           value={mobile}
           onChange={(e) => setMobile(e.target.value)}
           className="stitch-input w-full"
+          suppressHydrationWarning
         />
       </div>
 
@@ -72,6 +73,7 @@ export function CustomerLoginForm() {
           value={pin}
           onChange={(e) => setPin(e.target.value)}
           className="stitch-input w-full text-center tracking-widest text-lg font-bold"
+          suppressHydrationWarning
         />
       </div>
 
@@ -85,6 +87,7 @@ export function CustomerLoginForm() {
         type="submit"
         disabled={pending}
         className="stitch-btn-primary mt-2 w-full py-3.5"
+        suppressHydrationWarning
       >
         {pending ? "..." : "लॉगिन करा / Sign In"}
       </button>

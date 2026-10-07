@@ -7,7 +7,9 @@ import { downloadCsv, toCsv } from "@/lib/csv";
 import { grainLabel, sizeLabel } from "@/lib/millings";
 import { formatDateTime, type Lang } from "@/lib/i18n/format";
 import { PaymentModal } from "./PaymentModal";
+import { PendingClaimsSection } from "./PendingClaimsSection";
 import type { OrderView } from "@/services/orderService";
+import type { PaymentClaimView } from "@/services/paymentClaimService";
 
 export function PaymentsPanel({
   orders,
@@ -15,6 +17,7 @@ export function PaymentsPanel({
   duesOnly = false,
   cancelledOnly = false,
   customerId,
+  pendingClaims = [],
 }: {
   orders: OrderView[];
   lang: Lang;
@@ -27,6 +30,7 @@ export function PaymentsPanel({
    */
   cancelledOnly?: boolean;
   customerId?: string;
+  pendingClaims?: PaymentClaimView[];
 }) {
   const [payingOrder, setPayingOrder] = useState<OrderView | null>(null);
 
@@ -96,20 +100,26 @@ export function PaymentsPanel({
 
   if (rows.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-rose-200 bg-white/50 p-12 text-center text-zinc-500 shadow-soft dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
-        <p className="text-base font-medium">
-          {cancelledOnly
-            ? (lang === "mr" ? "कोणतेही ऑर्डर रद्द केलेले नाहीत." : "No cancelled orders.")
-            : duesOnly
-              ? (lang === "mr" ? "कोणतीही उधारी शिल्लक नाही — सर्व पैसे जमा झाले आहेत." : "No outstanding dues — all accounts are fully settled.")
-              : (lang === "mr" ? "अजुन कोणतीही पेमेंट नोंद उपलब्ध नाही." : "No payment records found.")}
-        </p>
+      <div className="flex flex-col gap-6">
+        <PendingClaimsSection initialClaims={pendingClaims} lang={lang} />
+        <div className="rounded-2xl border border-dashed border-rose-200 bg-white/50 p-12 text-center text-zinc-500 shadow-soft dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
+          <p className="text-base font-medium">
+            {cancelledOnly
+              ? (lang === "mr" ? "कोणतेही ऑर्डर रद्द केलेले नाहीत." : "No cancelled orders.")
+              : duesOnly
+                ? (lang === "mr" ? "कोणतीही उधारी शिल्लक नाही — सर्व पैसे जमा झाले आहेत." : "No outstanding dues — all accounts are fully settled.")
+                : (lang === "mr" ? "अजुन कोणतीही पेमेंट नोंद उपलब्ध नाही." : "No payment records found.")}
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-6">
+      <PendingClaimsSection initialClaims={pendingClaims} lang={lang} />
+
+      <div className="flex flex-col gap-3">
       <div className="no-print flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
           {rows.length} {lang === "mr" ? "नोंदी" : "records"}
@@ -239,6 +249,7 @@ export function PaymentsPanel({
           onClose={() => setPayingOrder(null)}
         />
       )}
+      </div>
     </div>
   );
 }

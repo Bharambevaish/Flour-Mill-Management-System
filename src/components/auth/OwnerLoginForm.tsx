@@ -67,6 +67,7 @@ export function OwnerLoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="owner@example.com"
           className="stitch-input w-full"
+          suppressHydrationWarning
         />
       </div>
 
@@ -83,6 +84,7 @@ export function OwnerLoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="••••••••••••"
           className="stitch-input w-full"
+          suppressHydrationWarning
         />
       </div>
 
@@ -103,6 +105,7 @@ export function OwnerLoginForm() {
             value={totpCode}
             onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ""))}
             className="stitch-input w-full text-center tracking-widest text-lg font-bold"
+            suppressHydrationWarning
           />
           <p className="mt-1.5 text-xs text-[#6b545a] dark:text-zinc-400">
             आपल्या ऑथेंटिकेटर अ‍ॅपमधून 6-अंकी कोड टाका / Enter the 6-digit code from your authenticator app
@@ -121,6 +124,7 @@ export function OwnerLoginForm() {
           type="submit"
           disabled={pending}
           className="stitch-btn-primary w-full py-3.5"
+          suppressHydrationWarning
         >
           {pending ? "..." : step === "totp" ? "पडताळा / Verify" : "लॉगिन करा / Sign In"}
         </button>
@@ -128,6 +132,7 @@ export function OwnerLoginForm() {
           <button
             type="button"
             disabled={pending}
+            suppressHydrationWarning
             onClick={() => {
               setStep("credentials");
               setTotpCode("");
