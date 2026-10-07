@@ -9,26 +9,22 @@ import { formatDateTime } from "@/lib/i18n/format";
 import { t, type Lang } from "@/lib/i18n/dict";
 import type { OrderView } from "@/services/orderService";
 
+import type { PaymentClaimView } from "@/services/paymentClaimService";
+
 const money = (n: number): string => `₹ ${n.toLocaleString("en-IN")}`;
 
-/**
- * The customer's list of orders, designed mobile-first: one column, generous
- * padding, a single money line that answers "what do I owe on this", and a
- * single "Details" tap that reveals both the payment history and the step-by-step
- * timestamps.
- *
- * The previous version stacked six blocks per card — token row, a grain line, a
- * three-across Total/Paid/Due row, a 4-dot progress bar, a "Currently:" caption
- * and its own separate "View times" toggle. On a 375 px screen that read as a
- * wall of numbers, so the three money figures collapsed to one and the
- * timestamps moved behind the same expander as the payments.
- */
 export function CustomerOrdersPanel({
   orders,
   lang,
+  millPhone,
+  pendingClaims = [],
+  onOpenClaimForOrder,
 }: {
   orders: OrderView[];
   lang: Lang;
+  millPhone?: string;
+  pendingClaims?: PaymentClaimView[];
+  onOpenClaimForOrder?: (orderId: string) => void;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -57,6 +53,9 @@ export function CustomerOrdersPanel({
         {orders.map((o) => {
           const open = openId === o.id;
           const cancelled = o.status === "cancelled";
+          const pendingClaim = pendingClaims.find(
+            (c) => (c.orderId === o.id || c.orderNumber === o.orderId) && c.status === "pending",
+          );
 
           return (
             <li
@@ -97,9 +96,39 @@ export function CustomerOrdersPanel({
                     </p>
                   )
                 ) : o.outstanding > 0 ? (
-                  <p className="text-2xl font-bold text-rose-700 dark:text-rose-400">
-                    {t("cust.due", lang)} {money(o.outstanding)}
-                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-2xl font-bold text-rose-700 dark:text-rose-400">
+                      {t("cust.due", lang)} {money(o.outstanding)}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {pendingClaim ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-300">
+                          <span className="animate-pulse">⏳</span>
+                          <span>{lang === "mr" ? "पडताळणी प्रलंबित" : "Verification Pending"}</span>
+                          <span className="font-mono text-[11px] opacity-80">({pendingClaim.upiTxnId})</span>
+                        </span>
+                      ) : (
+                        onOpenClaimForOrder && (
+                          <button
+                            type="button"
+                            onClick={() => onOpenClaimForOrder(o.id)}
+                            className="inline-flex min-h-9 items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:from-emerald-700 hover:to-teal-700 active:scale-95"
+                          >
+                            <span>✅</span>
+                            <span>{lang === "mr" ? "पैसे भरले?" : "Paid?"}</span>
+                          </button>
+                        )
+                      )}
+                      <a
+                        href={millPhone ? `tel:${millPhone}` : "tel:9876543210"}
+                        className="inline-flex min-h-9 items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-bold text-rose-800 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
+                        title={lang === "mr" ? "गिरणीला कॉल करा" : "Call Mill Owner"}
+                      >
+                        <span>📞</span>
+                        <span>{lang === "mr" ? "कॉल" : "Call"}</span>
+                      </a>
+                    </div>
+                  </div>
                 ) : (
                   <p className="text-lg font-bold text-emerald-700 dark:text-emerald-400">
                     {t("cust.paidInFull", lang)}

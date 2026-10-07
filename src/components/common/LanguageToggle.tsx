@@ -24,6 +24,7 @@ export function LanguageToggle({ initialLang = "en" }: { initialLang?: "mr" | "e
     <div className="inline-flex items-center rounded-xl border border-rose-200/80 bg-rose-50/60 p-1 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
       <button
         type="button"
+        suppressHydrationWarning
         onClick={() => toggleLanguage("en")}
         className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
           lang === "en"
@@ -35,6 +36,7 @@ export function LanguageToggle({ initialLang = "en" }: { initialLang?: "mr" | "e
       </button>
       <button
         type="button"
+        suppressHydrationWarning
         onClick={() => toggleLanguage("mr")}
         className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
           lang === "mr"

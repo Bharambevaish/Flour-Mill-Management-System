@@ -1,6 +1,7 @@
 import { connectDb } from "@/lib/db";
 import { requirePageSession } from "@/lib/auth/requirePageSession";
 import { listOrders } from "@/services/orderService";
+import { listPendingPaymentClaims } from "@/services/paymentClaimService";
 import { PaymentsPanel } from "@/components/owner/payments";
 import { getLang, formatLang } from "@/lib/i18n/i18n";
 
@@ -17,7 +18,10 @@ export default async function PaymentsPage({
   const { customer } = await searchParams;
   const customerId = typeof customer === "string" ? customer : undefined;
 
-  const orders = await listOrders();
+  const [orders, pendingClaims] = await Promise.all([
+    listOrders(),
+    listPendingPaymentClaims(),
+  ]);
   const dueTotal = orders.reduce((s, o) => s + o.outstanding, 0);
   const dueCount = orders.filter((o) => o.outstanding > 0).length;
 
@@ -53,7 +57,12 @@ export default async function PaymentsPage({
         </div>
       </header>
 
-      <PaymentsPanel orders={orders} customerId={customerId} lang={lang} />
+      <PaymentsPanel
+        orders={orders}
+        customerId={customerId}
+        lang={lang}
+        pendingClaims={pendingClaims}
+      />
     </div>
   );
 }

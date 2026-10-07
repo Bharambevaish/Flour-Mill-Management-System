@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { AdminModel } from "@/models/Admin";
+import { PaymentClaimModel } from "@/models/PaymentClaim";
 import { connectDb } from "@/lib/db";
 import { requirePageSession } from "@/lib/auth/requirePageSession";
 import { listCustomers } from "@/services/customerService";
@@ -13,10 +15,11 @@ export default async function OwnerDashboard() {
   const adminId = (await requirePageSession("owner")).toString();
   const lang = await getLang();
 
-  const [admin, customers, orders] = await Promise.all([
+  const [admin, customers, orders, pendingClaimsCount] = await Promise.all([
     AdminModel.findById(adminId).select("name email").lean(),
     listCustomers(),
     listOrders(),
+    PaymentClaimModel.countDocuments({ status: "pending" }),
   ]);
 
   /* Per-customer aggregation.
@@ -135,6 +138,42 @@ export default async function OwnerDashboard() {
         </div>
         <DashboardAutoRefresh lang={lang} />
       </header>
+
+      {pendingClaimsCount > 0 && (
+        <Link
+          href="/owner/payments"
+          className="flex items-center justify-between gap-3 rounded-2xl border-2 border-amber-300 bg-gradient-to-r from-amber-50 to-rose-50 p-4 shadow-sm transition-all hover:border-amber-400 dark:border-amber-700/60 dark:bg-zinc-900"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-400/20 text-xl text-amber-700 dark:text-amber-300">
+              🔔
+            </span>
+            <div>
+              <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                {formatLang(
+                  {
+                    mr: `${pendingClaimsCount} ग्राहकांनी QR/UPI द्वारे पेमेंट केले आहे — पडताळणी प्रलंबित!`,
+                    en: `${pendingClaimsCount} customers reported UPI payments — Verification pending!`,
+                  },
+                  lang,
+                )}
+              </p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                {formatLang(
+                  {
+                    mr: "खात्री करून जमा नोंदवण्यासाठी येथे क्लिक करा →",
+                    en: "Click here to verify receipts and record payments →",
+                  },
+                  lang,
+                )}
+              </p>
+            </div>
+          </div>
+          <span className="rounded-full bg-amber-500 px-3 py-1 text-xs font-black text-white shadow-xs">
+            {pendingClaimsCount}
+          </span>
+        </Link>
+      )}
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((s, idx) => {

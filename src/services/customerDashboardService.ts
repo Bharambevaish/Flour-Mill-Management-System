@@ -16,6 +16,10 @@ import {
   type CustomerNotificationView,
 } from "@/services/notificationService";
 import { getSettingsOrDefault } from "@/services/settingsService";
+import {
+  listPaymentClaimsForCustomer,
+  type PaymentClaimView,
+} from "@/services/paymentClaimService";
 
 export interface CustomerDashboardView {
   customer: {
@@ -28,6 +32,7 @@ export interface CustomerDashboardView {
   activeOrderCount: number;
   orders: OrderView[];
   notifications: CustomerNotificationView[];
+  pendingClaims: PaymentClaimView[];
   unreadCount: number;
   /**
    * How to pay. `hasUpiQr` is a flag rather than the image itself so the
@@ -37,6 +42,7 @@ export interface CustomerDashboardView {
   payment: {
     hasUpiQr: boolean;
     upiId: string;
+    millPhone: string;
   };
 }
 
@@ -56,11 +62,12 @@ export async function getCustomerDashboard(
     .lean();
   if (!customer || !customer.active) throw unauthorizedError("Not signed in");
 
-  const [orders, notifications, unreadCount, settings] = await Promise.all([
+  const [orders, notifications, unreadCount, settings, pendingClaims] = await Promise.all([
     getOrdersForCustomer(customerId),
     listNotificationsForCustomer(customerId as Types.ObjectId),
     unreadNotificationCount(customerId as Types.ObjectId),
     getSettingsOrDefault(),
+    listPaymentClaimsForCustomer(customerId as Types.ObjectId),
   ]);
 
   return {
@@ -79,10 +86,12 @@ export async function getCustomerDashboard(
       .length,
     orders,
     notifications,
+    pendingClaims,
     unreadCount,
     payment: {
       hasUpiQr: settings.upiQr !== null,
       upiId: settings.upiId,
+      millPhone: settings.phone || "",
     },
   };
 }

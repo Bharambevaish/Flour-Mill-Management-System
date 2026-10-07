@@ -81,7 +81,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
       className={`${plusJakartaSans.variable} ${geistSans.variable} ${geistMono.variable} ${theme} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}
         <ThemeToggle initialTheme={theme} />
       </body>

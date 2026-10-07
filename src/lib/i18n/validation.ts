@@ -239,3 +239,17 @@ export const changeOwnerPasswordSchema = z.object({
 export const totpCodeSchema = z.object({
   code: z.string().regex(/^\d{6}$/, "Enter the 6-digit code from your app"),
 });
+
+/* Customer payment claim (reporting UPI payment done) ---------------- */
+
+export const createPaymentClaimSchema = z.object({
+  orderId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid order ID").optional().nullable(),
+  amount: z.number().finite().positive().max(1000000),
+  upiTxnId: z.string().trim().min(4, "Transaction ID / UTR is required").max(64),
+  receiptImage: z.string().max(2_500_000, "Receipt image is too large (max 2 MB)").optional().nullable(),
+  notes: z.string().trim().max(200).optional(),
+});
+
+export const rejectPaymentClaimSchema = z.object({
+  reason: z.string().trim().min(1, "Reason is required").max(200),
+});

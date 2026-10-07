@@ -20,12 +20,16 @@ export function PaySlideOver({
   onClose,
   hasUpiQr,
   upiId,
+  millPhone,
+  onOpenClaimModal,
   lang,
 }: {
   open: boolean;
   onClose: () => void;
   hasUpiQr: boolean;
   upiId: string;
+  millPhone?: string;
+  onOpenClaimModal?: () => void;
   lang: Lang;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -168,6 +172,47 @@ export function PaySlideOver({
         <p className="mt-5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
           {t("cust.payHelp", lang)}
         </p>
+
+        {/* Action Buttons: Report Payment Done & Call Mill Owner */}
+        <div className="mt-6 flex flex-col gap-3 border-t border-zinc-100 pt-5 dark:border-zinc-800">
+          {onOpenClaimModal && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onOpenClaimModal();
+              }}
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 text-sm font-bold text-white shadow-md transition-all hover:from-emerald-700 hover:to-teal-700 active:scale-[0.99]"
+            >
+              <span>✅</span>
+              <span>
+                {lang === "mr" ? "पैसे भरले? पावती / UTR नोंदवा" : "Payment Done? Submit UTR / Receipt"}
+              </span>
+            </button>
+          )}
+
+          {millPhone ? (
+            <a
+              href={`tel:${millPhone}`}
+              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-rose-300 bg-rose-50/70 px-4 py-2.5 text-sm font-bold text-rose-800 transition-colors hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/60"
+            >
+              <span>📞</span>
+              <span>
+                {lang === "mr" ? "गिरणीला कॉल करा" : "Call Mill Owner"} ({millPhone})
+              </span>
+            </a>
+          ) : (
+            <a
+              href="tel:9876543210"
+              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-rose-300 bg-rose-50/70 px-4 py-2.5 text-sm font-bold text-rose-800 transition-colors hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/60"
+            >
+              <span>📞</span>
+              <span>
+                {lang === "mr" ? "गिरणीला कॉल करा" : "Call Mill Owner"}
+              </span>
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );
