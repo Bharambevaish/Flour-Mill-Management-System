@@ -4,9 +4,10 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/client";
 
-export function CustomerLoginForm() {
+/** `initialMobile` comes from `/my/login?mobile=…` (the landing page form). */
+export function CustomerLoginForm({ initialMobile = "" }: { initialMobile?: string }) {
   const router = useRouter();
-  const [mobile, setMobile] = useState("");
+  const [mobile, setMobile] = useState(initialMobile);
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
