@@ -33,7 +33,7 @@ export function ReportRangePicker({
   const customValid = !!customFrom && !!customTo && customFrom <= customTo;
 
   return (
-    <div className="no-print flex flex-wrap items-end gap-3 rounded-2xl border border-[var(--border-subtle)] bg-white p-4 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="no-print flex flex-wrap items-end gap-3 rounded-2xl border border-[var(--border-subtle)] bg-white p-4 shadow-soft dark:border-earth-800 dark:bg-earth-900">
       <div className="flex flex-wrap gap-2">
         {PRESETS.map((p) => (
           <button
@@ -51,8 +51,8 @@ export function ReportRangePicker({
         ))}
       </div>
 
-      <div className="flex flex-wrap items-end gap-3 border-rose-100 sm:border-l sm:pl-4 dark:border-zinc-700">
-        <label className="flex flex-col gap-1 text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+      <div className="flex flex-wrap items-end gap-3 border-clay-100 sm:border-l sm:pl-4 dark:border-earth-700">
+        <label className="flex flex-col gap-1 text-xs font-semibold text-earth-600 dark:text-earth-400">
           {lang === "mr" ? "पासून" : "From"}
           <input
             type="date"
@@ -61,7 +61,7 @@ export function ReportRangePicker({
             className="stitch-input px-2.5 py-1.5 text-xs sm:text-sm"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+        <label className="flex flex-col gap-1 text-xs font-semibold text-earth-600 dark:text-earth-400">
           {lang === "mr" ? "पर्यंत" : "To"}
           <input
             type="date"

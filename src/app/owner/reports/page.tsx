@@ -34,10 +34,10 @@ export default async function ReportsPage({
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+          <h1 className="text-2xl font-bold tracking-tight text-earth-900 dark:text-earth-100 font-display">
             {formatLang({ mr: "अहवाल व निर्यात", en: "Reports & Export" }, lang)}
           </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-sm text-earth-500 dark:text-earth-400">
             {formatLang(
               {
                 mr: "कालावधीनुसार व्यवसाय, धान्य, वसूल व उधारी — CSV डाउनलोड किंवा प्रिंट/PDF",

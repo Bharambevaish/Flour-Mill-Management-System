@@ -1,303 +1,333 @@
 @import "tailwindcss";
 
-/* Class-based dark mode: toggle `.dark` on <html>.
-   The switch lives in ThemeToggle; later it moves into a Settings tab
-   without touching this config. Default theme is "dark". */
+/* Class-based dark mode: toggle `.dark` on <html> (ThemeToggle writes the
+   `theme` cookie; layout.tsx applies it server-side, default "dark"). */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * "Chakki" theme — a flour mill's own colours.
+ *
+ *   paper   the cream of fresh flour (page ground)
+ *   clay    terracotta / kumkum — the brand, links and money still owed
+ *   haldi   turmeric / ripe wheat — waiting, queued, pending claims
+ *   leaf    field green — ready, paid, money received
+ *   neel    millstone blue — in the mill right now
+ *   earth   warm neutrals for text, borders and the dark theme
+ *
+ * The palette is flat on purpose: no gradients, no glows. Depth comes from a
+ * 1px border and a short, warm shadow, the way a paper slip sits on a counter.
+ */
+
 :root {
-  /* Canonical Stitch Theme Tokens (Light Mode) */
-  --background: #faf5f7;
-  --foreground: #1e1518;
-
-  /* Subtle hairline border. Consumed as `border-[var(--border-subtle)]`.
-     Was referenced in 26 places but never defined, so every one of those
-     borders silently fell back to the browser default. Dark mode overrides it
-     per-usage with `dark:border-zinc-800`, so only the light value is needed. */
-  --border-subtle: #f3d5dc;
-
-  --color-primary: #9d174d;
-  --color-primary-container: #be185d;
-  --color-on-primary: #ffffff;
-  --color-on-primary-container: #500724;
-  --color-secondary: #be185d;
-  --color-secondary-container: #fce7f3;
-  --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #7c1130;
-  --color-tertiary: #c2410c;
-  --color-tertiary-container: #ffedd5;
-  --color-on-tertiary: #ffffff;
-  --color-on-tertiary-fixed: #431407;
-
-  --color-surface: #faf5f7;
-  --color-surface-bright: #ffffff;
-  --color-surface-dim: #ebd7dc;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #ffffff;
-  --color-surface-container: #fef2f4;
-  --color-surface-container-high: #f7dbe2;
-  --color-surface-container-highest: #fbe7eb;
-  --color-surface-variant: #f5e4e8;
-  --color-on-surface: #1e1518;
-  --color-on-surface-variant: #6b545a;
-  --color-on-background: #1e1518;
-
-  --color-outline: #9f7d85;
-  --color-outline-variant: #f3d5dc;
-
-  --color-error: #b91c1c;
-  --color-error-container: #fee2e2;
-  --color-on-error: #ffffff;
-
-  --color-inverse-surface: #37242a;
-  --color-inverse-on-surface: #fff1f2;
-  --color-surface-tint: #be185d;
-
+  --background: #f6f1e7;
+  --foreground: #2b2117;
+  --surface: #fffdf8;
+  --muted: #6f6352;
+  --heading: #2b2117;
+  --border-subtle: #e8dfcf;
+  --border-strong: #d2c5ae;
+  --brand: #a8482a;
+  --brand-ink: #8c3a22;
+  --focus: #a8482a;
   color-scheme: light;
 }
 
 .dark,
 :root.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #171310;
+  --foreground: #efe7da;
+  --surface: #221d18;
+  --muted: #b2a48d;
+  --heading: #f6efe3;
+  --border-subtle: #352e26;
+  --border-strong: #4a4136;
+  --brand: #e08a63;
+  --brand-ink: #eca383;
+  --focus: #e9a97f;
   color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-heading: var(--heading);
+  --color-brand: var(--brand);
 
-  --color-primary: var(--color-primary);
-  --color-primary-container: var(--color-primary-container);
-  --color-on-primary: var(--color-on-primary);
-  --color-on-primary-container: var(--color-on-primary-container);
-  --color-secondary: var(--color-secondary);
-  --color-secondary-container: var(--color-secondary-container);
-  --color-on-secondary: var(--color-on-secondary);
-  --color-on-secondary-container: var(--color-on-secondary-container);
-  --color-tertiary: var(--color-tertiary);
-  --color-tertiary-container: var(--color-tertiary-container);
-  --color-on-tertiary: var(--color-on-tertiary);
-  --color-on-tertiary-fixed: var(--color-on-tertiary-fixed);
+  /* Warm white: cards and button text read as paper, not screen-white. */
+  --color-white: #fffdf8;
 
-  --color-surface: var(--color-surface);
-  --color-surface-bright: var(--color-surface-bright);
-  --color-surface-dim: var(--color-surface-dim);
-  --color-surface-container-lowest: var(--color-surface-container-lowest);
-  --color-surface-container-low: var(--color-surface-container-low);
-  --color-surface-container: var(--color-surface-container);
-  --color-surface-container-high: var(--color-surface-container-high);
-  --color-surface-container-highest: var(--color-surface-container-highest);
-  --color-surface-variant: var(--color-surface-variant);
-  --color-on-surface: var(--color-on-surface);
-  --color-on-surface-variant: var(--color-on-surface-variant);
-  --color-on-background: var(--color-on-background);
+  --color-clay-50: #fbf3ee;
+  --color-clay-100: #f6e4d9;
+  --color-clay-200: #ecc6b0;
+  --color-clay-300: #dfa182;
+  --color-clay-400: #e08a63;
+  --color-clay-500: #bd5c37;
+  --color-clay-600: #a8482a;
+  --color-clay-700: #8c3a22;
+  --color-clay-800: #712f1e;
+  --color-clay-900: #5c281b;
+  --color-clay-950: #33130c;
 
-  --color-outline: var(--color-outline);
-  --color-outline-variant: var(--color-outline-variant);
+  --color-earth-50: #faf7f1;
+  --color-earth-100: #f3eee4;
+  --color-earth-200: #e6ddcd;
+  --color-earth-300: #d2c5ae;
+  --color-earth-400: #b2a48d;
+  --color-earth-500: #7d705c;
+  --color-earth-600: #685d4c;
+  --color-earth-700: #4f4639;
+  --color-earth-800: #352e26;
+  --color-earth-900: #221d18;
+  --color-earth-950: #171310;
 
-  --color-error: var(--color-error);
-  --color-error-container: var(--color-error-container);
-  --color-on-error: var(--color-on-error);
+  --color-leaf-50: #f1f6ee;
+  --color-leaf-100: #dfebd8;
+  --color-leaf-200: #bfd6b1;
+  --color-leaf-300: #9cc489;
+  --color-leaf-400: #86b672;
+  --color-leaf-500: #548243;
+  --color-leaf-600: #426a35;
+  --color-leaf-700: #36562c;
+  --color-leaf-800: #2d4626;
+  --color-leaf-900: #263b21;
+  --color-leaf-950: #121f10;
 
-  --color-inverse-surface: var(--color-inverse-surface);
-  --color-inverse-on-surface: var(--color-inverse-on-surface);
-  --color-surface-tint: var(--color-surface-tint);
+  --color-haldi-50: #fdf7e8;
+  --color-haldi-100: #f9ebc4;
+  --color-haldi-200: #f2d68d;
+  --color-haldi-300: #e9bc55;
+  --color-haldi-400: #e3ad3c;
+  --color-haldi-500: #c98a1c;
+  --color-haldi-600: #a86c14;
+  --color-haldi-700: #865214;
+  --color-haldi-800: #6e4217;
+  --color-haldi-900: #5c3717;
+  --color-haldi-950: #341c09;
 
-  --font-sans: var(--font-plus-jakarta), var(--font-geist-sans), "Noto Sans Devanagari", "Nirmala UI", "Mangal",
-    system-ui, Arial, Helvetica, sans-serif;
-  --font-mono: var(--font-geist-mono);
+  --color-neel-50: #f0f3f8;
+  --color-neel-100: #dfe5ef;
+  --color-neel-200: #c2cde0;
+  --color-neel-300: #a5b6d4;
+  --color-neel-400: #8da2c8;
+  --color-neel-500: #536a95;
+  --color-neel-600: #42557b;
+  --color-neel-700: #374664;
+  --color-neel-800: #303c53;
+  --color-neel-900: #2b3446;
+  --color-neel-950: #1c212d;
 
-  --shadow-soft: 0 2px 14px -2px rgba(157, 23, 77, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.03);
-  --shadow-elevated: 0 10px 25px -4px rgba(157, 23, 77, 0.07), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
-  --shadow-glow-pink: 0 0 20px -3px rgba(190, 24, 93, 0.25);
+  --font-sans: var(--font-mukta), "Noto Sans Devanagari", "Nirmala UI", "Mangal", system-ui, Arial, sans-serif;
+  --font-display: var(--font-tiro), var(--font-mukta), "Noto Serif Devanagari", Georgia, serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
-  --color-berry-50: #fdf2f6;
-  --color-berry-100: #fce7f0;
-  --color-berry-200: #fbcfe3;
-  --color-berry-300: #f8a5cb;
-  --color-berry-400: #f36da8;
-  --color-berry-500: #e63d83;
-  --color-berry-600: #be185d;
-  --color-berry-700: #9e1c48;
-  --color-berry-800: #831a3d;
-  --color-berry-900: #6f1936;
-  --color-berry-950: #43081c;
-
-  --color-warmporcelain: #fffbf9;
-  --color-amberchalk: #fef7ee;
-
-  --font-display: var(--font-plus-jakarta), sans-serif;
+  --shadow-xs: 0 1px 0 rgba(60, 40, 20, 0.05);
+  --shadow-sm: 0 1px 2px rgba(60, 40, 20, 0.07);
+  --shadow-soft: 0 1px 0 rgba(60, 40, 20, 0.04), 0 2px 6px -2px rgba(60, 40, 20, 0.08);
+  --shadow-elevated: 0 1px 0 rgba(60, 40, 20, 0.05), 0 8px 20px -8px rgba(60, 40, 20, 0.18);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  font-feature-settings: "tnum" 1;
 }
 
-/* Stitch component patterns */
-.stitch-card {
-  background-color: #ffffff;
-  border-width: 1px;
-  border-color: #f6dbe2;
-  border-radius: 1rem;
-  box-shadow: 0 2px 14px -2px rgba(157, 23, 77, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.03);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.stitch-card:hover {
-  border-color: #f472b6;
-  box-shadow: 0 10px 25px -4px rgba(157, 23, 77, 0.07), 0 4px 10px -2px rgba(0, 0, 0, 0.03);
-}
-:where(.dark, .dark *) .stitch-card {
-  background-color: #18181b;
-  border-color: #27272a;
-  box-shadow: none;
-}
-:where(.dark, .dark *) .stitch-card:hover {
-  border-color: #3f3f46;
+/* Headings are set in the serif — the one "printed" voice of the app. */
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.005em;
 }
 
-.stitch-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: 0.75rem;
-  background-image: linear-gradient(to right, #e11d48, #db2777, #be123c);
-  color: #ffffff;
-  font-weight: 600;
-  box-shadow: 0 0 20px -3px rgba(190, 24, 93, 0.25);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.stitch-btn-primary:hover {
-  filter: brightness(1.05);
-  transform: scale(1.01);
-}
-.stitch-btn-primary:active {
-  transform: scale(0.98);
-}
-.stitch-btn-primary:disabled {
-  opacity: 0.5;
-  pointer-events: none;
+::selection {
+  background: #f2d68d;
+  color: #2b2117;
 }
 
-.stitch-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid #f6dbe2;
-  background-color: #ffffff;
-  color: #9d174d;
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.stitch-btn-secondary:hover {
-  background-color: #fdf2f4;
-  border-color: #f472b6;
-}
-.stitch-btn-secondary:active {
-  transform: scale(0.98);
-}
-:where(.dark, .dark *) .stitch-btn-secondary {
-  background-color: #27272a;
-  border-color: #3f3f46;
-  color: #e4e4e7;
-}
-:where(.dark, .dark *) .stitch-btn-secondary:hover {
-  background-color: #3f3f46;
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
-.stitch-input {
-  border-radius: 0.75rem;
-  border: 1px solid #f3d5dc;
-  background-color: rgba(254, 242, 244, 0.6);
-  color: #1e1518;
-  padding: 0.625rem 0.875rem;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.stitch-input::placeholder {
-  color: #9f7d85;
-  opacity: 0.7;
-}
-.stitch-input:focus {
-  background-color: #ffffff;
-  border-color: #be185d;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.18);
-}
-:where(.dark, .dark *) .stitch-input {
-  background-color: #18181b;
-  border-color: #3f3f46;
-  color: #f4f4f5;
-}
-:where(.dark, .dark *) .stitch-input:focus {
-  background-color: #18181b;
-  border-color: #71717a;
-  box-shadow: 0 0 0 3px rgba(113, 113, 122, 0.2);
+/* Component classes live in the `components` layer so a utility on the
+   element (px-5, py-3, rounded-2xl…) still wins over these defaults. */
+@layer components {
+  /* ---------- shared component classes ---------- */
+
+  .stitch-card {
+    background-color: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 0 rgba(60, 40, 20, 0.04), 0 2px 6px -2px rgba(60, 40, 20, 0.08);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .stitch-card:hover {
+    border-color: var(--border-strong);
+  }
+  :where(.dark, .dark *) .stitch-card {
+    box-shadow: none;
+  }
+
+  .stitch-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.25rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.625rem;
+    background-color: #a8482a;
+    color: #fffdf8;
+    font-weight: 600;
+    box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.14);
+    transition: background-color 0.15s ease, transform 0.1s ease;
+  }
+  .stitch-btn-primary:hover {
+    background-color: #8c3a22;
+  }
+  .stitch-btn-primary:active {
+    transform: translateY(1px);
+    box-shadow: none;
+  }
+  .stitch-btn-primary:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .stitch-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.25rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.625rem;
+    border: 1px solid var(--border-strong);
+    background-color: var(--surface);
+    color: var(--brand-ink);
+    font-weight: 600;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  .stitch-btn-secondary:hover {
+    background-color: #f6e4d9;
+    border-color: #dfa182;
+  }
+  .stitch-btn-secondary:active {
+    transform: translateY(1px);
+  }
+  :where(.dark, .dark *) .stitch-btn-secondary:hover {
+    background-color: #352e26;
+    border-color: #4a4136;
+  }
+
+  .stitch-input {
+    border-radius: 0.625rem;
+    border: 1px solid var(--border-strong);
+    background-color: var(--surface);
+    color: var(--foreground);
+    padding: 0.625rem 0.875rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .stitch-input::placeholder {
+    color: var(--muted);
+    opacity: 0.75;
+  }
+  .stitch-input:focus {
+    border-color: var(--focus);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(168, 72, 42, 0.16);
+  }
+  :where(.dark, .dark *) .stitch-input {
+    background-color: #1d1814;
+  }
+  :where(.dark, .dark *) .stitch-input:focus {
+    box-shadow: 0 0 0 3px rgba(233, 169, 127, 0.2);
+  }
 }
 
-/* Native select & option styling for light and dark modes */
 select {
   color-scheme: light;
 }
-
 select option {
-  background-color: #ffffff;
-  color: #1e1518;
+  background-color: #fffdf8;
+  color: #2b2117;
 }
-
 :where(.dark, .dark *) select,
 .dark select {
   color-scheme: dark;
 }
-
 :where(.dark, .dark *) select option,
 .dark select option {
-  background-color: #18181b;
-  color: #f4f4f5;
+  background-color: #221d18;
+  color: #efe7da;
 }
 
-/* Custom decorations for ambient grain, glass styling, and hero elements */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 175, 196, 0.25);
+  background: rgba(255, 253, 248, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border-subtle);
 }
 :where(.dark, .dark *) .glass-panel {
-  background: rgba(24, 24, 27, 0.85);
-  border: 1px solid rgba(63, 63, 70, 0.4);
+  background: rgba(34, 29, 24, 0.92);
 }
 
 .hover-lift {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 .hover-lift:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
 }
 
-.hero-crimson-gradient {
-  background: linear-gradient(135deg, #be185d 0%, #9e1c48 50%, #701a35 100%);
+/* A slip of paper: the customer's order card. Perforation drawn as a dashed
+   rule with two half-circle notches cut from the sides. */
+.slip-tear {
+  position: relative;
+  border-top: 1.5px dashed var(--border-strong);
+}
+.slip-tear::before,
+.slip-tear::after {
+  content: "";
+  position: absolute;
+  top: -9px;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: var(--background);
+  border: 1px solid var(--border-subtle);
+}
+.slip-tear::before {
+  left: -9px;
+  clip-path: inset(0 0 0 50%);
+}
+.slip-tear::after {
+  right: -9px;
+  clip-path: inset(0 50% 0 0);
 }
 
-.gold-amber-pill {
-  background: linear-gradient(90deg, #fff7ed 0%, #ffedd5 100%);
-  border: 1px solid #fed7aa;
-}
-:where(.dark, .dark *) .gold-amber-pill {
-  background: linear-gradient(90deg, #271b0e 0%, #362210 100%);
-  border: 1px solid #78350f;
+/* A rubber stamp, slightly crooked — shown when an order is fully paid. */
+.paid-stamp {
+  display: inline-block;
+  transform: rotate(-6deg);
+  border: 2px solid currentColor;
+  border-radius: 0.375rem;
+  padding: 0.1rem 0.6rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  opacity: 0.9;
 }
 
-.bg-radial-glow {
-  background-image: radial-gradient(circle at 50% 20%, rgba(254, 226, 236, 0.65) 0%, rgba(255, 251, 249, 0.95) 60%, #fffbf9 100%);
-}
-:where(.dark, .dark *) .bg-radial-glow {
-  background-image: radial-gradient(circle at 50% 20%, rgba(67, 8, 28, 0.25) 0%, rgba(10, 10, 10, 0.95) 60%, #0a0a0a 100%);
+/* Fine wheat-straw texture for hero bands (pure CSS, no image). */
+.straw {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.06) 0 2px,
+    transparent 2px 9px
+  );
 }
 
 /* Print → browser "Save as PDF". Toolbars/sidebar/theme switch carry `.no-print`. */

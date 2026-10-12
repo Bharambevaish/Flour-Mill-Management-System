@@ -21,15 +21,15 @@ export function LanguageToggle({ initialLang = "en" }: { initialLang?: "mr" | "e
   }
 
   return (
-    <div className="inline-flex items-center rounded-xl border border-rose-200/80 bg-rose-50/60 p-1 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="inline-flex items-center rounded-lg border border-[var(--border-strong)] bg-surface p-0.5">
       <button
         type="button"
         suppressHydrationWarning
         onClick={() => toggleLanguage("en")}
-        className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
+        className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
           lang === "en"
-            ? "bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-xs"
-            : "text-rose-900/70 hover:text-rose-950 dark:text-zinc-400 dark:hover:text-zinc-100"
+            ? "bg-earth-900 text-white dark:bg-earth-100 dark:text-earth-900"
+            : "text-earth-600 hover:text-heading dark:text-earth-400"
         }`}
       >
         English
@@ -38,10 +38,10 @@ export function LanguageToggle({ initialLang = "en" }: { initialLang?: "mr" | "e
         type="button"
         suppressHydrationWarning
         onClick={() => toggleLanguage("mr")}
-        className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
+        className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
           lang === "mr"
-            ? "bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-xs"
-            : "text-rose-900/70 hover:text-rose-950 dark:text-zinc-400 dark:hover:text-zinc-100"
+            ? "bg-earth-900 text-white dark:bg-earth-100 dark:text-earth-900"
+            : "text-earth-600 hover:text-heading dark:text-earth-400"
         }`}
       >
         मराठी

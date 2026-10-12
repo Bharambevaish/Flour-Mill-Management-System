@@ -71,12 +71,12 @@ export function NotificationsComposer({
   }
 
   return (
-    <section className="rounded-2xl border border-[var(--border-subtle)] bg-white shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="border-b border-rose-50 px-6 py-5 dark:border-zinc-800">
-        <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+    <section className="rounded-2xl border border-[var(--border-subtle)] bg-white shadow-soft dark:border-earth-800 dark:bg-earth-900">
+      <div className="border-b border-clay-50 px-6 py-5 dark:border-earth-800">
+        <h2 className="text-lg font-bold text-earth-900 dark:text-earth-100 font-display">
           ग्राहकांना सूचना पाठवा / Send a notification to customers
         </h2>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-1 text-sm text-earth-500 dark:text-earth-400">
           {customerCount} सक्रिय ग्राहक — सगळ्यांना किंवा निवडलेल्या ग्राहकांनाच पाठवा.
           <br />
           {customerCount} active customer{customerCount === 1 ? "" : "s"} — message everyone or just the ones you pick.
@@ -85,15 +85,15 @@ export function NotificationsComposer({
 
       <div className="space-y-5 p-6">
         {!inAppEnabled && (
-          <p className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm text-amber-800 dark:border-amber-500/40 dark:bg-amber-400/10 dark:text-amber-200">
+          <p className="rounded-xl border border-haldi-300 bg-haldi-50 px-4 py-2.5 text-sm text-haldi-800 dark:border-haldi-500/40 dark:bg-haldi-400/10 dark:text-haldi-200">
             Settings मध्ये “इन-ॲप सूचना” बंद आहे — काहीही पाठवले जाणार नाही. / In-app notifications are switched off in Settings — nothing will be delivered.
           </p>
         )}
 
         <div>
-          <div className="flex items-center gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+          <div className="flex items-center gap-2 text-sm font-semibold text-earth-700 dark:text-earth-300">
             <span>{lang === "mr" ? "मराठी संदेश" : "English message"}</span>
-            <label className="ml-auto flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+            <label className="ml-auto flex items-center gap-3 text-xs text-earth-500 dark:text-earth-400">
               <span className="flex items-center gap-1 cursor-pointer">
                 <input
                   type="radio"
@@ -101,7 +101,7 @@ export function NotificationsComposer({
                   value="mr"
                   checked={lang === "mr"}
                   onChange={() => setLang("mr")}
-                  className="accent-rose-700"
+                  className="accent-clay-700"
                 />
                 मराठी
               </span>
@@ -112,7 +112,7 @@ export function NotificationsComposer({
                   value="en"
                   checked={lang === "en"}
                   onChange={() => setLang("en")}
-                  className="accent-rose-700"
+                  className="accent-clay-700"
                 />
                 English
               </span>
@@ -126,37 +126,37 @@ export function NotificationsComposer({
             placeholder={lang === "mr" ? "उदा: उद्या चक्की बंद राहील — कृपया गाठोजी आधीच संपवा" : "e.g. The mill will be closed tomorrow — please finish your grain today"}
             className="stitch-input mt-2 text-sm"
           />
-          <p className="mt-1 text-right text-xs text-zinc-400">
+          <p className="mt-1 text-right text-xs text-earth-400">
             {message.length}/{MAX_LEN}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-[var(--border-subtle)] bg-rose-50/20 p-5 dark:border-zinc-800 dark:bg-zinc-900/40">
+        <div className="rounded-2xl border border-[var(--border-subtle)] bg-clay-50/20 p-5 dark:border-earth-800 dark:bg-earth-900/40">
           <div className="flex flex-wrap items-center gap-4 text-sm">
-            <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+            <span className="font-semibold text-earth-800 dark:text-earth-200">
               {lang === "mr" ? "कोणाला पाठवायचे?" : "Who should receive it?"}
             </span>
-            <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-earth-700 dark:text-earth-300">
               <input
                 type="radio"
                 name="audience"
                 checked={audience === "all"}
                 onChange={() => setAudience("all")}
-                className="accent-rose-700"
+                className="accent-clay-700"
               />
               {lang === "mr" ? "सर्व सक्रिय ग्राहक" : "All active customers"}
             </label>
-            <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-earth-700 dark:text-earth-300">
               <input
                 type="radio"
                 name="audience"
                 checked={audience === "specific"}
                 onChange={() => setAudience("specific")}
-                className="accent-rose-700"
+                className="accent-clay-700"
               />
               {lang === "mr" ? "निवडलेले ग्राहक" : "Specific customers"}
               {audience === "specific" && selected.size > 0 && (
-                <span className="rounded-full bg-rose-100 border border-rose-200 px-2 py-0.5 text-xs font-semibold text-rose-800 dark:bg-rose-900/40 dark:text-rose-300 dark:border-rose-700">
+                <span className="rounded-full bg-clay-100 border border-clay-200 px-2 py-0.5 text-xs font-semibold text-clay-800 dark:bg-clay-900/40 dark:text-clay-300 dark:border-clay-700">
                   {selected.size}
                 </span>
               )}
@@ -164,23 +164,23 @@ export function NotificationsComposer({
           </div>
 
           {audience === "specific" && (
-            <ul className="mt-3 max-h-48 divide-y divide-rose-50 overflow-y-auto rounded-xl border border-[var(--border-subtle)] bg-white dark:divide-zinc-800 dark:border-zinc-700 dark:bg-zinc-900">
+            <ul className="mt-3 max-h-48 divide-y divide-clay-50 overflow-y-auto rounded-xl border border-[var(--border-subtle)] bg-white dark:divide-earth-800 dark:border-earth-700 dark:bg-earth-900">
               {customers.map((c) => (
                 <li key={c.id}>
-                  <label className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-zinc-800 hover:bg-rose-50/40 dark:text-zinc-200 dark:hover:bg-zinc-800/60">
+                  <label className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-earth-800 hover:bg-clay-50/40 dark:text-earth-200 dark:hover:bg-earth-800/60">
                     <input
                       type="checkbox"
                       checked={selected.has(c.id)}
                       onChange={() => toggle(c.id)}
-                      className="accent-rose-700"
+                      className="accent-clay-700"
                     />
                     <span className="truncate font-medium">{c.name}</span>
-                    <span className="ml-auto shrink-0 text-xs text-zinc-500 dark:text-zinc-400">{c.mobile}</span>
+                    <span className="ml-auto shrink-0 text-xs text-earth-500 dark:text-earth-400">{c.mobile}</span>
                   </label>
                 </li>
               ))}
               {customers.length === 0 && (
-                <li className="px-3 py-2 text-sm text-zinc-500 dark:text-zinc-400">
+                <li className="px-3 py-2 text-sm text-earth-500 dark:text-earth-400">
                   {lang === "mr" ? "कोणतेही सक्रिय ग्राहक नाहीत." : "No active customers."}
                 </li>
               )}
@@ -189,13 +189,13 @@ export function NotificationsComposer({
         </div>
 
         {error && (
-          <p className="rounded-xl border border-rose-300 bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-800 dark:border-rose-500/40 dark:bg-rose-500/10 dark:text-rose-200">
+          <p className="rounded-xl border border-clay-300 bg-clay-50 px-4 py-2.5 text-sm font-medium text-clay-800 dark:border-clay-500/40 dark:bg-clay-500/10 dark:text-clay-200">
             {error}
           </p>
         )}
 
         {sentCount !== null && (
-          <p className="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200">
+          <p className="rounded-xl border border-leaf-300 bg-leaf-50 px-4 py-2.5 text-sm font-medium text-leaf-800 dark:border-leaf-500/40 dark:bg-leaf-500/10 dark:text-leaf-200">
             {sentCount > 0
               ? `पाठवले: ${sentCount} ग्राहकांना. / Sent to ${sentCount} customer${sentCount === 1 ? "" : "s"}.`
               : "कोणतेही सक्रिय ग्राहक नाहीत. / No active customers to notify."}

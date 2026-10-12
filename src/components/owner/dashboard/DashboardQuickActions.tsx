@@ -10,7 +10,7 @@ export function DashboardQuickActions({ lang }: { lang: Lang }) {
 
   return (
     <section>
-      <h2 className="mb-3.5 text-base font-bold text-[#4c0519] dark:text-zinc-100">
+      <h2 className="mb-3 text-lg text-heading">
         {lang === "mr" ? "जलद क्रिया" : "Quick Actions"}
       </h2>
       <div className="flex flex-wrap gap-3">
@@ -22,13 +22,13 @@ export function DashboardQuickActions({ lang }: { lang: Lang }) {
         </Link>
         <Link
           href="/owner/queue"
-          className="stitch-btn-primary px-4 py-2.5 text-sm"
+          className="stitch-btn-secondary px-4 py-2.5 text-sm"
         >
           {lang === "mr" ? "दळण्याची यादी" : "Milling Queue"}
         </Link>
         <Link
           href="/owner/outstanding"
-          className="rounded-xl border border-rose-200/90 bg-rose-50/80 px-4 py-2.5 text-sm font-semibold text-rose-900 shadow-xs transition-all hover:bg-rose-100/90 hover:border-rose-300 dark:border-rose-500/40 dark:bg-rose-500/10 dark:text-rose-300"
+          className="stitch-btn-secondary px-4 py-2.5 text-sm"
         >
           {lang === "mr" ? "उधारी वसूल करा" : "Collect Dues"}
         </Link>

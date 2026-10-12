@@ -55,7 +55,7 @@ export function OwnerLoginForm() {
   return (
     <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-4">
       <div>
-        <label htmlFor="email" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#6b545a] dark:text-zinc-300">
+        <label htmlFor="email" className="mb-1.5 block text-xs font-semibold text-muted dark:text-earth-300">
           ईमेल / Email
         </label>
         <input
@@ -72,7 +72,7 @@ export function OwnerLoginForm() {
       </div>
 
       <div>
-        <label htmlFor="owner-password" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#6b545a] dark:text-zinc-300">
+        <label htmlFor="owner-password" className="mb-1.5 block text-xs font-semibold text-muted dark:text-earth-300">
           पासवर्ड / Password
         </label>
         <input
@@ -90,7 +90,7 @@ export function OwnerLoginForm() {
 
       {step === "totp" && (
         <div>
-          <label htmlFor="totp-code" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#6b545a] dark:text-zinc-300">
+          <label htmlFor="totp-code" className="mb-1.5 block text-xs font-semibold text-muted dark:text-earth-300">
             ऑथेंटिकेटर कोड / 2FA Code
           </label>
           <input
@@ -107,14 +107,14 @@ export function OwnerLoginForm() {
             className="stitch-input w-full text-center tracking-widest text-lg font-bold"
             suppressHydrationWarning
           />
-          <p className="mt-1.5 text-xs text-[#6b545a] dark:text-zinc-400">
+          <p className="mt-1.5 text-xs text-muted dark:text-earth-400">
             आपल्या ऑथेंटिकेटर अ‍ॅपमधून 6-अंकी कोड टाका / Enter the 6-digit code from your authenticator app
           </p>
         </div>
       )}
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">
+        <div className="rounded-xl border border-clay-200 bg-clay-50 p-3 text-xs font-semibold text-clay-800 dark:border-clay-900/50 dark:bg-clay-950/40 dark:text-clay-300">
           {error}
         </div>
       )}
@@ -123,7 +123,7 @@ export function OwnerLoginForm() {
         <button
           type="submit"
           disabled={pending}
-          className="stitch-btn-primary w-full py-3.5"
+          className="stitch-btn-primary w-full py-3 text-base"
           suppressHydrationWarning
         >
           {pending ? "..." : step === "totp" ? "पडताळा / Verify" : "लॉगिन करा / Sign In"}

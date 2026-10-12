@@ -28,18 +28,18 @@ export function PaymentEntry({
   const inputClass = "stitch-input w-full";
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-rose-200/80 bg-rose-50/40 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex flex-col gap-3 rounded-2xl border border-clay-200/80 bg-clay-50/40 p-4 dark:border-earth-800 dark:bg-earth-900">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#805e68] dark:text-zinc-400">{title}</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-muted dark:text-earth-400">{title}</p>
         {max > 0 && (
-          <p className="text-xs font-semibold text-rose-700 dark:text-rose-400">
+          <p className="text-xs font-semibold text-clay-700 dark:text-clay-400">
             {lang === "mr" ? `जास्तीत जास्त ₹ ${max.toLocaleString("en-IN")}` : `Max allowed ₹ ${max.toLocaleString("en-IN")}`}
           </p>
         )}
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-semibold text-[#6b545a] dark:text-zinc-400">
+        <label className="mb-1 block text-xs font-semibold text-muted dark:text-earth-400">
           {lang === "mr" ? "रक्कम (₹)" : "Amount (₹)"}
         </label>
         <input
@@ -56,7 +56,7 @@ export function PaymentEntry({
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-semibold text-[#6b545a] dark:text-zinc-400">
+        <label className="mb-1 block text-xs font-semibold text-muted dark:text-earth-400">
           {lang === "mr" ? "पेमेंट पद्धत" : "Payment Method"}
         </label>
         <div className="flex gap-2">
@@ -65,8 +65,8 @@ export function PaymentEntry({
             onClick={() => onMethodChange("cash")}
             className={`flex-1 rounded-xl border px-3 py-2 text-xs font-bold transition-all ${
               method === "cash"
-                ? "border-rose-400 bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-xs dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                : "border-rose-200/80 bg-white text-rose-900 shadow-xs hover:bg-rose-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                ? "border-clay-400 bg-clay-600 text-white shadow-xs dark:border-earth-100 dark:bg-earth-100 dark:text-earth-900"
+                : "border-clay-200/80 bg-white text-clay-900 shadow-xs hover:bg-clay-50 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-300 dark:hover:bg-earth-700"
             }`}
           >
             {lang === "mr" ? "रोख (Cash)" : "Cash"}
@@ -76,8 +76,8 @@ export function PaymentEntry({
             onClick={() => onMethodChange("upi")}
             className={`flex-1 rounded-xl border px-3 py-2 text-xs font-bold transition-all ${
               method === "upi"
-                ? "border-rose-400 bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-xs dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                : "border-rose-200/80 bg-white text-rose-900 shadow-xs hover:bg-rose-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                ? "border-clay-400 bg-clay-600 text-white shadow-xs dark:border-earth-100 dark:bg-earth-100 dark:text-earth-900"
+                : "border-clay-200/80 bg-white text-clay-900 shadow-xs hover:bg-clay-50 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-300 dark:hover:bg-earth-700"
             }`}
           >
             UPI
@@ -87,7 +87,7 @@ export function PaymentEntry({
 
       {method === "upi" && (
         <div>
-          <label className="mb-0.5 block text-xs text-zinc-500 dark:text-zinc-400">
+          <label className="mb-0.5 block text-xs text-earth-500 dark:text-earth-400">
             {lang === "mr" ? "UPI ट्रान्सॅक्शन आयडी (Transaction ID)" : "UPI Transaction ID"}
           </label>
           <input

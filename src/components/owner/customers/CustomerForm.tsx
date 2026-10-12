@@ -28,7 +28,7 @@ export function CustomerForm({
 
   const inputClass =
     "stitch-input text-sm";
-  const labelClass = "mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300";
+  const labelClass = "mb-1.5 block text-xs font-semibold text-earth-700 dark:text-earth-300";
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -55,7 +55,7 @@ export function CustomerForm({
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-5">
-      <h2 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+      <h2 className="text-lg font-bold tracking-tight text-earth-900 dark:text-earth-100 font-display">
         {isEdit
           ? (lang === "mr" ? "ग्राहक माहिती बदला" : "Edit Customer Details")
           : (lang === "mr" ? "नवीन ग्राहक खाते तयार करा" : "Add New Customer")}
@@ -111,7 +111,7 @@ export function CustomerForm({
         </div>
       </div>
 
-      {error && <p className="text-sm font-medium text-rose-600 dark:text-rose-400">{error}</p>}
+      {error && <p className="text-sm font-medium text-clay-600 dark:text-clay-400">{error}</p>}
 
       <div className="flex items-center gap-3">
         <button
@@ -130,7 +130,7 @@ export function CustomerForm({
         </button>
       </div>
 
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+      <p className="text-xs text-earth-500 dark:text-earth-400">
         {isEdit
           ? (lang === "mr"
               ? "टीप: नवीन पिन दिल्यास ग्राहकाला पहिल्या लॉगिनवर तो बदलावा लागेल."

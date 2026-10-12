@@ -8,6 +8,40 @@ All notable changes to this project, in reverse chronological order. Format base
 - Web push (needs a service worker — see the PWA note in `0.12.0`)
 - Phase 2: SMS (MSG91) + WhatsApp (Meta)
 
+## [0.13.0] - 2026-10-12 — "Chakki" visual redesign
+
+UI only — no API, schema or business-logic change (only new `cust.*` i18n keys).
+
+### New theme
+- Flat, warm palette in `globals.css`: flour-cream paper ground, terracotta
+  `clay` brand, `haldi` (pending), `neel` (milling), `leaf` (ready / paid) and
+  warm `earth` neutrals. Every rose/pink/zinc/slate/emerald/amber/sky utility
+  was renamed to these ramps; gradients, pink glows and the Material token set
+  were removed. Dark mode is now warm brown instead of cold zinc.
+- Fonts: Mukta (Marathi + Latin at matching weight) for UI, Tiro Devanagari
+  Marathi serif for headings and rupee figures (replaces Plus Jakarta / Geist).
+- Component classes (`stitch-*`) moved into `@layer components` and given
+  default padding — several Receipt / Collect / CSV buttons previously
+  rendered with no padding at all.
+- Emoji (🌾 📞 ✅ 🔔 🖨 💳 📸 ❌ ⚠️) replaced by drawn stroke icons
+  (`src/components/common/Icons.tsx`) and a `BrandMark` wheat-ear logo; PWA
+  icons regenerated in the new colours (`npm run icons`).
+
+### Customer portal
+- New top bar, serif greeting, and a terracotta "what you owe" card with Pay /
+  Call buttons — or a green "All settled" card when nothing is due.
+- "Your flour is ready" banner whenever an order is in तयार.
+- Orders are paper slips (token stub, perforated tear line, a crooked
+  "Paid in full" stamp) split into Current / Past orders.
+- Order progress is a 4-stop stepper with readable 13px words and ticks.
+- Notifications open on the newest 5 with "Show all".
+
+### Owner
+- Shared `AuthShell` login layout for both logins.
+- Sidebar: ink-coloured active item, wheat-ear brand; content capped at 6xl.
+- Dashboard: eight equal tiles replaced by three panels — Today, In the mill
+  now (links to the queue), Outstanding.
+
 ## [0.12.0] - 2026-09-30 — Installable customer app (PWA manifest) & production CSP fix
 
 ### Installable Android app

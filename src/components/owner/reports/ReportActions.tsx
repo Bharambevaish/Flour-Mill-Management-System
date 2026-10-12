@@ -21,10 +21,10 @@ export function ReportActions({ query, lang }: { query: string; lang: Lang }) {
           download
           className="stitch-btn-secondary text-xs sm:text-sm"
         >
-          ⬇ {lang === "mr" ? l.mr : l.en} CSV
+          {lang === "mr" ? l.mr : l.en} CSV
         </a>
       ))}
-      <PrintButton label={lang === "mr" ? "🖨 प्रिंट / PDF" : "🖨 Print / PDF"} />
+      <PrintButton label={lang === "mr" ? "प्रिंट / PDF" : "Print / PDF"} />
     </div>
   );
 }

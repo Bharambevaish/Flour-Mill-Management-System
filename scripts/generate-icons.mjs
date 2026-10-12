@@ -25,11 +25,11 @@ const CANVAS = 512;
 const CX = CANVAS / 2;
 
 /** Warm cream for the grain, so it reads as wheat rather than pure white. */
-const CREAM = "#fff4e0";
+const CREAM = "#f9ebc4";
 
-/** The mill's rose brand ramp — matches `rose-500` → `rose-700` on the login mark. */
-const ROSE_FROM = "#f43f5e";
-const ROSE_TO = "#be123c";
+/** The mill's terracotta brand ramp — matches `clay-500` → `clay-700` in globals.css. */
+const ROSE_FROM = "#bd5c37";
+const ROSE_TO = "#8c3a22";
 
 /**
  * The wheat ear. Pairs of grains hang off a central stem, tapering toward the

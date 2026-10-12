@@ -1,22 +1,24 @@
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
-import { Plus_Jakarta_Sans, Geist, Geist_Mono } from "next/font/google";
+import { Mukta, Tiro_Devanagari_Marathi } from "next/font/google";
 import "./globals.css";
 import { ThemeToggle } from "@/components/common";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta",
-  subsets: ["latin"],
+/**
+ * Mukta carries both scripts at matching weight, so a Marathi label and an
+ * English one sit on the same line without one looking bolder. Tiro is the
+ * "printed" serif used for headings and the big rupee figures.
+ */
+const mukta = Mukta({
+  variable: "--font-mukta",
+  subsets: ["devanagari", "latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const tiro = Tiro_Devanagari_Marathi({
+  variable: "--font-tiro",
+  subsets: ["devanagari", "latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -66,8 +68,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#faf5f7" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+    { media: "(prefers-color-scheme: light)", color: "#f6f1e7" },
+    { media: "(prefers-color-scheme: dark)", color: "#171310" },
   ],
 };
 
@@ -79,7 +81,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${plusJakartaSans.variable} ${geistSans.variable} ${geistMono.variable} ${theme} h-full antialiased`}
+      className={`${mukta.variable} ${tiro.variable} ${theme} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}

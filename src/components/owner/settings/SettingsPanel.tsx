@@ -42,7 +42,7 @@ function PasswordInput({
   const [visible, setVisible] = useState(false);
   return (
     <div>
-      <label htmlFor={id} className="mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+      <label htmlFor={id} className="mb-1.5 block text-xs font-semibold text-earth-700 dark:text-earth-300">
         {label}
       </label>
       <div className="relative">
@@ -59,7 +59,7 @@ function PasswordInput({
           onClick={() => setVisible((v) => !v)}
           aria-label={visible ? "Hide password" : "Show password"}
           title={visible ? "लपवा / Hide" : "दाखवा / Show"}
-          className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100"
+          className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-earth-500 hover:text-earth-800 dark:text-earth-400 dark:hover:text-earth-100"
         >
           {visible ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
         </button>
@@ -376,8 +376,8 @@ export function SettingsPanel({
   const tabClass = (id: TabId) =>
     `border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
       activeTab === id
-        ? "border-rose-600 text-rose-700 dark:border-rose-400 dark:text-rose-400"
-        : "border-transparent text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+        ? "border-clay-600 text-clay-700 dark:border-clay-400 dark:text-clay-400"
+        : "border-transparent text-earth-500 hover:text-earth-800 dark:text-earth-400 dark:hover:text-earth-200"
     }`;
 
   const inputClass =
@@ -386,7 +386,7 @@ export function SettingsPanel({
   return (
     <div className="flex flex-col gap-6">
       {/* Navigation Tabs */}
-      <div className="flex flex-wrap border-b border-rose-100 dark:border-zinc-800">
+      <div className="flex flex-wrap border-b border-clay-100 dark:border-earth-800">
         <button onClick={() => setActiveTab("general")} className={tabClass("general")}>
           १. भाषा व चक्की प्रोफाइल / Profile &amp; Lang
         </button>
@@ -408,8 +408,8 @@ export function SettingsPanel({
         <div
           className={`rounded-2xl border p-4 text-sm font-medium shadow-soft ${
             message.type === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-950/50 dark:text-emerald-300"
-              : "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-500/30 dark:bg-rose-950/50 dark:text-rose-300"
+              ? "border-leaf-200 bg-leaf-50 text-leaf-800 dark:border-leaf-500/30 dark:bg-leaf-950/50 dark:text-leaf-300"
+              : "border-clay-200 bg-clay-50 text-clay-800 dark:border-clay-500/30 dark:bg-clay-950/50 dark:text-clay-300"
           }`}
         >
           {message.text}
@@ -419,21 +419,21 @@ export function SettingsPanel({
       {/* Tab 1: General & Profile */}
       {activeTab === "general" && (
         <div className="space-y-6">
-          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
-            <h3 className="mb-4 text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-earth-800 dark:bg-earth-900">
+            <h3 className="mb-4 text-base font-bold text-earth-900 dark:text-earth-100 font-display">
               भाषा आणि देखावा / Language &amp; Display Toggle
             </h3>
             <div className="flex flex-wrap items-center gap-6">
               <div>
-                <p className="mb-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">तुमची भाषा / Your session language</p>
+                <p className="mb-1.5 text-xs font-semibold text-earth-500 dark:text-earth-400">तुमची भाषा / Your session language</p>
                 <LanguageToggle initialLang={initialLang} />
               </div>
               <div>
-                <p className="mb-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">थीम निवडा / Theme Toggle</p>
+                <p className="mb-1.5 text-xs font-semibold text-earth-500 dark:text-earth-400">थीम निवडा / Theme Toggle</p>
                 <ThemeToggle initialTheme={initialTheme} />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                <label className="mb-1.5 block text-xs font-semibold text-earth-500 dark:text-earth-400">
                   मिलची डीफॉल्ट भाषा / Mill default language
                 </label>
                 <select
@@ -448,13 +448,13 @@ export function SettingsPanel({
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
-            <h3 className="mb-4 text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-earth-800 dark:bg-earth-900">
+            <h3 className="mb-4 text-base font-bold text-earth-900 dark:text-earth-100 font-display">
               चक्की माहिती / Mill Profile
             </h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-xs font-semibold text-earth-700 dark:text-earth-300">
                   चक्कीचे नाव / Mill Name
                 </label>
                 <input
@@ -466,7 +466,7 @@ export function SettingsPanel({
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-xs font-semibold text-earth-700 dark:text-earth-300">
                   संपर्क मोबाईल / Contact Mobile
                 </label>
                 <input
@@ -479,7 +479,7 @@ export function SettingsPanel({
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-xs font-semibold text-earth-700 dark:text-earth-300">
                   चलनाचे चिन्ह / Currency Symbol
                 </label>
                 <input
@@ -492,7 +492,7 @@ export function SettingsPanel({
               </div>
 
               <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-xs font-semibold text-earth-700 dark:text-earth-300">
                   पत्ता / Address
                 </label>
                 <input
@@ -510,22 +510,22 @@ export function SettingsPanel({
 
       {/* Tab 2: Milling Rates */}
       {activeTab === "rates" && (
-        <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
-          <h3 className="mb-1 text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+        <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-earth-800 dark:bg-earth-900">
+          <h3 className="mb-1 text-base font-bold text-earth-900 dark:text-earth-100 font-display">
             दळणाचे डीफॉल्ट दर ({currency} / KG)
           </h3>
-          <p className="mb-4 text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="mb-4 text-xs text-earth-500 dark:text-earth-400">
             नवीन ऑर्डर घेताना हे दर आपोआप लागू होतील (ऑर्डर घेताना बदलता येतात)
           </p>
           {invalidRates && (
-            <p className="mb-3 text-xs font-semibold text-rose-600 dark:text-rose-400">
+            <p className="mb-3 text-xs font-semibold text-clay-600 dark:text-clay-400">
               कृपया वैध दर टाका (शून्य किंवा त्याहून अधिक) / Rates must be zero or more
             </p>
           )}
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-rose-100 bg-rose-50/40 text-xs font-semibold text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
+              <thead className="border-b border-clay-100 bg-clay-50/40 text-xs font-semibold text-earth-600 dark:border-earth-800 dark:bg-earth-950 dark:text-earth-400">
                 <tr>
                   <th className="px-4 py-3">धान्य / Grain</th>
                   {SIZES.map((s) => (
@@ -535,10 +535,10 @@ export function SettingsPanel({
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-rose-50 dark:divide-zinc-800">
+              <tbody className="divide-y divide-clay-50 dark:divide-earth-800">
                 {GRAINS.map((g) => (
-                  <tr key={g.key} className="hover:bg-rose-50/20 dark:hover:bg-zinc-800/40 transition-colors">
-                    <td className="px-4 py-3 font-semibold text-zinc-900 dark:text-zinc-100">
+                  <tr key={g.key} className="hover:bg-clay-50/20 dark:hover:bg-earth-800/40 transition-colors">
+                    <td className="px-4 py-3 font-semibold text-earth-900 dark:text-earth-100">
                       {g.mr} / {g.en}
                     </td>
                     {SIZES.map((s) => (
@@ -563,8 +563,8 @@ export function SettingsPanel({
 
       {/* Tab 3: Notifications */}
       {activeTab === "notifs" && (
-        <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
-          <h3 className="mb-4 text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+        <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-earth-800 dark:bg-earth-900">
+          <h3 className="mb-4 text-base font-bold text-earth-900 dark:text-earth-100 font-display">
             सूचना चॅनेल्स / Notification Channels &amp; Integrations
           </h3>
 
@@ -601,16 +601,16 @@ export function SettingsPanel({
                 },
               ] as const
             ).map((c) => (
-              <label key={c.key} className="flex items-center justify-between rounded-xl border border-[var(--border-subtle)] p-3.5 hover:bg-rose-50/20 dark:border-zinc-800 dark:hover:bg-zinc-800/40 cursor-pointer transition-colors">
+              <label key={c.key} className="flex items-center justify-between rounded-xl border border-[var(--border-subtle)] p-3.5 hover:bg-clay-50/20 dark:border-earth-800 dark:hover:bg-earth-800/40 cursor-pointer transition-colors">
                 <div>
-                  <p className="font-semibold text-zinc-900 dark:text-zinc-100">{c.title}</p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{c.desc}</p>
+                  <p className="font-semibold text-earth-900 dark:text-earth-100">{c.title}</p>
+                  <p className="text-xs text-earth-500 dark:text-earth-400">{c.desc}</p>
                 </div>
                 <input
                   type="checkbox"
                   checked={c.checked}
                   onChange={c.toggle}
-                  className="h-4 w-4 rounded accent-rose-700"
+                  className="h-4 w-4 rounded accent-clay-700"
                 />
               </label>
             ))}
@@ -621,8 +621,8 @@ export function SettingsPanel({
       {/* Tab 4: Security */}
       {activeTab === "security" && (
         <div className="space-y-6">
-          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
-            <h3 className="mb-4 text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-earth-800 dark:bg-earth-900">
+            <h3 className="mb-4 text-base font-bold text-earth-900 dark:text-earth-100 font-display">
               पासवर्ड बदला / Change Owner Password
             </h3>
             <div className="grid max-w-md grid-cols-1 gap-4">
@@ -648,7 +648,7 @@ export function SettingsPanel({
                 autoComplete="new-password"
               />
               {passMsg && (
-                <p className={`text-sm font-medium ${passMsg.type === "success" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+                <p className={`text-sm font-medium ${passMsg.type === "success" ? "text-leaf-600 dark:text-leaf-400" : "text-clay-600 dark:text-clay-400"}`}>
                   {passMsg.text}
                 </p>
               )}
@@ -665,34 +665,34 @@ export function SettingsPanel({
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
+          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-earth-800 dark:bg-earth-900">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+                <h3 className="text-base font-bold text-earth-900 dark:text-earth-100 font-display">
                   टू-फॅक्टर ऑथेंटिकेशन (TOTP 2FA)
                 </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                <p className="text-xs text-earth-500 dark:text-earth-400">
                   Google Authenticator / QR द्वारे अतिरिक्त सुरक्षा
                 </p>
               </div>
               <span
                 className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                   twoFaEnabled
-                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                    : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+                    ? "bg-leaf-100 text-leaf-800 dark:bg-leaf-950/60 dark:text-leaf-300"
+                    : "bg-earth-100 text-earth-600 dark:bg-earth-800 dark:text-earth-300"
                 }`}
               >
                 {twoFaEnabled ? "ON" : "OFF"}
               </span>
             </div>
 
-            {twoFaError && <p className="mb-3 text-sm font-medium text-rose-600 dark:text-rose-400">{twoFaError}</p>}
+            {twoFaError && <p className="mb-3 text-sm font-medium text-clay-600 dark:text-clay-400">{twoFaError}</p>}
 
             {twoFaStep === "idle" && (
               <div>
                 {twoFaEnabled ? (
                   <div className="flex max-w-md flex-col gap-3">
-                    <p className="text-sm text-zinc-600 dark:text-zinc-300">
+                    <p className="text-sm text-earth-600 dark:text-earth-300">
                       डिसेबल करण्यासाठी आपल्या ऑथेंटिकेटर ऍपमधील 6-अंकी कोड टाका / Enter your current 6-digit code to disable
                     </p>
                     <input
@@ -711,7 +711,7 @@ export function SettingsPanel({
                       onClick={() => {
                         void disableTotp();
                       }}
-                      className="stitch-btn-secondary text-sm border-rose-300 text-rose-700 hover:bg-rose-50"
+                      className="stitch-btn-secondary text-sm border-clay-300 text-clay-700 hover:bg-clay-50"
                     >
                       {twoFaBusy ? "..." : "2FA बंद करा / Disable 2FA"}
                     </button>
@@ -733,23 +733,23 @@ export function SettingsPanel({
 
             {twoFaStep === "setup" && setupInfo && (
               <div className="max-w-md space-y-3">
-                <p className="text-sm text-zinc-600 dark:text-zinc-300">
+                <p className="text-sm text-earth-600 dark:text-earth-300">
                   Google Authenticator किंवा इतर ऍपने हा QR स्कॅन करा / Scan this QR with your authenticator app:
                 </p>
-                <div className="inline-block rounded-xl border border-[var(--border-subtle)] bg-white p-3 dark:border-zinc-800">
+                <div className="inline-block rounded-xl border border-[var(--border-subtle)] bg-white p-3 dark:border-earth-800">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={setupInfo.qrDataUrl} alt="TOTP QR code" className="h-40 w-40" />
                 </div>
                 <div>
-                  <p className="mb-1 text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="mb-1 text-xs text-earth-500 dark:text-earth-400">
                     QR स्कॅन करता येत नसेल तर हा कोड लिहून ठेवा / Manual fallback secret:
                   </p>
-                  <code className="rounded bg-rose-50 border border-rose-100 px-2 py-1 text-xs text-rose-900 dark:bg-zinc-800 dark:text-zinc-100">
+                  <code className="rounded bg-clay-50 border border-clay-100 px-2 py-1 text-xs text-clay-900 dark:bg-earth-800 dark:text-earth-100">
                     {setupInfo.secret}
                   </code>
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  <label className="mb-1.5 block text-xs font-semibold text-earth-700 dark:text-earth-300">
                     6-अंकी कोड / 6-digit Code
                   </label>
                   <input
@@ -797,11 +797,11 @@ export function SettingsPanel({
       {/* Tab 5: UPI payment — the one QR every customer sees on their portal */}
       {activeTab === "upi" && (
         <div className="space-y-6">
-          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
-            <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-earth-800 dark:bg-earth-900">
+            <h3 className="text-base font-bold text-earth-900 dark:text-earth-100 font-display">
               UPI QR कोड / UPI QR Code
             </h3>
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mt-1 text-sm text-earth-600 dark:text-earth-400">
               हा QR सर्व ग्राहकांना दिसेल. तुमच्या बँकचा QR इथे अपलोड करा. / This one QR is shown to every
               customer. Upload your bank&apos;s QR image here.
             </p>
@@ -819,12 +819,12 @@ export function SettingsPanel({
                     alt="UPI QR code"
                     width={180}
                     height={180}
-                    className="h-[180px] w-[180px] rounded-2xl border border-zinc-200 bg-white p-2 dark:border-zinc-800"
+                    className="h-[180px] w-[180px] rounded-2xl border border-earth-200 bg-white p-2 dark:border-earth-800"
                   />
                 ) : (
-                  <div className="flex h-[180px] w-[180px] flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-zinc-300 p-4 text-center dark:border-zinc-700">
-                    <span className="text-3xl text-zinc-300 dark:text-zinc-600">▦</span>
-                    <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                  <div className="flex h-[180px] w-[180px] flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-earth-300 p-4 text-center dark:border-earth-700">
+                    <span className="text-3xl text-earth-300 dark:text-earth-600">▦</span>
+                    <span className="text-xs font-semibold text-earth-500 dark:text-earth-400">
                       QR सेट नाही / No QR set
                     </span>
                   </div>
@@ -832,7 +832,7 @@ export function SettingsPanel({
               </div>
 
               <div className="min-w-0 flex-1 space-y-3">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                <p className="text-xs text-earth-500 dark:text-earth-400">
                   PNG, JPEG किंवा WEBP · कमाल १ MB · फाइल नेटवर नाही, मूळ स्वरूपात साठवली जाते /
                   PNG, JPEG or WEBP · 1 MB max · stored as-is, never re-encoded
                 </p>
@@ -864,26 +864,26 @@ export function SettingsPanel({
                       काढा / Remove
                     </button>
                   )}
-                  {qrBusy && <span className="self-center text-sm text-zinc-500">...</span>}
+                  {qrBusy && <span className="self-center text-sm text-earth-500">...</span>}
                 </div>
 
                 {qr && (
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="text-xs text-earth-500 dark:text-earth-400">
                     {qr.contentType} · {new Date(qr.uploadedAt).toLocaleString("en-IN")}
                   </p>
                 )}
                 {qrError && (
-                  <p className="text-sm font-semibold text-rose-600 dark:text-rose-400">{qrError}</p>
+                  <p className="text-sm font-semibold text-clay-600 dark:text-clay-400">{qrError}</p>
                 )}
               </div>
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
-            <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+          <section className="rounded-2xl border border-[var(--border-subtle)] bg-white p-6 shadow-soft dark:border-earth-800 dark:bg-earth-900">
+            <h3 className="text-base font-bold text-earth-900 dark:text-earth-100 font-display">
               UPI आयडी / UPI ID
             </h3>
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mt-1 text-sm text-earth-600 dark:text-earth-400">
               ग्राहक UPI आयडीही कॉपी करू शकतात. / Customers can also copy this UPI ID.
             </p>
             <input
@@ -893,7 +893,7 @@ export function SettingsPanel({
               placeholder="yourname@bank"
               className="stitch-input mt-3 text-sm"
             />
-            <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1.5 text-xs text-earth-500 dark:text-earth-400">
               वापरकर्तानावर @ असणे आवश्यक / Must contain an @ (e.g. name@okaxis)
             </p>
           </section>
@@ -903,7 +903,7 @@ export function SettingsPanel({
       {/* Action Bar */}
       <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
         {invalid && (
-          <p className="text-xs font-semibold text-rose-600 dark:text-rose-400">
+          <p className="text-xs font-semibold text-clay-600 dark:text-clay-400">
             कृपया मिलचे नाव आणि वैध दर तपासा / Fix the mill name or rate values first
           </p>
         )}

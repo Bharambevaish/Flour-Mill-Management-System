@@ -32,7 +32,7 @@ export function DashboardAutoRefresh({ lang }: { lang: Lang }) {
   return (
     <div className="flex shrink-0 items-center gap-3">
       {lastUpdated && (
-        <span className="text-xs text-zinc-400 dark:text-zinc-500">
+        <span className="text-xs text-earth-400 dark:text-earth-500">
           {lang === "mr"
             ? `शेवटचे अपडेट ${lastUpdated.toLocaleTimeString(localeOf(lang), { hour: "2-digit", minute: "2-digit" })}`
             : `Updated at ${lastUpdated.toLocaleTimeString(localeOf(lang), { hour: "2-digit", minute: "2-digit" })}`}
