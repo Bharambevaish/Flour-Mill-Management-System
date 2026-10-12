@@ -36,6 +36,16 @@ UI only — no API, schema or business-logic change (only new `cust.*` i18n keys
 - Order progress is a 4-stop stepper with readable 13px words and ticks.
 - Notifications open on the newest 5 with "Show all".
 
+### Landing page
+- Rebuilt in the new theme and fully bilingual (follows the `lang` cookie).
+- Removed claims the app does not support: scale sync / "99.9% accuracy",
+  biometric login, offline sync, SMS / WhatsApp alerts, OTP login and a
+  placeholder support number. Only real features are listed now.
+- Hero shows a labelled example order slip; a "How it works" (3 steps),
+  features and owner panel follow.
+- The mobile-number box now really carries over: `/my/login?mobile=…`
+  pre-fills the customer login (digits only, max 10).
+
 ### Owner
 - Shared `AuthShell` login layout for both logins.
 - Sidebar: ink-coloured active item, wheat-ear brand; content capped at 6xl.

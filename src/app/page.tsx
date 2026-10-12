@@ -1,321 +1,278 @@
 import Link from "next/link";
-import { BrandMark } from "@/components/common";
+import { BrandMark, IconArrowRight, IconBell, IconCheck } from "@/components/common";
 import { getLang } from "@/lib/i18n/i18n";
 import { LandingNavLanguageToggle, CustomerTrackForm } from "@/components/landing/LandingClientComponents";
 
+/**
+ * Public landing page.
+ *
+ * Every claim on this page is something the app really does today. Earlier
+ * copy advertised scale sync, biometrics, SMS/WhatsApp alerts and OTP login —
+ * none of which exist — so a customer or the mill owner would have been
+ * promised features they could not find. Keep it that way: when a feature
+ * ships, add it here; not before.
+ */
+
+type L = { mr: string; en: string };
+
+const COPY = {
+  tagline: { mr: "गिरणी व्यवस्थापन", en: "Mill management" },
+  ownerLogin: { mr: "मालक लॉगिन", en: "Owner login" },
+  customerLogin: { mr: "ग्राहक लॉगिन", en: "Customer login" },
+  eyebrow: { mr: "दळण · उधारी · पावती", en: "Milling · Dues · Receipts" },
+  headline: { mr: "माझं दळण झालं का?", en: "Is my flour ready?" },
+  headline2: { mr: "आता फोन करायची गरज नाही.", en: "No more phone calls to find out." },
+  lead: {
+    mr: "तुम्ही आणलेल्या धान्याचं वजन, दळणाची स्थिती, आणि किती पैसे बाकी आहेत — सगळं तुमच्या मोबाईलवर. माल तयार झाला की लगेच सूचना.",
+    en: "Your grain's weight, where it is in the mill, and what you still owe — all on your phone. The moment it's ready, you get a notice.",
+  },
+  trackLabel: { mr: "तुमचा मोबाईल नंबर टाका", en: "Enter your mobile number" },
+  sampleTag: { mr: "उदाहरण", en: "Example" },
+  howTitle: { mr: "कसं चालतं", en: "How it works" },
+  featuresTitle: { mr: "गिरणीत काय मिळतं", en: "What's in it" },
+  ownerTitle: { mr: "गिरणी मालकांसाठी", en: "For the mill owner" },
+  ownerBody: {
+    mr: "नवीन ऑर्डर नोंदवा, दळण्याची रांग सांभाळा, रोख / UPI जमा नोंदवा आणि कोणाची किती उधारी आहे ते एका नजरेत पहा.",
+    en: "Take in new orders, run the milling queue, record cash / UPI payments and see who owes what at a glance.",
+  },
+  footer: { mr: "दळण व्यवस्थापन प्रणाली", en: "Mill management system" },
+} satisfies Record<string, L>;
+
+const STEPS: { title: L; body: L }[] = [
+  {
+    title: { mr: "माल आणा", en: "Bring your grain" },
+    body: {
+      mr: "गिरणीवर धान्याचं वजन (किलो), प्रकार आणि बारीक / मध्यम / जाडसर — सगळं नोंदवलं जातं. तुम्हाला ऑर्डर क्रमांक मिळतो.",
+      en: "The mill records the weight in kg, the grain and the size you want — fine, medium or coarse. You get an order number.",
+    },
+  },
+  {
+    title: { mr: "स्थिती पहा", en: "Watch it move" },
+    body: {
+      mr: "रांगेत → दळण सुरू → तयार. प्रत्येक बदल तुमच्या फोनवर दिसतो; माल तयार झाला की सूचना येते.",
+      en: "Queued → milling → ready. Every step shows on your phone, with a notice when it's ready to collect.",
+    },
+  },
+  {
+    title: { mr: "हिशोब साफ", en: "Settle up" },
+    body: {
+      mr: "रोख किंवा UPI ने पैसे भरा. एकूण आकारणी, जमा रक्कम आणि बाकी उधारी — सगळं स्पष्ट, पावतीसह.",
+      en: "Pay in cash or by UPI. Charges, what you've paid and what's left — all clear, with a receipt.",
+    },
+  },
+];
+
+const FEATURES: { title: L; body: L }[] = [
+  {
+    title: { mr: "ऑर्डरची थेट स्थिती", en: "Live order status" },
+    body: { mr: "चालू आणि जुन्या सर्व ऑर्डर, वेळेसह.", en: "Current and past orders, with times." },
+  },
+  {
+    title: { mr: "उधारी व पावती", en: "Dues & receipts" },
+    body: { mr: "प्रत्येक जमा रक्कम नोंदवलेली, बाकी आपोआप मोजलेली.", en: "Every payment recorded, the balance worked out for you." },
+  },
+  {
+    title: { mr: "ॲपमध्ये सूचना", en: "In-app notices" },
+    body: { mr: "ऑर्डर मिळाली, दळण सुरू, तयार, पैसे मिळाले.", en: "Received, milling, ready, payment received." },
+  },
+  {
+    title: { mr: "मराठी व English", en: "Marathi & English" },
+    body: { mr: "एका टॅपमध्ये भाषा बदला. फोनवर ॲपसारखं इन्स्टॉल करा.", en: "Switch language in one tap. Install it on your phone like an app." },
+  },
+];
+
 export default async function Home() {
   const lang = await getLang();
+  const tx = (l: L) => (lang === "mr" ? l.mr : l.en);
+  const mr = lang === "mr";
 
   return (
-    <div className="min-h-screen bg-background text-earth-800 font-sans antialiased selection:bg-clay-100 selection:text-clay-900 flex flex-col dark:bg-earth-950 dark:text-earth-100">
-      {/* BEGIN: TopNavigationBar */}
-      <header className="w-full border-b border-clay-100/70 bg-white/70 backdrop-blur-md sticky top-0 z-50 dark:bg-earth-900/80 dark:border-earth-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between gap-3">
-          {/* Brand Logo & Identity */}
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
-            <BrandMark className="w-9 h-9 sm:w-10 sm:h-10 xl:w-11 xl:h-11 shrink-0" />
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm sm:text-base xl:text-lg font-bold tracking-tight text-earth-900 font-display dark:text-earth-100 whitespace-nowrap">
-                  Feed and Flour Management
-                </span>
-                <span className="hidden xl:inline-flex items-center px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase bg-clay-50 text-clay-700 rounded-full border border-clay-200/60 dark:bg-earth-800 dark:text-clay-400 dark:border-earth-700 whitespace-nowrap shrink-0">
-                  Enterprise Mill OS
-                </span>
-              </div>
-              <p className="text-[10px] sm:text-xs text-earth-500 font-medium tracking-tight dark:text-earth-400 whitespace-nowrap">
-                Operations &amp; Customer Portal
-              </p>
-            </div>
+    <div className="flex min-h-screen flex-col overflow-x-clip bg-background text-foreground">
+      {/* Top bar */}
+      <header className="sticky top-0 z-40 border-b border-[var(--border-subtle)] bg-background/95 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
+          <Link href="/" className="flex min-w-0 items-center gap-2.5">
+            <BrandMark className="h-9 w-9 shrink-0 sm:h-10 sm:w-10" />
+            <span className="min-w-0 leading-tight">
+              <span className="block truncate text-[15px] font-bold text-heading sm:text-base">Feed &amp; Flour</span>
+              <span className="block truncate text-xs text-muted">{tx(COPY.tagline)}</span>
+            </span>
           </Link>
-
-          {/* Center Status Bar (Operational Indicator) */}
-          <div className="hidden lg:flex items-center gap-3.5 xl:gap-5 text-[11px] xl:text-xs text-earth-600 bg-white/85 border border-earth-200/80 px-3.5 xl:px-4 py-1.5 rounded-full shadow-xs whitespace-nowrap shrink-0 dark:bg-earth-900/80 dark:border-earth-800 dark:text-earth-300">
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-leaf-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-leaf-500"></span>
-              </span>
-              <span className="font-medium text-earth-700 dark:text-earth-200 whitespace-nowrap">
-                Milling System Active <span className="text-leaf-600 font-semibold dark:text-leaf-400">• 100% Online</span>
-              </span>
-            </div>
-            <div className="w-px h-3.5 bg-earth-200 dark:bg-earth-700 shrink-0"></div>
-            <div className="flex items-center gap-1.5 font-medium text-earth-500 dark:text-earth-400 whitespace-nowrap">
-              <svg className="w-3.5 h-3.5 text-clay-600 dark:text-clay-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              <span id="live-time-indicator" className="whitespace-nowrap">Today&apos;s Shift: 8:00 AM – 9:00 PM</span>
-            </div>
-          </div>
-
-          {/* Quick Actions / Language & Help */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0 whitespace-nowrap">
-            {/* Language Switcher Pill */}
+          <div className="flex items-center gap-2 sm:gap-3">
             <LandingNavLanguageToggle initialLang={lang} />
-
-            {/* Help Link */}
-            <a
-              className="text-[11px] sm:text-xs font-medium text-earth-600 hover:text-clay-700 flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-clay-50 transition-colors whitespace-nowrap shrink-0 dark:text-earth-400 dark:hover:text-earth-100 dark:hover:bg-earth-800"
-              href="#support"
+            <Link
+              href="/login"
+              className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-earth-700 transition-colors hover:bg-earth-100 hover:text-heading sm:inline-flex dark:text-earth-300 dark:hover:bg-earth-800"
             >
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-clay-600 dark:text-clay-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                <line x1="12" x2="12.01" y1="17" y2="17"></line>
-              </svg>
-              <span>Help &amp; Support</span>
-            </a>
+              {tx(COPY.ownerLogin)}
+            </Link>
           </div>
         </div>
       </header>
-      {/* END: TopNavigationBar */}
 
-      {/* BEGIN: MainContent */}
-      <main className="flex-grow flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-        <div className="w-full max-w-6xl mx-auto space-y-6 sm:space-y-8 lg:space-y-10">
-          {/* BEGIN: HeroHeadlineSection */}
-          <div className="text-center max-w-4xl mx-auto space-y-2.5 sm:space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full gold-amber-pill shadow-xs transition-all">
-              <span className="h-1.5 w-1.5 rounded-full bg-haldi-500" />
-              <span className="text-[11px] sm:text-xs font-semibold text-haldi-900 tracking-wide font-display dark:text-haldi-200">
-                Grain &amp; Animal Feed Milling Platform
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-haldi-500"></span>
-              <span className="text-[10px] sm:text-[11px] font-medium text-haldi-800 dark:text-haldi-300">Digital Scale &amp; Ledger</span>
-            </div>
-
-            <h1 className="text-3xl sm:text-4xl md:text-[40px] lg:text-[46px] font-extrabold text-earth-900 tracking-tight font-display dark:text-earth-100 leading-[1.15]">
-              <span className="text-clay-700 dark:text-clay-400">
-                Feed and Flour Management
-              </span>
+      <main className="flex-1">
+        {/* Hero */}
+        <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-14 pt-10 sm:px-6 md:grid-cols-[1.15fr_1fr] md:pt-16 lg:gap-16">
+          <div>
+            <p className="text-sm font-semibold text-haldi-700 dark:text-haldi-300">{tx(COPY.eyebrow)}</p>
+            <h1 className="mt-3 text-[40px] leading-[1.08] text-heading sm:text-5xl lg:text-[58px]">
+              {tx(COPY.headline)}
+              <span className="mt-1 block text-clay-700 dark:text-clay-400">{tx(COPY.headline2)}</span>
             </h1>
-
-            <p className="text-xs sm:text-sm md:text-[15px] text-earth-600 max-w-2xl mx-auto font-normal leading-relaxed dark:text-earth-400">
-              Unified management for cattle feed, poultry feed, and grain flour milling. Direct digital scale sync, instant customer receipts, and seamless ledger balancing.
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-earth-700 sm:text-lg dark:text-earth-300">
+              {tx(COPY.lead)}
             </p>
-          </div>
-          {/* END: HeroHeadlineSection */}
 
-          {/* BEGIN: GatewayPortals */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 lg:gap-8 items-stretch">
-            {/* PORTAL 1: Owner Portal */}
-            <div
-              className="lg:col-span-6 bg-white rounded-3xl p-6 sm:p-7 lg:p-8 border border-clay-200/80 shadow-lg shadow-clay-900/5 flex flex-col justify-between hover-lift relative overflow-hidden dark:bg-earth-900 dark:border-earth-800"
-              data-purpose="owner-portal-card"
-            >
-              <div className="absolute top-0 left-0 right-0 h-1 bg-clay-600"></div>
-              <div className="space-y-4 sm:space-y-5">
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-clay-50 text-clay-800 border border-clay-200 dark:bg-earth-800 dark:text-clay-300 dark:border-earth-700">
-                    <svg className="w-3.5 h-3.5 text-clay-600 dark:text-clay-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                    </svg>
-                    Owner &amp; Admin Desk
-                  </span>
-                  <span className="text-xs text-earth-400 font-medium dark:text-earth-500">Operator Access</span>
-                </div>
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-earth-900 mb-1.5 dark:text-earth-100">Owner Portal</h2>
-                  <p className="text-xs sm:text-sm text-earth-600 leading-relaxed dark:text-earth-400">
-                    Complete command center for grain grinding and commercial feed production. Manage batch queues, inventory, and automated khata accounting.
-                  </p>
-                </div>
-                <div className="space-y-2.5 sm:space-y-3">
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-earth-50 border border-earth-100 dark:bg-earth-800/60 dark:border-earth-800">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-clay-100 flex items-center justify-center text-clay-700 shrink-0 dark:bg-clay-950/60 dark:text-clay-300">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
-                      </svg>
-                    </div>
-                    <div className="text-xs">
-                      <span className="font-semibold text-earth-800 block dark:text-earth-200">Digital Scale &amp; Batch Logging</span>
-                      <span className="text-earth-500 dark:text-earth-400">Auto-capture weights for grain flour, cattle feed, and poultry mash with zero manual entry.</span>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-earth-50 border border-earth-100 dark:bg-earth-800/60 dark:border-earth-800">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-leaf-100 flex items-center justify-center text-leaf-700 shrink-0 dark:bg-leaf-950/60 dark:text-leaf-300">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
-                      </svg>
-                    </div>
-                    <div className="text-xs">
-                      <span className="font-semibold text-earth-800 block dark:text-earth-200">Khata Ledger &amp; Instant UPI</span>
-                      <span className="text-earth-500 dark:text-earth-400">Automated billing ledger, dues tracking, and dynamic UPI payment reconciliation.</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-5 sm:pt-6">
-                <Link
-                  className="w-full flex items-center justify-center gap-2 bg-clay-600 hover:bg-clay-700 text-white py-3.5 px-5 sm:px-6 rounded-2xl font-semibold text-sm sm:text-base shadow-md shadow-clay-700/25 hover:brightness-110 active:scale-[0.99] transition-all group"
-                  href="/login"
-                >
-                  <span>Owner Login</span>
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <line x1="5" x2="19" y1="12" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
-                  </svg>
-                </Link>
-                <div className="flex items-center justify-center gap-3 mt-2.5 text-[11px] text-earth-400 dark:text-earth-500">
-                  <span className="flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5 text-leaf-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path clipRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fillRule="evenodd"></path>
-                    </svg>
-                    Biometric &amp; PIN Authentication
-                  </span>
-                  <span>•</span>
-                  <span>Offline Sync Protected</span>
-                </div>
-              </div>
+            <div className="mt-7 max-w-md">
+              <label htmlFor="track-input" className="mb-1.5 block text-sm font-semibold text-heading">
+                {tx(COPY.trackLabel)}
+              </label>
+              <CustomerTrackForm lang={lang} />
             </div>
 
-            {/* PORTAL 2: Customer Portal */}
-            <div
-              className="lg:col-span-6 bg-white/90 rounded-3xl p-6 sm:p-7 lg:p-8 border border-clay-200/80 shadow-lg shadow-clay-900/5 flex flex-col justify-between hover-lift relative overflow-hidden backdrop-blur-sm dark:bg-earth-900 dark:border-earth-800"
-              data-purpose="customer-portal-card"
-            >
-              <div className="space-y-4 sm:space-y-5">
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-haldi-50 text-haldi-900 border border-haldi-200 dark:bg-earth-800 dark:text-haldi-300 dark:border-earth-700">
-                    <svg className="w-3.5 h-3.5 text-haldi-600 dark:text-haldi-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    Customer Self-Service
-                  </span>
-                  <span className="text-xs text-earth-400 font-medium dark:text-earth-500">Order Tracking &amp; Receipts</span>
-                </div>
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-earth-900 mb-1.5 dark:text-earth-100">Customer Desk &amp; Status</h2>
-                  <p className="text-xs sm:text-sm text-earth-600 leading-relaxed dark:text-earth-400">
-                    Track grain milling or feed preparation status in real time. Check weight receipts and ready-for-pickup notifications.
-                  </p>
-                </div>
-
-                <div className="bg-clay-50/60 p-3.5 sm:p-4 rounded-2xl border border-clay-100 dark:bg-earth-800/80 dark:border-earth-700">
-                  <label className="block text-xs font-semibold text-clay-900 mb-1.5 dark:text-clay-300" htmlFor="track-input">
-                    Instant Milling / Feed Order Status
-                  </label>
-                  <CustomerTrackForm />
-                  <p className="text-[10px] sm:text-[11px] text-earth-400 mt-1.5 dark:text-earth-500">Lookup wheat, jowar, bajra, cattle mash, or custom mix orders</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs text-earth-600 dark:text-earth-400">
-                  <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white border border-clay-100/80 dark:bg-earth-800 dark:border-earth-700">
-                    <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-leaf-50 text-leaf-600 flex items-center justify-center text-[9px] sm:text-[10px] font-bold dark:bg-leaf-950 dark:text-leaf-400">✓</span>
-                    <span className="font-medium text-earth-700 dark:text-earth-300 text-[11px] sm:text-xs">SMS Pickup Alerts</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white border border-clay-100/80 dark:bg-earth-800 dark:border-earth-700">
-                    <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-leaf-50 text-leaf-600 flex items-center justify-center text-[9px] sm:text-[10px] font-bold dark:bg-leaf-950 dark:text-leaf-400">✓</span>
-                    <span className="font-medium text-earth-700 dark:text-earth-300 text-[11px] sm:text-xs">Digital Weight Slip</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-5 sm:pt-6">
-                <Link
-                  className="w-full flex items-center justify-center gap-2 bg-white hover:bg-clay-50/70 text-clay-800 border-2 border-clay-200 hover:border-clay-300 py-3.5 px-5 sm:px-6 rounded-2xl font-semibold text-sm sm:text-base transition-all group shadow-xs dark:bg-earth-800 dark:border-earth-700 dark:text-clay-300 dark:hover:bg-earth-750"
-                  href="/my/login"
-                >
-                  <span>Customer Login</span>
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 text-clay-700 transition-transform dark:text-clay-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <line x1="5" x2="19" y1="12" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
-                  </svg>
-                </Link>
-                <div className="flex items-center justify-center gap-2 mt-2.5 text-[11px] text-earth-400 dark:text-earth-500">
-                  <span>Quick OTP sign-in &amp; password-free access</span>
-                </div>
-              </div>
+            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+              <Link href="/my/login" className="inline-flex items-center gap-1.5 font-semibold text-clay-700 hover:underline dark:text-clay-400">
+                {tx(COPY.customerLogin)} <IconArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="/login" className="inline-flex items-center gap-1.5 font-semibold text-earth-700 hover:underline sm:hidden dark:text-earth-300">
+                {tx(COPY.ownerLogin)} <IconArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
-          {/* END: GatewayPortals */}
 
-          {/* BEGIN: FeatureTrustGrid */}
-          <section className="pt-5 sm:pt-6 border-t border-clay-200/60 dark:border-earth-800" data-purpose="features-trust-grid">
-            <div className="text-center mb-4 sm:mb-5">
-              <p className="text-[11px] sm:text-xs uppercase tracking-widest font-bold text-clay-800/80 dark:text-clay-400">
-                Key Features of Modern Mill Management
-              </p>
+          <SampleSlip lang={lang} tag={tx(COPY.sampleTag)} />
+        </section>
+
+        {/* How it works */}
+        <section className="border-y border-[var(--border-subtle)] bg-surface">
+          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+            <h2 className="text-3xl text-heading">{tx(COPY.howTitle)}</h2>
+            <ol className="mt-8 grid gap-8 md:grid-cols-3 md:gap-10">
+              {STEPS.map((s, i) => (
+                <li key={i} className="relative">
+                  <span className="font-display text-5xl leading-none text-clay-300 dark:text-clay-800">
+                    {mr ? ["१", "२", "३"][i] : i + 1}
+                  </span>
+                  <h3 className="mt-3 text-lg font-bold text-heading">{tx(s.title)}</h3>
+                  <p className="mt-1.5 text-[15px] leading-relaxed text-earth-700 dark:text-earth-300">{tx(s.body)}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* Features + owner */}
+        <section className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.4fr_1fr]">
+          <div>
+            <h2 className="text-3xl text-heading">{tx(COPY.featuresTitle)}</h2>
+            <ul className="mt-6 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+              {FEATURES.map((f, i) => (
+                <li key={i} className="flex gap-3">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-leaf-100 text-leaf-700 dark:bg-leaf-950 dark:text-leaf-400">
+                    <IconCheck className="h-3.5 w-3.5" strokeWidth={3} />
+                  </span>
+                  <span>
+                    <span className="block font-bold text-heading">{tx(f.title)}</span>
+                    <span className="mt-0.5 block text-[15px] text-earth-700 dark:text-earth-300">{tx(f.body)}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="straw flex flex-col justify-between gap-6 rounded-2xl bg-earth-900 p-6 text-white sm:p-8 dark:bg-earth-800">
+            <div>
+              <h2 className="text-2xl">{tx(COPY.ownerTitle)}</h2>
+              <p className="mt-2 text-[15px] leading-relaxed text-earth-200">{tx(COPY.ownerBody)}</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-              {/* Feature 1: Digital Precision Scale */}
-              <div className="glass-panel p-4 sm:p-4.5 rounded-2xl border border-clay-100/80 shadow-xs flex items-start gap-3.5">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-clay-50 text-clay-700 flex items-center justify-center shrink-0 border border-clay-100 dark:bg-earth-800 dark:text-clay-300 dark:border-earth-700">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-bold text-earth-800 mb-0.5 dark:text-earth-100">99.9% Scale Accuracy</h3>
-                  <p className="text-[11px] sm:text-xs text-earth-500 leading-snug dark:text-earth-400">Direct computerized scale sync. Zero human error in weight records.</p>
-                </div>
-              </div>
-
-              {/* Feature 2: SMS & WhatsApp Alerts */}
-              <div className="glass-panel p-4 sm:p-4.5 rounded-2xl border border-clay-100/80 shadow-xs flex items-start gap-3.5">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-leaf-50 text-leaf-700 flex items-center justify-center shrink-0 border border-leaf-100 dark:bg-earth-800 dark:text-leaf-400 dark:border-earth-700">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-bold text-earth-800 mb-0.5 dark:text-earth-100">SMS &amp; WhatsApp Alerts</h3>
-                  <p className="text-[11px] sm:text-xs text-earth-500 leading-snug dark:text-earth-400">Automated pickup messages, token codes, and status updates to mobile.</p>
-                </div>
-              </div>
-
-              {/* Feature 3: Khata Ledger */}
-              <div className="glass-panel p-4 sm:p-4.5 rounded-2xl border border-clay-100/80 shadow-xs flex items-start gap-3.5">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-haldi-50 text-haldi-700 flex items-center justify-center shrink-0 border border-haldi-100 dark:bg-earth-800 dark:text-haldi-400 dark:border-earth-700">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-bold text-earth-800 mb-0.5 dark:text-earth-100">Customer Credit Ledger</h3>
-                  <p className="text-[11px] sm:text-xs text-earth-500 leading-snug dark:text-earth-400">Effortless management of monthly bills, pending balances, and records.</p>
-                </div>
-              </div>
-
-              {/* Feature 4: Bilingual Local Support */}
-              <div className="glass-panel p-4 sm:p-4.5 rounded-2xl border border-clay-100/80 shadow-xs flex items-start gap-3.5">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-neel-50 text-neel-700 flex items-center justify-center shrink-0 border border-neel-100 dark:bg-earth-800 dark:text-neel-400 dark:border-earth-700">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-bold text-earth-800 mb-0.5 dark:text-earth-100">Bilingual Support</h3>
-                  <p className="text-[11px] sm:text-xs text-earth-500 leading-snug dark:text-earth-400">Seamless Marathi &amp; English interface, easy for operators and patrons alike.</p>
-                </div>
-              </div>
-            </div>
-          </section>
-          {/* END: FeatureTrustGrid */}
-        </div>
+            <Link
+              href="/login"
+              className="inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-xl bg-white px-5 text-sm font-bold text-earth-900 transition-transform active:translate-y-px"
+            >
+              {tx(COPY.ownerLogin)} <IconArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </section>
       </main>
-      {/* END: MainContent */}
 
-      {/* BEGIN: MinimalFooter */}
-      <footer className="w-full border-t border-clay-100/80 bg-white/70 py-4 sm:py-5 text-xs text-earth-500 dark:bg-earth-950/80 dark:border-earth-800 dark:text-earth-400">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-earth-700 dark:text-earth-200">Feed and Flour Management Platform</span>
-            <span>•</span>
-            <span>All Rights Reserved © 2025</span>
-          </div>
-          <div className="flex items-center gap-6 text-earth-500 dark:text-earth-400">
-            <a className="hover:text-clay-700 transition dark:hover:text-clay-400" href="#security">Data Security</a>
-            <a className="hover:text-clay-700 transition dark:hover:text-clay-400" href="#terms">Terms &amp; Conditions</a>
-            <a id="support" className="hover:text-clay-700 transition dark:hover:text-clay-400 scroll-mt-24" href="#support">Technical Support: 1800-270-XXXX</a>
-          </div>
+      <footer className="border-t border-[var(--border-subtle)]">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-5 text-sm text-muted sm:flex-row sm:px-6">
+          <span>
+            <span className="font-semibold text-earth-700 dark:text-earth-300">Feed &amp; Flour</span> · {tx(COPY.footer)}
+          </span>
+          <span>© {new Date().getFullYear()}</span>
         </div>
       </footer>
-      {/* END: MinimalFooter */}
+    </div>
+  );
+}
+
+/**
+ * A static picture of what a customer sees — the same slip, stepper and money
+ * line as the real portal, built from the same tokens. Labelled "Example" so
+ * nobody mistakes it for live data.
+ */
+function SampleSlip({ lang, tag }: { lang: "mr" | "en"; tag: string }) {
+  const mr = lang === "mr";
+  const steps = mr ? ["रांगेत", "दळण सुरू", "तयार", "घेतले"] : ["Queued", "Milling", "Ready", "Collected"];
+  return (
+    <div className="relative mx-auto w-full max-w-sm" aria-hidden="true">
+      {/* a second slip peeking out behind, like a stack on the counter */}
+      <div className="absolute inset-x-6 -bottom-3 top-6 rotate-2 rounded-2xl border border-[var(--border-subtle)] bg-surface/70" />
+      <div className="relative -rotate-1 overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-surface shadow-elevated">
+        <span className="absolute right-3 top-3 rounded-md bg-earth-100 px-2 py-0.5 text-[11px] font-semibold text-muted dark:bg-earth-800">
+          {tag}
+        </span>
+        <div className="p-5">
+          <div className="flex items-start gap-3.5">
+            <span className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl border-2 border-dashed border-clay-300 text-clay-700 dark:border-clay-800 dark:text-clay-400">
+              <span className="text-[10px] font-semibold leading-none opacity-80">{mr ? "क्र." : "No."}</span>
+              <span className="font-display text-xl leading-none">12</span>
+            </span>
+            <div>
+              <p className="text-lg font-bold leading-tight text-heading">{mr ? "गहू" : "Wheat"}</p>
+              <p className="mt-0.5 text-sm text-muted">{mr ? "बारीक" : "Fine"} · 25 kg · ₹4/kg</p>
+            </div>
+          </div>
+          <ol className="mt-5 grid grid-cols-4">
+            {steps.map((s, i) => (
+              <li key={s} className="relative flex flex-col items-center text-center">
+                {i > 0 && (
+                  <span className={`absolute right-1/2 top-[9px] h-0.5 w-full ${i <= 1 ? "bg-earth-500 dark:bg-earth-400" : "bg-earth-200 dark:bg-earth-700"}`} />
+                )}
+                <span
+                  className={`relative z-10 flex h-5 w-5 items-center justify-center rounded-full ${
+                    i === 0
+                      ? "bg-earth-600 text-white dark:bg-earth-400 dark:text-earth-950"
+                      : i === 1
+                        ? "bg-neel-500 ring-4 ring-neel-200 dark:ring-neel-900"
+                        : "border-2 border-earth-300 bg-surface dark:border-earth-700"
+                  }`}
+                >
+                  {i === 0 && <IconCheck className="h-3 w-3" strokeWidth={3} />}
+                </span>
+                <span
+                  className={`mt-1.5 text-[13px] leading-tight ${
+                    i === 1 ? "font-bold text-neel-600 dark:text-neel-300" : i === 0 ? "text-earth-600 dark:text-earth-300" : "text-earth-400 dark:text-earth-500"
+                  }`}
+                >
+                  {s}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div className="slip-tear flex items-end justify-between gap-3 px-5 pb-5 pt-4">
+          <div>
+            <p className="text-xs font-semibold text-muted">{mr ? "शिल्लक बाकी" : "Balance due"}</p>
+            <p className="font-display text-[28px] leading-none text-clay-700 dark:text-clay-400">₹ 60</p>
+          </div>
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-leaf-50 px-2.5 py-1.5 text-xs font-semibold text-leaf-800 dark:bg-leaf-950 dark:text-leaf-300">
+            <IconBell className="h-3.5 w-3.5" />
+            {mr ? "तयार झाल्यावर सूचना" : "Notified when ready"}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
