@@ -144,9 +144,12 @@ export function PaymentsPanel({
           >
             <div className="flex min-w-0 flex-col gap-1.5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-clay-100 bg-clay-50 px-2.5 py-0.5 text-xs font-semibold text-clay-800 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-300">
+                <Link
+                  href={`/owner/orders/${order.orderId}`}
+                  className="rounded-full border border-clay-100 bg-clay-50 px-2.5 py-0.5 text-xs font-semibold text-clay-800 hover:border-clay-300 dark:border-earth-700 dark:bg-earth-800 dark:text-earth-300"
+                >
                   Order #{order.orderId}
-                </span>
+                </Link>
                 <StatusBadge status={order.status} lang={lang} />
                 {cancelledOnly && order.refundDue > 0 && (
                   <span className="rounded-full bg-haldi-100 px-2.5 py-0.5 text-xs font-semibold text-haldi-800 dark:bg-haldi-500/15 dark:text-haldi-300">

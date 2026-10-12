@@ -1319,6 +1319,77 @@ async function main() {
   check("pwa: the portal links the manifest", /rel="manifest"/.test(loginHtml), /rel="manifest"/.test(loginHtml) ? "" : "no rel=\"manifest\" in /my/login HTML");
   check("pwa: the apple-touch-icon is declared (iOS home screen)", /apple-touch-icon/.test(loginHtml), /apple-touch-icon/.test(loginHtml) ? "" : "no apple-touch-icon in /my/login HTML");
 
+  /* --- 25. Payment reminders (उधारी आठवण) + order details page ------------ */
+  // Fresh owner session: earlier sections deliberately log out / rotate it.
+  await login();
+
+  // An order that certainly carries a balance: 10 kg × ₹5 = ₹50, nothing paid.
+  await freshCsrf();
+  const remOrder = await api<{ order?: { id: string; orderId: number } }>("/api/orders", "POST", {
+    customerId, grainType: "jowar", requiredSize: "fine", weightKg: 10, ratePerKg: 5,
+  });
+  const remNo = remOrder.json.order?.orderId;
+  check("remind: setup order created", remOrder.status === 201 && !!remNo, `got ${remOrder.status}`);
+
+  // Real reminders this customer already got inside the cooldown window would
+  // make the first send a (correct) skip. Park them and put them back after.
+  const cooldownMs = 6 * 60 * 60 * 1000;
+  const parkedReminders = await Notif.find({
+    customerId: customer._id, type: "paymentReminder", sentAt: { $gte: new Date(Date.now() - cooldownMs) },
+  }).toArray();
+  if (parkedReminders.length) await Notif.deleteMany({ _id: { $in: parkedReminders.map((d) => d._id) } });
+
+  const anonRem = await apiAnon("/api/owner/notifications/reminders", "POST", { customerIds: [customerId] });
+  check("remind: anonymous caller is refused", anonRem.status === 401 || anonRem.status === 403, `got ${anonRem.status}`);
+
+  await freshCsrf();
+  const badRem = await api("/api/owner/notifications/reminders", "POST", { customerIds: ["not-an-id"] });
+  check("remind: malformed customer id → 400", badRem.status === 400, `got ${badRem.status}`);
+
+  type RemRes = { sent: number; skippedRecent: number; skippedNoDue: number; disabled: boolean };
+  await freshCsrf();
+  const rem1 = await api<RemRes>("/api/owner/notifications/reminders", "POST", { customerIds: [customerId] });
+  check("remind: targeted send → 200, sent=1", rem1.status === 200 && rem1.json.sent === 1, JSON.stringify(rem1.json));
+
+  // The amount must be the server's own figure: Σ outstanding of live orders.
+  const liveOrders = await Order.find({ customerId: customer._id, status: { $ne: "cancelled" } }).toArray();
+  const expectedDue = Math.round(
+    liveOrders.reduce((sum, o) => sum + Math.max(0, Number(o.totalCharges) - Number(o.paidAmount)), 0) * 100,
+  ) / 100;
+  const remRows = await Notif.find({ customerId: customer._id, type: "paymentReminder", sentAt: { $gte: new Date(testStart) } }).toArray();
+  const remMsg = String(remRows[0]?.message ?? "");
+  check("remind: exactly one private reminder row for that customer", remRows.length === 1, `rows=${remRows.length}`);
+  check("remind: message carries the customer's real total", remMsg.includes(`₹${expectedDue.toLocaleString("en-IN")}`), `${remMsg} (expected ₹${expectedDue})`);
+  check("remind: message names the owing order number", remMsg.includes(`#${remNo}`), remMsg);
+
+  await freshCsrf();
+  const rem2 = await api<RemRes>("/api/owner/notifications/reminders", "POST", { customerIds: [customerId] });
+  const remRows2 = await Notif.countDocuments({ customerId: customer._id, type: "paymentReminder", sentAt: { $gte: new Date(testStart) } });
+  check("remind: immediate repeat is skipped (cooldown), no duplicate row", rem2.json.sent === 0 && rem2.json.skippedRecent === 1 && remRows2 === 1, JSON.stringify(rem2.json));
+
+  await freshCsrf();
+  const noDueId = new mongoose.Types.ObjectId().toString();
+  const rem3 = await api<RemRes>("/api/owner/notifications/reminders", "POST", { customerIds: [noDueId] });
+  check("remind: unknown / no-due customer is skipped, nothing sent", rem3.status === 200 && rem3.json.sent === 0 && rem3.json.skippedNoDue === 1, JSON.stringify(rem3.json));
+
+  await new Promise((r) => setTimeout(r, 400)); // audit() is fire-and-forget
+  const remAudit = await Aud.countDocuments({ action: "notifications.paymentReminder", createdAt: { $gte: new Date(testStart) } });
+  check("remind: every send is audited", remAudit >= 3, `audits=${remAudit}`);
+
+  // Order details page, addressed by order number.
+  const detail = await apiText(`/owner/orders/${remNo}`);
+  check("details: owner gets the page", detail.status === 200 && detail.text.includes(String(customer.name)), `got ${detail.status}`);
+  const missing = await apiText(`/owner/orders/99999999`);
+  check("details: unknown order number → 404", missing.status === 404, `got ${missing.status}`);
+  const anonDetail = await fetch(`${BASE}/owner/orders/${remNo}`, { redirect: "manual" });
+  check("details: anonymous visitor is sent to log in", anonDetail.status >= 300 && anonDetail.status < 400, `got ${anonDetail.status}`);
+
+  if (remNo) await Order.deleteOne({ orderId: remNo });
+  await Aud.deleteMany({ "meta.orderId": remNo });
+  await Aud.deleteMany({ action: "notifications.paymentReminder", createdAt: { $gte: new Date(testStart) } });
+  await Notif.deleteMany({ customerId: customer._id, type: "paymentReminder", sentAt: { $gte: new Date(testStart) } });
+  if (parkedReminders.length) await Notif.insertMany(parkedReminders);
+
   await Aud.deleteMany({ createdAt: { $gte: new Date(testStart) }, action: { $in: ["customer.create", "logout"] } });
   /* ---------- cleanup: remove every trace the test created ---------- */
   // The customer minted for the QR-download checks.

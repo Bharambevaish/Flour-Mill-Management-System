@@ -330,6 +330,30 @@ select option {
   );
 }
 
+/* Landing chakki: grains drop into the stones, flour pours into the sack. */
+@keyframes mill-grain-fall {
+  0% { transform: translateY(0); opacity: 0; }
+  15% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(18px); opacity: 0; }
+}
+@keyframes mill-flour-pour {
+  0%, 100% { stroke-dasharray: 4 6; stroke-dashoffset: 0; }
+  50% { stroke-dasharray: 4 6; stroke-dashoffset: -20; }
+}
+.mill-grain {
+  animation: mill-grain-fall 1.35s ease-in infinite;
+}
+.mill-flour {
+  animation: mill-flour-pour 1.6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mill-grain,
+  .mill-flour {
+    animation: none;
+  }
+}
+
 /* Print → browser "Save as PDF". Toolbars/sidebar/theme switch carry `.no-print`. */
 @media print {
   .no-print {

@@ -11,6 +11,14 @@ notifications inbox, owner targeted/all-customer messaging) with real PIN
 login hardening (lockout, timing equalization, idle timeout, deactivation gate).
 
 # Completed (all verified: lint clean, `next build` clean, DB round-trip test green (user: "keep making tests"))
+- **Flour Mill rename + reminders + order details + landing** (`0.14.0`, on top
+  of the `0.13.0` "chakki" redesign): app name is `APP_NAME` in
+  `src/lib/brand.ts`; payment reminders via `reminderService` +
+  `POST /api/owner/notifications/reminders` (6h cooldown, server-side amounts,
+  `paymentReminder` type) shown on `/owner/outstanding`; order details at
+  `/owner/orders/<order no.>`; landing reads rates/phone/address from Settings.
+  Test section 25. Note: on FerretDB (used when MongoDB can't be downloaded) the
+  two `logout:` audit assertions fail on the original code too.
 - **Order status timeline** (`0.10.1`): customers now see the journey on each
   order card — an `OrderProgress` bar (रांगेत → दळण सुरू → तयार → घेतले, filled
   to the current step, live "Currently:" caption) with an expandable **View

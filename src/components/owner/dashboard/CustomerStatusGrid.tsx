@@ -109,7 +109,10 @@ export function CustomerStatusGrid({
               <>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-earth-900 dark:text-earth-200">
-                    #{activeOrder.orderId} · {grainLabel(activeOrder.grainType, lang)} ·{" "}
+                    <Link href={`/owner/orders/${activeOrder.orderId}`} className="text-clay-700 hover:underline dark:text-clay-400">
+                      #{activeOrder.orderId}
+                    </Link>{" "}
+                    · {grainLabel(activeOrder.grainType, lang)} ·{" "}
                     {sizeLabel(activeOrder.requiredSize, lang)} · {activeOrder.weightKg} kg
                   </p>
                   <StatusBadge status={activeOrder.status} lang={lang} />

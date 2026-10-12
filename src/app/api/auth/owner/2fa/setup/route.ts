@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const actorId = (await requireSession("owner")).toString();
 
     const settings = await getSettingsOrDefault();
-    const issuer = settings.millName || "Feed and Flour Management";
+    const issuer = settings.millName || "Flour Mill";
 
     const setup = await createTotpSetup(actorId, issuer);
 

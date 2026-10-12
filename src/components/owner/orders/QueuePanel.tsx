@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/client";
@@ -171,7 +172,10 @@ export function QueuePanel({
                 </p>
 
                 <p className="text-[11px] text-muted dark:text-earth-400">
-                  Order #{order.orderId} ·{" "}
+                  <Link href={`/owner/orders/${order.orderId}`} className="font-semibold text-clay-700 hover:underline dark:text-clay-400">
+                    Order #{order.orderId}
+                  </Link>{" "}
+                  ·{" "}
                   {formatDateTime(order.createdAt, lang)}
                 </p>
               </div>

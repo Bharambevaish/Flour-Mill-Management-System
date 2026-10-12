@@ -34,7 +34,7 @@ export function CustomerPortal({
           <div className="flex min-w-0 items-center gap-2.5">
             <BrandMark className="h-9 w-9 shrink-0" />
             <span className="truncate text-[15px] font-bold leading-tight text-heading">
-              {lang === "mr" ? "माझी गिरणी" : "My Mill"}
+              Flour Mill
             </span>
           </div>
           <div className="flex items-center gap-2">
