@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import Link from "next/link";
 import { BrandMark, IconArrowRight, IconBell, IconCheck, IconPhone, IconPrinter, IconClock } from "@/components/common";
 import { getLang } from "@/lib/i18n/i18n";
@@ -126,7 +128,7 @@ export default async function Home() {
             className="pointer-events-none absolute inset-0 opacity-60 [background-image:radial-gradient(var(--border-strong)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]"
           />
           <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-4 pb-12 pt-10 sm:px-6 md:grid-cols-[1.1fr_1fr] md:pb-20 md:pt-16 lg:gap-14">
-            <div className="min-w-0">
+            <div className="rise-in min-w-0">
               <p className="inline-flex items-center gap-2 rounded-full border border-haldi-300 bg-haldi-50 px-3 py-1 text-sm font-semibold text-haldi-800 dark:border-haldi-800 dark:bg-haldi-950/60 dark:text-haldi-300">
                 <span className="h-1.5 w-1.5 rounded-full bg-haldi-500" />
                 {millName}
@@ -156,9 +158,9 @@ export default async function Home() {
             </div>
 
             <div className="relative mx-auto w-full max-w-[440px]">
-              <MillIllustration className="w-full" />
+              <HeroArt alt={mr ? "गिरणीत दळण सुरू आहे" : "Grain being milled at the mill"} />
               {/* floating "ready" toast, the moment the customer waits for */}
-              <div className="absolute bottom-6 left-1 flex max-w-[230px] -rotate-2 items-start gap-2.5 rounded-xl border border-leaf-200 bg-surface p-3 shadow-elevated md:-left-6 dark:border-leaf-900">
+              <div className="float-bob absolute bottom-6 left-1 flex max-w-[230px] -rotate-2 items-start gap-2.5 rounded-xl border border-leaf-200 bg-surface p-3 shadow-elevated md:-left-6 dark:border-leaf-900">
                 <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-leaf-600 text-white">
                   <IconBell className="h-3.5 w-3.5" />
                 </span>
@@ -167,7 +169,7 @@ export default async function Home() {
                   <span className="text-xs text-muted">{mr ? "#12 · गहू · 25 kg" : "#12 · Wheat · 25 kg"}</span>
                 </span>
               </div>
-              <div className="absolute right-1 top-8 rotate-3 rounded-xl border border-[var(--border-subtle)] bg-surface px-3 py-2 shadow-elevated md:-right-4">
+              <div style={{ animationDelay: "-2s" }} className="float-bob absolute right-1 top-8 rotate-3 rounded-xl border border-[var(--border-subtle)] bg-surface px-3 py-2 shadow-elevated md:-right-4">
                 <span className="block text-[11px] font-semibold text-muted">{mr ? "शिल्लक बाकी" : "Balance due"}</span>
                 <span className="font-display text-2xl leading-none text-clay-700 dark:text-clay-400">₹ 60</span>
               </div>
@@ -305,6 +307,58 @@ export default async function Home() {
 }
 
 /* ───────────────────────── pieces ───────────────────────── */
+
+/**
+ * Hero artwork. Drop a real clip at `public/landing/hero.mp4` (optionally
+ * `hero.webm` + a `hero.jpg` poster) — or a still at `public/landing/hero.webp`
+ * / `hero.jpg` — and it replaces the drawn chakki automatically; nothing else
+ * to change. Without one, the animated SVG mill is shown.
+ */
+const LANDING_DIR = path.join(process.cwd(), "public", "landing");
+const has = (f: string) => existsSync(path.join(LANDING_DIR, f));
+
+function HeroArt({ alt }: { alt: string }) {
+  const mp4 = has("hero.mp4");
+  const webm = has("hero.webm");
+  const poster = has("hero.jpg") ? "/landing/hero.jpg" : has("hero.webp") ? "/landing/hero.webp" : undefined;
+
+  if (mp4 || webm) {
+    return (
+      <div className="aspect-square overflow-hidden rounded-[2rem] border border-[var(--border-subtle)] bg-haldi-100 shadow-elevated dark:bg-earth-900">
+        <video
+          className="h-full w-full object-cover motion-reduce:hidden"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={poster}
+          aria-label={alt}
+        >
+          {webm && <source src="/landing/hero.webm" type="video/webm" />}
+          {mp4 && <source src="/landing/hero.mp4" type="video/mp4" />}
+        </video>
+        {/* reduced motion: the poster still, or the drawn mill */}
+        {poster ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={poster} alt={alt} className="hidden h-full w-full object-cover motion-reduce:block" />
+        ) : (
+          <MillIllustration className="hidden w-full motion-reduce:block" />
+        )}
+      </div>
+    );
+  }
+  if (poster) {
+    return (
+      <div className="aspect-square overflow-hidden rounded-[2rem] border border-[var(--border-subtle)] shadow-elevated">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={poster} alt={alt} className="h-full w-full object-cover" />
+      </div>
+    );
+  }
+  return <MillIllustration className="w-full" />;
+}
+
 
 function WheatGlyph() {
   return (

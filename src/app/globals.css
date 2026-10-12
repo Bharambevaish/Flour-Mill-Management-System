@@ -341,15 +341,63 @@ select option {
   0%, 100% { stroke-dasharray: 4 6; stroke-dashoffset: 0; }
   50% { stroke-dasharray: 4 6; stroke-dashoffset: -20; }
 }
+@keyframes mill-turn {
+  to { transform: rotate(360deg); }
+}
+@keyframes mill-sway {
+  0%, 100% { transform: rotate(-2.5deg); }
+  50% { transform: rotate(2.5deg); }
+}
+@keyframes mill-dust-rise {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  20% { opacity: 0.9; }
+  100% { transform: translate(-6px, -34px) scale(1.8); opacity: 0; }
+}
+@keyframes float-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -6px; }
+}
+@keyframes rise-in {
+  from { opacity: 0; translate: 0 14px; }
+  to { opacity: 1; translate: 0 0; }
+}
 .mill-grain {
-  animation: mill-grain-fall 1.35s ease-in infinite;
+  animation: mill-grain-fall 1.3s ease-in infinite;
 }
 .mill-flour {
   animation: mill-flour-pour 1.6s linear infinite;
 }
+.mill-turn {
+  animation: mill-turn 6s linear infinite;
+}
+.mill-sway {
+  transform-box: view-box;
+  animation: mill-sway 4.8s ease-in-out infinite;
+}
+.mill-ring {
+  transform-box: view-box;
+  animation: mill-turn 90s linear infinite;
+}
+.mill-dust {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mill-dust-rise 3.2s ease-out infinite;
+}
+.float-bob {
+  animation: float-bob 4s ease-in-out infinite;
+}
+.rise-in {
+  animation: rise-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
 @media (prefers-reduced-motion: reduce) {
   .mill-grain,
-  .mill-flour {
+  .mill-flour,
+  .mill-turn,
+  .mill-sway,
+  .mill-ring,
+  .mill-dust,
+  .float-bob,
+  .rise-in {
     animation: none;
   }
 }
