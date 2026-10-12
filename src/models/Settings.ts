@@ -30,7 +30,7 @@ export interface ISettings {
 
 const SettingsSchema = new Schema<ISettings>(
   {
-    millName: { type: String, default: "Feed and Flour Management" },
+    millName: { type: String, default: "Flour Mill" },
     phone: { type: String, default: "" },
     address: { type: String, default: "" },
     currency: { type: String, default: "₹" },

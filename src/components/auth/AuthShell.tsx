@@ -24,7 +24,7 @@ export function AuthShell({
         <Link href="/" className="flex items-center gap-3">
           <BrandMark className="h-11 w-11 rounded-xl ring-2 ring-white/25" />
           <span className="text-base font-bold leading-tight">
-            Feed &amp; Flour
+            Flour Mill
             <span className="block text-xs font-medium text-clay-100">गिरणी व्यवस्थापन</span>
           </span>
         </Link>

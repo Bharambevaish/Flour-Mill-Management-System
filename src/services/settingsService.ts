@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
+import { APP_NAME, LEGACY_APP_NAMES } from "@/lib/brand";
 
 import { connectDb } from "@/lib/db";
 import type { Lang } from "@/lib/i18n";
@@ -36,7 +37,7 @@ export interface SettingsView {
 
 function defaultView(): SettingsView {
   return {
-    millName: "Feed and Flour Management",
+    millName: APP_NAME,
     phone: "",
     address: "",
     currency: "₹",
@@ -113,7 +114,7 @@ export async function getSettingsOrDefault(): Promise<SettingsView> {
 
   return {
     millName:
-      typeof doc.millName === "string" && doc.millName.trim()
+      typeof doc.millName === "string" && doc.millName.trim() && !LEGACY_APP_NAMES.includes(doc.millName.trim())
         ? doc.millName
         : fallback.millName,
     phone: typeof doc.phone === "string" ? doc.phone : "",

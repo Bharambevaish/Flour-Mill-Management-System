@@ -29,8 +29,15 @@ export function OrderStatusTimes({ order, lang }: { order: OrderView; lang: Lang
   for (const h of order.statusHistory) at.set(h.status, h.at);
 
   const cancelledAt = order.cancelledAt;
+  // A step the order has not reached yet never shows a time, even if an old
+  // history row carries one (e.g. an order moved back by a correction).
+  const currentIdx = ORDER_LIFECYCLE_STATUSES.indexOf(order.status as (typeof ORDER_LIFECYCLE_STATUSES)[number]);
   const rows: { status: OrderStatus; label: string; at?: string }[] =
-    ORDER_LIFECYCLE_STATUSES.map((s) => ({ status: s, label: t(STEP_KEY[s], lang), at: at.get(s) }));
+    ORDER_LIFECYCLE_STATUSES.map((s, i) => ({
+      status: s,
+      label: t(STEP_KEY[s], lang),
+      at: currentIdx === -1 || i <= currentIdx ? at.get(s) : undefined,
+    }));
 
   if (order.status === "cancelled") {
     rows.push({ status: "cancelled", label: t("step.cancelled", lang), at: cancelledAt });

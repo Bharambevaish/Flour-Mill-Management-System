@@ -22,8 +22,8 @@ const tiro = Tiro_Devanagari_Marathi({
 });
 
 export const metadata: Metadata = {
-  title: "Feed and Flour Management",
-  description: "Feed and Flour Management — आपल्या मालाची स्थिती तपासा",
+  title: "Flour Mill",
+  description: "Flour Mill — आपल्या मालाची स्थिती तपासा",
 
   /**
    * The manifest itself lives in `app/manifest.ts`; adding a `manifest` field
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
    */
   appleWebApp: {
     capable: true,
-    title: "Feed and Flour Management",
+    title: "Flour Mill",
     statusBarStyle: "default",
   },
 };

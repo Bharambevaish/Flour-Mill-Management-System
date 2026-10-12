@@ -9,6 +9,7 @@ export type NotificationType =
   | "orderCancelled"
   | "paymentReceived"
   | "paymentDue"
+  | "paymentReminder"
   | "broadcast";
 
 export const NOTIFICATION_TYPES: NotificationType[] = [
@@ -19,6 +20,7 @@ export const NOTIFICATION_TYPES: NotificationType[] = [
   "orderCancelled",
   "paymentReceived",
   "paymentDue",
+  "paymentReminder",
   "broadcast",
 ];
 

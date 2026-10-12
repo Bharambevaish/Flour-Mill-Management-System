@@ -1,5 +1,5 @@
 # Production Deployment & Hosting Plan
-**Project:** Feed & Flour Mill Management System (Grain Craft OS)  
+**Project:** Flour Mill  
 **Document:** `deploymentplan.md`  
 **Date:** September 2026  
 

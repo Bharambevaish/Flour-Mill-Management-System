@@ -106,7 +106,7 @@ export function SettingsPanel({
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabId>("general");
 
-  const [millName, setMillName] = useState(initialSettings?.millName || "Feed and Flour Management");
+  const [millName, setMillName] = useState(initialSettings?.millName || "Flour Mill");
   const [phone, setPhone] = useState(initialSettings?.phone || "");
   const [address, setAddress] = useState(initialSettings?.address || "");
   const [currency, setCurrency] = useState(initialSettings?.currency || "₹");
@@ -148,7 +148,7 @@ export function SettingsPanel({
 
   const initial = useMemo(
     () => ({
-      millName: initialSettings?.millName || "Feed and Flour Management",
+      millName: initialSettings?.millName || "Flour Mill",
       phone: initialSettings?.phone || "",
       address: initialSettings?.address || "",
       currency: initialSettings?.currency || "₹",

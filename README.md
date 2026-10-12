@@ -1,4 +1,4 @@
-# Feed and Flour Management
+# Flour Mill
 
 A bilingual (मराठी / English) order, payment and outstanding-dues manager for a
 small flour mill. The owner runs the whole business from a single console, and

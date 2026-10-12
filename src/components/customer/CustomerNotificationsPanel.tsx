@@ -18,6 +18,7 @@ const TYPE_LABEL: Record<
   orderCancelled: { mr: "रद्द", en: "Cancelled" },
   paymentReceived: { mr: "पेमेंट", en: "Payment" },
   paymentDue: { mr: "उधारी", en: "Due" },
+  paymentReminder: { mr: "उधारी आठवण", en: "Payment reminder" },
   broadcast: { mr: "घोषणा", en: "Announcement" },
 };
 
@@ -30,6 +31,7 @@ const TYPE_TONE: Partial<Record<CustomerNotificationView["type"], string>> = {
   orderCancelled: "text-earth-500 dark:text-earth-400",
   paymentReceived: "text-leaf-700 dark:text-leaf-300",
   paymentDue: "text-clay-700 dark:text-clay-400",
+  paymentReminder: "text-clay-700 dark:text-clay-400",
   broadcast: "text-clay-700 dark:text-clay-400",
 };
 

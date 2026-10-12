@@ -67,7 +67,7 @@ function Brand({
       <BrandMark className="h-10 w-10 shrink-0" />
       <div className="min-w-0 flex-1">
         <p className="text-[15px] font-bold leading-tight text-heading">
-          Feed &amp; Flour
+          Flour Mill
         </p>
         <p className="mt-0.5 truncate text-xs font-medium text-muted">
           गिरणी व्यवस्थापन

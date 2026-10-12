@@ -147,6 +147,18 @@ export const broadcastNotificationSchema = z.object({
     .optional(),
 });
 
+/**
+ * Owner → payment reminder. `customerIds` empty/absent = everyone who owes
+ * money right now. The amounts are never taken from the client: the server
+ * recomputes each customer's dues from their orders.
+ */
+export const paymentReminderSchema = z.object({
+  customerIds: z
+    .array(z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid customer"))
+    .max(200, "Too many recipients")
+    .optional(),
+});
+
 /* Owner settings ----------------------------------------------------- */
 
 const SETTINGS_GRAINS = [
@@ -252,4 +264,4 @@ export const createPaymentClaimSchema = z.object({
 
 export const rejectPaymentClaimSchema = z.object({
   reason: z.string().trim().min(1, "Reason is required").max(200),
-});
+});
