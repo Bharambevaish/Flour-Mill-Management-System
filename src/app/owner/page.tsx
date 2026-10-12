@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IconBell } from "@/components/common";
 import { AdminModel } from "@/models/Admin";
 import { PaymentClaimModel } from "@/models/PaymentClaim";
 import { connectDb } from "@/lib/db";
@@ -129,11 +130,11 @@ export default async function OwnerDashboard() {
     <div className="flex flex-col gap-7">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-[#4c0519] dark:text-zinc-100">
+          <h1 className="text-3xl leading-tight text-heading">
             {formatLang({ mr: `सस्नेह नमस्कार, ${admin?.name}`, en: `Welcome back, ${admin?.name}` }, lang)}
           </h1>
-          <p className="mt-1 text-sm font-medium text-[#6b545a] dark:text-zinc-400">
-            {formatLang({ mr: "आजचा व्यवसाय व थेट ऑपरेशन्स आढावा", en: "Today's mill operations overview & telemetry" }, lang)}
+          <p className="mt-1 text-sm text-muted">
+            {formatLang({ mr: "आजचा व्यवसाय व थेट ऑपरेशन्स आढावा", en: "Today's mill at a glance" }, lang)}
           </p>
         </div>
         <DashboardAutoRefresh lang={lang} />
@@ -142,14 +143,14 @@ export default async function OwnerDashboard() {
       {pendingClaimsCount > 0 && (
         <Link
           href="/owner/payments"
-          className="flex items-center justify-between gap-3 rounded-2xl border-2 border-amber-300 bg-gradient-to-r from-amber-50 to-rose-50 p-4 shadow-sm transition-all hover:border-amber-400 dark:border-amber-700/60 dark:bg-zinc-900"
+          className="flex items-center justify-between gap-3 rounded-xl border border-haldi-300 bg-haldi-50 p-4 transition-colors hover:border-haldi-400 dark:border-haldi-700/60 dark:bg-earth-900"
         >
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-400/20 text-xl text-amber-700 dark:text-amber-300">
-              🔔
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-haldi-400/20 text-xl text-haldi-700 dark:text-haldi-300">
+              <IconBell className="h-5 w-5" />
             </span>
             <div>
-              <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+              <p className="text-sm font-bold text-earth-900 dark:text-earth-100">
                 {formatLang(
                   {
                     mr: `${pendingClaimsCount} ग्राहकांनी QR/UPI द्वारे पेमेंट केले आहे — पडताळणी प्रलंबित!`,
@@ -158,7 +159,7 @@ export default async function OwnerDashboard() {
                   lang,
                 )}
               </p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              <p className="text-xs text-earth-500 dark:text-earth-400">
                 {formatLang(
                   {
                     mr: "खात्री करून जमा नोंदवण्यासाठी येथे क्लिक करा →",
@@ -169,38 +170,62 @@ export default async function OwnerDashboard() {
               </p>
             </div>
           </div>
-          <span className="rounded-full bg-amber-500 px-3 py-1 text-xs font-black text-white shadow-xs">
+          <span className="rounded-full bg-haldi-500 px-3 py-1 text-xs font-black text-white shadow-xs">
             {pendingClaimsCount}
           </span>
         </Link>
       )}
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {stats.map((s, idx) => {
-          const isOutstanding = idx === 6 || idx === 7;
-          const isCollected = idx === 2;
-          return (
-            <section
-              key={s.title}
-              className="stitch-card p-5"
-            >
-              <p className="text-xs font-bold uppercase tracking-wider text-[#805e68] dark:text-zinc-400">
-                {s.title}
-              </p>
-              <p
-                className={`mt-2 text-3xl font-extrabold ${
-                  isOutstanding
-                    ? "text-rose-700 dark:text-rose-400"
-                    : isCollected
-                      ? "text-emerald-800 dark:text-emerald-400"
-                      : "text-gray-900 dark:text-zinc-100"
-                }`}
-              >
-                {s.value}
-              </p>
-            </section>
-          );
-        })}
+      {/* Three panels instead of eight equal tiles: what happened today, what
+          is physically in the mill, and what is still owed. */}
+      <div className="grid gap-4 lg:grid-cols-[1.1fr_1.2fr_1fr]">
+        <section className="stitch-card p-5">
+          <h2 className="text-lg text-heading">{formatLang({ mr: "आज", en: "Today" }, lang)}</h2>
+          <dl className="mt-4 grid grid-cols-3 gap-3">
+            {[stats[1], stats[2], stats[0]].map((s, i) => (
+              <div key={s.title}>
+                <dt className="text-xs font-medium leading-tight text-muted">{s.title}</dt>
+                <dd className={`mt-1.5 font-display text-[26px] leading-none ${i === 1 ? "text-leaf-700 dark:text-leaf-400" : "text-heading"}`}>
+                  {s.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section className="stitch-card p-5">
+          <h2 className="text-lg text-heading">{formatLang({ mr: "गिरणीत सध्या", en: "In the mill now" }, lang)}</h2>
+          <ol className="mt-4 grid grid-cols-3 gap-2">
+            {[
+              { s: stats[3], dot: "bg-haldi-500", href: "/owner/queue" },
+              { s: stats[4], dot: "bg-neel-500", href: "/owner/queue" },
+              { s: stats[5], dot: "bg-leaf-600", href: "/owner/queue" },
+            ].map(({ s, dot, href }) => (
+              <li key={s.title}>
+                <Link href={href} className="block rounded-lg border border-[var(--border-subtle)] px-3 py-2.5 transition-colors hover:border-[var(--border-strong)] hover:bg-earth-50 dark:hover:bg-earth-800/50">
+                  <span className="flex items-center gap-1.5 text-xs font-medium leading-tight text-muted">
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} />
+                    <span className="truncate">{s.title}</span>
+                  </span>
+                  <span className="mt-1.5 block font-display text-[26px] leading-none text-heading">{s.value}</span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="stitch-card flex flex-col justify-between p-5">
+          <h2 className="text-lg text-heading">{formatLang({ mr: "उधारी", en: "Outstanding" }, lang)}</h2>
+          <div className="mt-4">
+            <p className="font-display text-[36px] leading-none text-clay-700 dark:text-clay-400">{stats[6].value}</p>
+            <p className="mt-2 text-sm text-muted">
+              {stats[7].value} · {stats[7].title}
+            </p>
+          </div>
+          <Link href="/owner/outstanding" className="mt-3 text-sm font-semibold text-clay-700 hover:underline dark:text-clay-400">
+            {formatLang({ mr: "उधारी यादी पहा →", en: "View dues →" }, lang)}
+          </Link>
+        </section>
       </div>
 
       <DashboardQuickActions lang={lang} />
@@ -208,10 +233,10 @@ export default async function OwnerDashboard() {
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-[#4c0519] dark:text-zinc-100">
+            <h2 className="text-xl text-heading">
               {formatLang({ mr: "ग्राहकांची स्थिती (लक्ष देणे आवश्यक)", en: "Customer Status (Attention Needed)" }, lang)}
             </h2>
-            <p className="text-xs font-medium text-[#6b545a] dark:text-zinc-400">
+            <p className="text-xs font-medium text-muted dark:text-earth-400">
               {formatLang(
                 { mr: "कुणाची ऑर्डर प्रलंबित किंवा उधारी बाकी आहे", en: "Customers with active orders or outstanding balances" },
                 lang
@@ -223,7 +248,7 @@ export default async function OwnerDashboard() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold text-[#4c0519] dark:text-zinc-100">
+        <h2 className="text-xl text-heading">
           {formatLang({ mr: "सर्व ग्राहक सूची", en: "All Customers Overview" }, lang)}
         </h2>
         <CustomerStatusGrid customers={rows} lang={lang} />

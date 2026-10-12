@@ -117,7 +117,7 @@ export function QueuePanel({
 
   if (orders.length === 0) {
     return (
-      <p className="rounded-2xl border border-dashed border-rose-200/80 bg-white/60 p-8 text-center text-sm font-medium text-[#7d5e67] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+      <p className="rounded-2xl border border-dashed border-clay-200/80 bg-white/60 p-8 text-center text-sm font-medium text-muted dark:border-earth-800 dark:bg-earth-900 dark:text-earth-400">
         {lang === "mr"
           ? "याक्षणी रांगेत कोणतीही प्रलंबित ऑर्डर नाही."
           : "No pending or processing orders in the queue right now."}
@@ -133,7 +133,7 @@ export function QueuePanel({
       : 0;
 
   const inputClass = "stitch-input w-full text-sm";
-  const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-wider text-[#6b545a] dark:text-zinc-400";
+  const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-wider text-muted dark:text-earth-400";
 
   return (
     <div className="flex flex-col gap-3">
@@ -149,28 +149,28 @@ export function QueuePanel({
             >
               <div className="flex min-w-0 flex-col gap-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center rounded-full border border-rose-200/80 bg-rose-50 px-2.5 py-0.5 text-xs font-bold text-rose-800 shadow-xs dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                  <span className="inline-flex items-center rounded-full border border-clay-200/80 bg-clay-50 px-2.5 py-0.5 text-xs font-bold text-clay-800 shadow-xs dark:border-earth-700 dark:bg-earth-800 dark:text-earth-300">
                     {lang === "mr" ? `रांग क्र. ${order.queueNo ?? order.orderId}` : `Token #${order.queueNo ?? order.orderId}`}
                   </span>
                   <StatusBadge status={order.status} lang={lang} />
                 </div>
 
-                <p className="truncate text-base font-bold text-gray-900 dark:text-zinc-100">
+                <p className="truncate text-base font-bold text-earth-900 dark:text-earth-100">
                   {order.customer ? order.customer.name : "—"}
                   {order.customer && (
-                    <span className="font-medium text-xs text-[#7d5e67] dark:text-zinc-400">
+                    <span className="font-medium text-xs text-muted dark:text-earth-400">
                       {" "}
                       · {order.customer.mobile}
                     </span>
                   )}
                 </p>
 
-                <p className="text-xs font-medium text-[#7d5e67] dark:text-zinc-400">
+                <p className="text-xs font-medium text-muted dark:text-earth-400">
                   {grainLabel(order.grainType, lang)} · {sizeLabel(order.requiredSize, lang)} ·{" "}
                   {order.weightKg} kg · ₹{order.ratePerKg}/kg
                 </p>
 
-                <p className="text-[11px] text-[#7d5e67] dark:text-zinc-400">
+                <p className="text-[11px] text-muted dark:text-earth-400">
                   Order #{order.orderId} ·{" "}
                   {formatDateTime(order.createdAt, lang)}
                 </p>
@@ -178,15 +178,15 @@ export function QueuePanel({
 
               <div className="flex shrink-0 items-center justify-between gap-4 sm:flex-col sm:items-end">
                 <div className="text-right">
-                  <p className="text-sm font-extrabold text-[#9d174d] dark:text-zinc-100">
+                  <p className="text-sm font-extrabold text-clay-700 dark:text-earth-100">
                     {lang === "mr" ? "किंमत ₹" : "Total ₹"} {order.totalCharges.toLocaleString("en-IN")}
                   </p>
                   {order.outstanding > 0 ? (
-                    <p className="text-xs font-semibold text-rose-700 dark:text-rose-400">
+                    <p className="text-xs font-semibold text-clay-700 dark:text-clay-400">
                       {lang === "mr" ? "बाकी ₹" : "Due ₹"} {order.outstanding.toLocaleString("en-IN")}
                     </p>
                   ) : (
-                    <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                    <p className="text-xs font-semibold text-leaf-700 dark:text-leaf-400">
                       {lang === "mr" ? "पैसे पूर्ण" : "Paid"}
                     </p>
                   )}
@@ -215,7 +215,7 @@ export function QueuePanel({
                       type="button"
                       onClick={() => setCancelOrder(order)}
                       disabled={busy || actionOrder !== null || editingId !== null}
-                      className="px-3.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-40 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                      className="px-3.5 py-1.5 text-xs font-semibold text-clay-700 hover:bg-clay-50 disabled:opacity-40 dark:text-clay-400 dark:hover:bg-clay-500/10"
                     >
                       {lang === "mr" ? "ऑर्डर रद्द" : "Cancel order"}
                     </button>
@@ -226,7 +226,7 @@ export function QueuePanel({
               {isEditing && draft && (
                 <form
                   onSubmit={saveEdit}
-                  className="flex w-full flex-col gap-3 border-t border-zinc-200 pt-3 dark:border-zinc-800"
+                  className="flex w-full flex-col gap-3 border-t border-earth-200 pt-3 dark:border-earth-800"
                 >
                   <div className="grid gap-3 sm:grid-cols-3">
                     <div>
@@ -324,7 +324,7 @@ export function QueuePanel({
                     )}
 
                     <div className="flex items-end pb-0.5">
-                      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                      <p className="text-sm font-semibold text-earth-900 dark:text-earth-100">
                         {lang === "mr" ? "नवीन एकूण ₹ " : "New Total ₹ "}{draftTotal.toLocaleString("en-IN")}
                       </p>
                     </div>

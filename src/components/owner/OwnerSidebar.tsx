@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogoutButton, LanguageToggle } from "@/components/common";
+import { LogoutButton, LanguageToggle, BrandMark } from "@/components/common";
 
 const NAV_ITEMS = [
   { href: "/owner", mr: "डॅशबोर्ड", en: "Dashboard", Icon: IconGrid },
@@ -27,14 +27,14 @@ export function OwnerSidebar({ millName, lang = "en" }: { millName?: string; lan
 
   return (
     <>
-      <aside className="no-print hidden w-64 shrink-0 flex-col border-r border-[#f4e6e9] bg-white shadow-[2px_0_16px_rgba(157,23,77,0.03)] md:flex dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none">
+      <aside className="no-print hidden w-64 shrink-0 flex-col border-r border-[var(--border-subtle)] bg-surface md:flex dark:border-earth-800">
         <Brand millName={millName} />
-        <nav className="flex-1 space-y-1.5 overflow-y-auto px-3.5 py-4">
+        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
           {NAV_ITEMS.map((item) => (
             <SidebarLink key={item.href} item={item} active={isActive(item)} lang={lang} />
           ))}
         </nav>
-        <div className="flex flex-col gap-2.5 border-t border-[#faedf0] p-3.5 dark:border-zinc-800">
+        <div className="flex flex-col gap-2.5 border-t border-[var(--border-subtle)] p-3.5 dark:border-earth-800">
           <div className="flex justify-center">
             <LanguageToggle initialLang={lang} />
           </div>
@@ -43,11 +43,11 @@ export function OwnerSidebar({ millName, lang = "en" }: { millName?: string; lan
       </aside>
 
       {/* Mobile: top brand bar + horizontal nav */}
-      <header className="no-print sticky top-0 z-40 flex items-center justify-between border-b border-[#f4e6e9] bg-white/95 px-4 py-3 backdrop-blur-md md:hidden dark:border-zinc-800 dark:bg-zinc-900/95">
+      <header className="no-print sticky top-0 z-40 flex items-center justify-between border-b border-[var(--border-subtle)] bg-surface/95 px-4 py-2.5 backdrop-blur-md md:hidden dark:border-earth-800">
         <Brand compact millName={millName} />
         <LogoutButton lang={lang} />
       </header>
-      <nav className="no-print flex gap-2 overflow-x-auto border-b border-[#f4e6e9] bg-[#faf5f7] px-4 py-2.5 md:hidden dark:border-zinc-800 dark:bg-zinc-950">
+      <nav className="no-print flex gap-2 overflow-x-auto border-b border-[var(--border-subtle)] bg-background px-4 py-2.5 md:hidden dark:border-earth-800 dark:bg-earth-950">
         {NAV_ITEMS.map((item) => (
           <MobileChip key={item.href} item={item} active={isActive(item)} lang={lang} />
         ))}
@@ -63,16 +63,14 @@ function Brand({
   millName?: string;
 }) {
   return (
-    <div className={`flex items-center gap-3 border-b border-[#faedf0] dark:border-zinc-800 ${compact ? "border-b-0 py-1" : "px-5 py-4"}`}>
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-pink-600 via-rose-500 to-amber-400 text-lg font-bold text-white shadow-glow-pink">
-        🌾
-      </span>
+    <div className={`flex items-center gap-3 border-b border-[var(--border-subtle)] dark:border-earth-800 ${compact ? "border-b-0 py-1" : "px-5 py-4"}`}>
+      <BrandMark className="h-10 w-10 shrink-0" />
       <div className="min-w-0 flex-1">
-        <p className="text-[13px] sm:text-sm font-extrabold leading-tight text-[#9d174d] dark:text-zinc-100">
-          Feed and Flour Management
+        <p className="text-[15px] font-bold leading-tight text-heading">
+          Feed &amp; Flour
         </p>
-        <p className="mt-0.5 truncate text-[10px] font-bold uppercase tracking-wider text-rose-800/70 dark:text-zinc-400">
-          ENTERPRISE MILL OS
+        <p className="mt-0.5 truncate text-xs font-medium text-muted">
+          गिरणी व्यवस्थापन
         </p>
       </div>
     </div>
@@ -93,13 +91,13 @@ function SidebarLink({
   return (
     <Link
       href={item.href}
-      className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all ${
+      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold transition-colors ${
         active
-          ? "border border-rose-200/90 bg-gradient-to-r from-rose-100/90 to-pink-50 text-rose-800 shadow-xs dark:border-zinc-700 dark:bg-zinc-100 dark:text-zinc-900"
-          : "text-[#684a53] hover:bg-rose-50/70 hover:text-rose-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+          ? "bg-earth-900 text-white dark:bg-earth-100 dark:text-earth-900"
+          : "text-earth-700 hover:bg-earth-100 hover:text-heading dark:text-earth-300 dark:hover:bg-earth-800 dark:hover:text-earth-100"
       }`}
     >
-      <Icon className={`h-5 w-5 shrink-0 transition-transform ${active ? "text-rose-700 dark:text-zinc-900" : "text-[#936b76] dark:text-zinc-400"}`} />
+      <Icon className={`h-5 w-5 shrink-0 transition-transform ${active ? "text-clay-300 dark:text-clay-600" : "text-earth-500 dark:text-earth-400"}`} />
       <span className="truncate">{label}</span>
     </Link>
   );
@@ -121,8 +119,8 @@ function MobileChip({
       href={item.href}
       className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
         active
-          ? "border-rose-300 bg-gradient-to-r from-rose-100 to-pink-50 text-rose-800 shadow-xs dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-          : "border-rose-200/80 bg-white text-[#684a53] hover:bg-rose-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+          ? "border-earth-900 bg-earth-900 text-white dark:border-earth-100 dark:bg-earth-100 dark:text-earth-900"
+          : "border-[var(--border-strong)] bg-surface text-earth-700 hover:bg-earth-100 dark:text-earth-300"
       }`}
     >
       <Icon className="h-3.5 w-3.5" />

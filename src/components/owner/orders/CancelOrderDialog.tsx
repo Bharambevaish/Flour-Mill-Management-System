@@ -66,24 +66,24 @@ export function CancelOrderDialog({
       <div
         role="dialog"
         aria-modal="true"
-        className="relative w-full max-w-md rounded-t-3xl border border-[var(--border-subtle)] bg-white p-6 pb-8 shadow-2xl sm:rounded-3xl dark:border-zinc-800 dark:bg-zinc-900"
+        className="relative w-full max-w-md rounded-t-3xl border border-[var(--border-subtle)] bg-white p-6 pb-8 shadow-2xl sm:rounded-3xl dark:border-earth-800 dark:bg-earth-900"
       >
-        <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+        <h3 className="text-lg font-bold text-earth-900 dark:text-earth-100 font-display">
           {lang === "mr" ? "ऑर्डर रद्द करायचा?" : "Cancel this order?"}
         </h3>
 
-        <div className="mt-3 rounded-2xl bg-zinc-50 p-3 text-sm dark:bg-zinc-800">
-          <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+        <div className="mt-3 rounded-2xl bg-earth-50 p-3 text-sm dark:bg-earth-800">
+          <p className="font-semibold text-earth-900 dark:text-earth-100">
             #{order.orderId} · {order.customer?.name ?? ""}
           </p>
-          <p className="text-zinc-600 dark:text-zinc-400">
+          <p className="text-earth-600 dark:text-earth-400">
             {order.grainType} · {order.weightKg} kg ·{" "}
             {formatDateTime(order.createdAt, lang)}
           </p>
         </div>
 
         {hasPaid ? (
-          <div className="mt-4 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-sm font-medium text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+          <div className="mt-4 rounded-2xl border border-haldi-300 bg-haldi-50 p-3 text-sm font-medium text-haldi-900 dark:border-haldi-500/30 dark:bg-haldi-500/10 dark:text-haldi-200">
             <p>
               {lang === "mr"
                 ? `या ऑर्डरवर ₹${order.paidAmount.toLocaleString("en-IN")} जमा आहेत.`
@@ -96,14 +96,14 @@ export function CancelOrderDialog({
             </p>
           </div>
         ) : (
-          <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-4 text-sm text-earth-600 dark:text-earth-400">
             {lang === "mr"
               ? "या ऑर्डरवर पैसे जमा नाहीत."
               : "No payment has been recorded on this order."}
           </p>
         )}
 
-        <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-4 text-sm text-earth-600 dark:text-earth-400">
           {lang === "mr"
             ? "ऑर्डर कायम राहील, फक्त रद्द म्हणून दाखवला जाईल. कारण लिहा (ऐच्छिक):"
             : "The order is kept and just marked cancelled. Add a reason (optional):"}
@@ -120,7 +120,7 @@ export function CancelOrderDialog({
         />
 
         {error && (
-          <p className="mt-3 text-sm font-semibold text-rose-600 dark:text-rose-400">{error}</p>
+          <p className="mt-3 text-sm font-semibold text-clay-600 dark:text-clay-400">{error}</p>
         )}
 
         <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

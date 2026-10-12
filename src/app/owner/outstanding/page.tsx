@@ -20,10 +20,10 @@ export default async function OutstandingPage() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+          <h1 className="text-2xl font-bold tracking-tight text-earth-900 dark:text-earth-100 font-display">
             {formatLang({ mr: "उधारी खाते", en: "Customer Outstanding Dues" }, lang)}
           </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-sm text-earth-500 dark:text-earth-400">
             {formatLang(
               { mr: "ज्या ऑर्डरचे पैसे शिल्लक आहेत त्यांची सूची", en: "Orders with pending outstanding balances requiring settlement" },
               lang
@@ -37,12 +37,12 @@ export default async function OutstandingPage() {
           >
             {formatLang({ mr: "सर्व नोंदी पहा", en: "All Payments Ledger" }, lang)}
           </Link>
-          <div className="rounded-2xl border border-[var(--border-subtle)] bg-white px-5 py-3 shadow-soft text-right dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+          <div className="rounded-2xl border border-[var(--border-subtle)] bg-white px-5 py-3 shadow-soft text-right dark:border-earth-800 dark:bg-earth-900">
+            <p className="text-xs font-medium text-earth-500 dark:text-earth-400">
               {formatLang({ mr: "एकूण उधारी", en: "Total Outstanding" }, lang)}
             </p>
-            <p className="text-lg font-bold text-rose-700 dark:text-rose-400">₹ {dueTotal.toLocaleString("en-IN")}</p>
-            <p className="text-xs text-zinc-400 dark:text-zinc-500">
+            <p className="text-lg font-bold text-clay-700 dark:text-clay-400">₹ {dueTotal.toLocaleString("en-IN")}</p>
+            <p className="text-xs text-earth-400 dark:text-earth-500">
               {dueOrders.length} {formatLang({ mr: "ऑर्डर बाकी", en: "orders pending" }, lang)}
             </p>
           </div>

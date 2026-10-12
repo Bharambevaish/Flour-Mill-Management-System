@@ -42,7 +42,7 @@ export function CustomerStatusGrid({
 
   if (rows.length === 0) {
     return (
-      <p className="rounded-2xl border border-dashed border-rose-200/80 bg-white/60 p-8 text-center text-sm font-medium text-[#7d5e67] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+      <p className="rounded-2xl border border-dashed border-clay-200/80 bg-white/60 p-8 text-center text-sm font-medium text-muted dark:border-earth-800 dark:bg-earth-900 dark:text-earth-400">
         {lang === "mr"
           ? "कोणतीही प्रलंबित ऑर्डर किंवा उधारी नाही. सर्व ग्राहक सेटल आहेत."
           : "No active orders or dues — everyone is settled."}
@@ -61,26 +61,26 @@ export function CustomerStatusGrid({
             <div className="min-w-0">
               <Link
                 href="/owner/customers"
-                className="truncate font-bold text-gray-900 hover:text-rose-700 dark:text-zinc-100 dark:hover:text-rose-400"
+                className="truncate font-bold text-earth-900 hover:text-clay-700 dark:text-earth-100 dark:hover:text-clay-400"
                 title={customer.name}
               >
                 {customer.name}
               </Link>
-              <p className="text-xs font-medium text-[#7d5e67] dark:text-zinc-400">{customer.mobile}</p>
+              <p className="text-xs font-medium text-muted dark:text-earth-400">{customer.mobile}</p>
             </div>
 
             <div className="flex flex-col items-end gap-1">
               {outstanding > 0 ? (
                 <Link
                   href={`/owner/payments?customer=${customer.id}`}
-                  className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-800 shadow-xs transition-colors hover:bg-rose-100 dark:border-rose-500/30 dark:bg-rose-500/15 dark:text-rose-300"
+                  className="inline-flex items-center rounded-full border border-clay-200 bg-clay-50 px-2.5 py-0.5 text-xs font-semibold text-clay-800 shadow-xs transition-colors hover:bg-clay-100 dark:border-clay-500/30 dark:bg-clay-500/15 dark:text-clay-300"
                 >
                   {lang === "mr"
                     ? `उधारी ₹ ${outstanding.toLocaleString("en-IN")} →`
                     : `Due ₹ ${outstanding.toLocaleString("en-IN")} →`}
                 </Link>
               ) : (
-                <span className="inline-flex items-center rounded-full border border-emerald-200/80 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 shadow-xs dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300">
+                <span className="inline-flex items-center rounded-full border border-leaf-200/80 bg-leaf-50 px-2.5 py-0.5 text-xs font-semibold text-leaf-800 shadow-xs dark:border-leaf-500/30 dark:bg-leaf-500/15 dark:text-leaf-300">
                   {lang === "mr" ? "पैसे पूर्ण" : "Fully Paid"}
                 </span>
               )}
@@ -89,14 +89,14 @@ export function CustomerStatusGrid({
               {refundDue > 0 && (
                 <Link
                   href="/owner/queue"
-                  className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 shadow-xs hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25"
+                  className="inline-flex items-center rounded-full border border-haldi-300 bg-haldi-50 px-2.5 py-0.5 text-xs font-semibold text-haldi-800 shadow-xs hover:bg-haldi-100 dark:border-haldi-500/30 dark:bg-haldi-500/15 dark:text-haldi-300 dark:hover:bg-haldi-500/25"
                 >
                   {lang === "mr"
                     ? `परत द्यायचे ₹ ${refundDue.toLocaleString("en-IN")} →`
                     : `Refund due ₹ ${refundDue.toLocaleString("en-IN")} →`}
                 </Link>
               )}
-              <span className="text-xs text-[#7d5e67] dark:text-zinc-500">
+              <span className="text-xs text-muted dark:text-earth-500">
                 {lang === "mr"
                   ? `${orderCount} ऑर्डर · वसूल ₹ ${paidAmount.toLocaleString("en-IN")} / एकूण ₹ ${totalCharges.toLocaleString("en-IN")}`
                   : `${orderCount} order${orderCount === 1 ? "" : "s"} · Paid ₹ ${paidAmount.toLocaleString("en-IN")} / Total ₹ ${totalCharges.toLocaleString("en-IN")}`}
@@ -104,23 +104,23 @@ export function CustomerStatusGrid({
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 border-t border-[#f6dbe2] pt-3 dark:border-zinc-800">
+          <div className="flex flex-col gap-1.5 border-t border-[var(--border-subtle)] pt-3 dark:border-earth-800">
             {activeOrder ? (
               <>
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-zinc-200">
+                  <p className="text-sm font-semibold text-earth-900 dark:text-earth-200">
                     #{activeOrder.orderId} · {grainLabel(activeOrder.grainType, lang)} ·{" "}
                     {sizeLabel(activeOrder.requiredSize, lang)} · {activeOrder.weightKg} kg
                   </p>
                   <StatusBadge status={activeOrder.status} lang={lang} />
                 </div>
-                <p className="text-xs font-medium text-[#7d5e67] dark:text-zinc-400">
+                <p className="text-xs font-medium text-muted dark:text-earth-400">
                   ₹ {activeOrder.ratePerKg}/kg · {lang === "mr" ? "किंमत" : "Total"} ₹ {activeOrder.totalCharges.toLocaleString("en-IN")} ·{" "}
                   {timeAgo(activeOrder.createdAt, lang)}
                 </p>
               </>
             ) : (
-              <p className="text-xs font-medium text-[#7d5e67] dark:text-zinc-400">
+              <p className="text-xs font-medium text-muted dark:text-earth-400">
                 {lang === "mr" ? "सध्या कोणतीही सक्रिय ऑर्डर नाही" : "No active order right now"}
               </p>
             )}

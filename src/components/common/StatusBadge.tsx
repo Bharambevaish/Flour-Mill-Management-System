@@ -12,27 +12,27 @@ export const STATUS_BADGE: Record<OrderStatus, { mr: string; en: string; cls: st
   pending: {
     mr: "प्रलंबित",
     en: "Pending",
-    cls: "bg-amber-50 text-amber-800 border border-amber-200/80 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30",
+    cls: "bg-haldi-50 text-haldi-800 border border-haldi-200/80 dark:bg-haldi-500/15 dark:text-haldi-300 dark:border-haldi-500/30",
   },
   processing: {
     mr: "दळण्यात",
     en: "Processing",
-    cls: "bg-sky-50 text-sky-800 border border-sky-200/80 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/30",
+    cls: "bg-neel-50 text-neel-800 border border-neel-200/80 dark:bg-neel-500/15 dark:text-neel-300 dark:border-neel-500/30",
   },
   completed: {
     mr: "तयार",
     en: "Ready",
-    cls: "bg-emerald-50 text-emerald-800 border border-emerald-200/80 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30",
+    cls: "bg-leaf-50 text-leaf-800 border border-leaf-200/80 dark:bg-leaf-500/15 dark:text-leaf-300 dark:border-leaf-500/30",
   },
   collected: {
     mr: "घेतला",
     en: "Collected",
-    cls: "bg-rose-50/70 text-rose-800 border border-rose-200/70 dark:bg-zinc-500/15 dark:text-zinc-300 dark:border-zinc-700",
+    cls: "bg-earth-100 text-earth-700 border border-earth-300/80 dark:bg-earth-500/15 dark:text-earth-300 dark:border-earth-700",
   },
   cancelled: {
     mr: "रद्द",
     en: "Cancelled",
-    cls: "bg-zinc-100 text-zinc-600 border border-zinc-300/80 line-through dark:bg-zinc-800/60 dark:text-zinc-400 dark:border-zinc-700",
+    cls: "bg-earth-100 text-earth-600 border border-earth-300/80 line-through dark:bg-earth-800/60 dark:text-earth-400 dark:border-earth-700",
   },
 };
 
@@ -40,7 +40,7 @@ export function StatusBadge({ status, lang = "en" }: { status: OrderStatus; lang
   const b = STATUS_BADGE[status];
   const label = lang === "mr" ? b.mr : b.en;
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-xs ${b.cls}`}>
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${b.cls}`}>
       {label}
     </span>
   );

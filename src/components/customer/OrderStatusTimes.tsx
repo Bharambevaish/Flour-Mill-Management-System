@@ -38,7 +38,7 @@ export function OrderStatusTimes({ order, lang }: { order: OrderView; lang: Lang
 
   return (
     <div>
-      <p className="text-xs font-bold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+      <p className="text-xs font-bold uppercase tracking-wide text-earth-500 dark:text-earth-400">
         {t("step.times", lang)}
       </p>
       <ul className="mt-1.5 flex flex-col gap-1">
@@ -50,20 +50,20 @@ export function OrderStatusTimes({ order, lang }: { order: OrderView; lang: Lang
               <span
                 className={
                   isCurrent
-                    ? "font-bold text-zinc-900 dark:text-zinc-100"
+                    ? "font-bold text-earth-900 dark:text-earth-100"
                     : reached
-                      ? "text-zinc-700 dark:text-zinc-300"
-                      : "text-zinc-400 dark:text-zinc-600"
+                      ? "text-earth-700 dark:text-earth-300"
+                      : "text-earth-400 dark:text-earth-600"
                 }
               >
                 {r.label}
                 {isCurrent && (
-                  <span className="ml-1.5 text-xs font-normal text-emerald-600 dark:text-emerald-400">
+                  <span className="ml-1.5 text-xs font-normal text-leaf-600 dark:text-leaf-400">
                     ({lang === "mr" ? "सध्या" : "now"})
                   </span>
                 )}
               </span>
-              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+              <span className="text-xs text-earth-500 dark:text-earth-400">
                 {r.at ? formatDateTime(r.at, lang) : "—"}
               </span>
             </li>

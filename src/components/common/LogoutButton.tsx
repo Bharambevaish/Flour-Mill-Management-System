@@ -26,7 +26,7 @@ export function LogoutButton({ lang = "en" }: { lang?: Lang }) {
       type="button"
       onClick={logout}
       disabled={pending}
-      className="min-h-11 rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-900 shadow-xs transition-all hover:bg-rose-50 hover:border-rose-300 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700"
+      className="min-h-10 rounded-lg border border-[var(--border-strong)] bg-transparent px-3.5 py-1.5 text-sm font-semibold text-earth-700 transition-colors hover:bg-earth-100 hover:text-heading disabled:opacity-60 dark:text-earth-300 dark:hover:bg-earth-800"
     >
       {pending ? "..." : t("logout", lang)}
     </button>

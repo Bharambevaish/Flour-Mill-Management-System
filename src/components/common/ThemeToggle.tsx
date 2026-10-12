@@ -32,7 +32,7 @@ export function ThemeToggle({ initialTheme }: { initialTheme?: Theme }) {
       onClick={toggle}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "लाईट मोड / Light mode" : "डार्क मोड / Dark mode"}
-      className="no-print fixed bottom-4 right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-zinc-300 bg-white/80 text-zinc-700 shadow-md backdrop-blur transition-colors hover:bg-white dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-300 dark:hover:bg-zinc-800"
+      className="no-print fixed bottom-4 right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-earth-300 bg-white/80 text-earth-700 shadow-md backdrop-blur transition-colors hover:bg-white dark:border-earth-700 dark:bg-earth-900/80 dark:text-earth-300 dark:hover:bg-earth-800"
     >
       {isDark ? <SunIcon /> : <MoonIcon />}
     </button>

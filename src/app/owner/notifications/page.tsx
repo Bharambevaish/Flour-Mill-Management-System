@@ -52,10 +52,10 @@ export default async function NotificationsPage() {
   return (
     <div className="flex flex-col gap-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+        <h1 className="text-2xl font-bold tracking-tight text-earth-900 dark:text-earth-100 font-display">
           {formatLang({ mr: "सूचना", en: "Notifications" }, lang)}
         </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="text-sm text-earth-500 dark:text-earth-400">
           {formatLang(
             {
               mr: "ग्राहकांना एकाच वेळी सूचना पाठवा (इन-ॲप). प्रत्येक ग्राहकाला त्याच्या डॅशबोर्डवर दिसेल.",
@@ -78,27 +78,27 @@ export default async function NotificationsPage() {
       />
 
       {recentTop.length > 0 && (
-        <section className="rounded-2xl border border-[var(--border-subtle)] bg-white shadow-soft dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="border-b border-rose-50 px-6 py-4 dark:border-zinc-800">
-            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+        <section className="rounded-2xl border border-[var(--border-subtle)] bg-white shadow-soft dark:border-earth-800 dark:bg-earth-900">
+          <div className="border-b border-clay-50 px-6 py-4 dark:border-earth-800">
+            <h2 className="text-base font-bold text-earth-900 dark:text-earth-100 font-display">
               {formatLang({ mr: "नुकत्याच पाठवलेल्या सूचना", en: "Recent broadcasts" }, lang)}
             </h2>
           </div>
-          <ul className="divide-y divide-rose-50 dark:divide-zinc-800">
+          <ul className="divide-y divide-clay-50 dark:divide-earth-800">
             {recentTop.map((r, i) => (
-              <li key={`${r.lang}-${r.sentAt.getTime()}-${i}`} className="flex items-start justify-between gap-4 px-6 py-3.5 hover:bg-rose-50/20 dark:hover:bg-zinc-800/40 transition-colors">
+              <li key={`${r.lang}-${r.sentAt.getTime()}-${i}`} className="flex items-start justify-between gap-4 px-6 py-3.5 hover:bg-clay-50/20 dark:hover:bg-earth-800/40 transition-colors">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">{r.message}</p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="truncate text-sm font-semibold text-earth-900 dark:text-earth-100">{r.message}</p>
+                  <p className="text-xs text-earth-500 dark:text-earth-400">
                     {formatLang({ mr: "ग्राहक", en: "customers" }, lang)}: {r.count} · {r.lang === "mr" ? "मराठी" : "English"}
                   </p>
                 </div>
-                <span className="shrink-0 text-xs font-medium text-zinc-400">{formatAgo(r.sentAt)}</span>
+                <span className="shrink-0 text-xs font-medium text-earth-400">{formatAgo(r.sentAt)}</span>
               </li>
             ))}
           </ul>
-          <div className="border-t border-rose-50 px-6 py-3.5 dark:border-zinc-800">
-            <Link href="/owner/outstanding" className="text-sm font-semibold text-rose-700 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-300">
+          <div className="border-t border-clay-50 px-6 py-3.5 dark:border-earth-800">
+            <Link href="/owner/outstanding" className="text-sm font-semibold text-clay-700 hover:text-clay-800 dark:text-clay-400 dark:hover:text-clay-300">
               {formatLang({ mr: "उधारी विभाग पहा →", en: "View outstanding →" }, lang)}
             </Link>
           </div>

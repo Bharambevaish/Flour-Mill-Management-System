@@ -1,5 +1,6 @@
 "use client";
 
+import { IconCheck, IconPhone } from "@/components/common/Icons";
 import { useEffect, useRef, useState } from "react";
 import { t, type Lang } from "@/lib/i18n/dict";
 
@@ -80,12 +81,12 @@ export function PaySlideOver({
 
       <div
         ref={panelRef}
-        className="absolute inset-x-0 bottom-0 max-h-[92dvh] overflow-y-auto rounded-t-3xl border-t border-[var(--border-subtle)] bg-white p-5 pb-8 shadow-2xl sm:inset-y-0 sm:left-auto sm:right-0 sm:max-h-none sm:w-full sm:max-w-md sm:rounded-none sm:rounded-l-3xl sm:border-l sm:border-t-0 sm:py-6 dark:border-zinc-800 dark:bg-zinc-900"
+        className="absolute inset-x-0 bottom-0 max-h-[92dvh] overflow-y-auto rounded-t-3xl border-t border-[var(--border-subtle)] bg-white p-5 pb-8 shadow-2xl sm:inset-y-0 sm:left-auto sm:right-0 sm:max-h-none sm:w-full sm:max-w-md sm:rounded-none sm:rounded-l-3xl sm:border-l sm:border-t-0 sm:py-6 dark:border-earth-800 dark:bg-earth-900"
       >
-        <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-zinc-300 sm:hidden dark:bg-zinc-700" />
+        <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-earth-300 sm:hidden dark:bg-earth-700" />
 
         <div className="flex items-start justify-between gap-3">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]">
+          <h2 className="text-xl font-bold text-earth-900 dark:text-earth-100 font-display">
             {t("cust.payTitle", lang)}
           </h2>
           <button
@@ -93,7 +94,7 @@ export function PaySlideOver({
             type="button"
             onClick={onClose}
             aria-label={t("cust.payClose", lang)}
-            className="-mr-1 -mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xl text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+            className="-mr-1 -mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xl text-earth-500 hover:bg-earth-100 dark:text-earth-400 dark:hover:bg-earth-800"
           >
             ×
           </button>
@@ -109,7 +110,7 @@ export function PaySlideOver({
               alt={t("cust.payQrAlt", lang)}
               width={280}
               height={280}
-              className="h-auto w-full max-w-[280px] rounded-2xl border border-zinc-200 bg-white p-2 dark:border-zinc-800"
+              className="h-auto w-full max-w-[280px] rounded-2xl border border-earth-200 bg-white p-2 dark:border-earth-800"
             />
             {/* Save a copy to the device. A plain link to the same route with
                 `?download=1` — no fetch, no base64 round-trip through React, and
@@ -121,7 +122,7 @@ export function PaySlideOver({
             <a
               href="/api/my/payment-qr?download=1"
               download
-              className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-zinc-300 px-4 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-earth-300 px-4 text-sm font-semibold text-earth-700 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-200 dark:hover:bg-earth-800"
             >
               <svg
                 aria-hidden="true"
@@ -139,42 +140,42 @@ export function PaySlideOver({
               </svg>
               {t("cust.payDownload", lang)}
             </a>
-            <p className="mt-1.5 text-center text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1.5 text-center text-xs text-earth-500 dark:text-earth-400">
               {t("cust.payDownloadHint", lang)}
             </p>
           </div>
         ) : (
-          <p className="mt-5 rounded-2xl bg-amber-50 p-4 text-sm font-medium text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+          <p className="mt-5 rounded-2xl bg-haldi-50 p-4 text-sm font-medium text-haldi-800 dark:bg-haldi-500/10 dark:text-haldi-300">
             {t("cust.payQrMissing", lang)}
           </p>
         )}
 
         {upiId && (
-          <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 p-3 dark:border-zinc-800">
+          <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-earth-200 p-3 dark:border-earth-800">
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+              <p className="text-xs font-semibold text-earth-500 dark:text-earth-400">
                 {t("cust.upiId", lang)}
               </p>
-              <p className="truncate text-base font-bold text-zinc-900 dark:text-zinc-100">
+              <p className="truncate text-base font-bold text-earth-900 dark:text-earth-100">
                 {upiId}
               </p>
             </div>
             <button
               type="button"
               onClick={() => void copyUpiId()}
-              className="min-h-11 shrink-0 rounded-xl bg-rose-600 px-4 text-sm font-semibold text-white hover:bg-rose-700"
+              className="min-h-11 shrink-0 rounded-xl bg-clay-600 px-4 text-sm font-semibold text-white hover:bg-clay-700"
             >
               {copied ? t("cust.copied", lang) : t("cust.copy", lang)}
             </button>
           </div>
         )}
 
-        <p className="mt-5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+        <p className="mt-5 text-sm leading-relaxed text-earth-600 dark:text-earth-400">
           {t("cust.payHelp", lang)}
         </p>
 
         {/* Action Buttons: Report Payment Done & Call Mill Owner */}
-        <div className="mt-6 flex flex-col gap-3 border-t border-zinc-100 pt-5 dark:border-zinc-800">
+        <div className="mt-6 flex flex-col gap-3 border-t border-earth-100 pt-5 dark:border-earth-800">
           {onOpenClaimModal && (
             <button
               type="button"
@@ -182,9 +183,9 @@ export function PaySlideOver({
                 onClose();
                 onOpenClaimModal();
               }}
-              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 text-sm font-bold text-white shadow-md transition-all hover:from-emerald-700 hover:to-teal-700 active:scale-[0.99]"
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-leaf-600 px-4 py-3 text-sm font-bold text-white shadow-md transition-all hover:bg-leaf-700 active:scale-[0.99]"
             >
-              <span>✅</span>
+              <IconCheck className="h-4 w-4" />
               <span>
                 {lang === "mr" ? "पैसे भरले? पावती / UTR नोंदवा" : "Payment Done? Submit UTR / Receipt"}
               </span>
@@ -194,9 +195,9 @@ export function PaySlideOver({
           {millPhone ? (
             <a
               href={`tel:${millPhone}`}
-              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-rose-300 bg-rose-50/70 px-4 py-2.5 text-sm font-bold text-rose-800 transition-colors hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/60"
+              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-clay-300 bg-clay-50/70 px-4 py-2.5 text-sm font-bold text-clay-800 transition-colors hover:bg-clay-100 dark:border-clay-900/50 dark:bg-clay-950/40 dark:text-clay-300 dark:hover:bg-clay-900/60"
             >
-              <span>📞</span>
+              <IconPhone className="h-4 w-4" />
               <span>
                 {lang === "mr" ? "गिरणीला कॉल करा" : "Call Mill Owner"} ({millPhone})
               </span>
@@ -204,9 +205,9 @@ export function PaySlideOver({
           ) : (
             <a
               href="tel:9876543210"
-              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-rose-300 bg-rose-50/70 px-4 py-2.5 text-sm font-bold text-rose-800 transition-colors hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/60"
+              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-clay-300 bg-clay-50/70 px-4 py-2.5 text-sm font-bold text-clay-800 transition-colors hover:bg-clay-100 dark:border-clay-900/50 dark:bg-clay-950/40 dark:text-clay-300 dark:hover:bg-clay-900/60"
             >
-              <span>📞</span>
+              <IconPhone className="h-4 w-4" />
               <span>
                 {lang === "mr" ? "गिरणीला कॉल करा" : "Call Mill Owner"}
               </span>

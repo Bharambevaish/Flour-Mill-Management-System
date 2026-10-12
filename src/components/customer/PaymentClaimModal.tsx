@@ -1,5 +1,6 @@
 "use client";
 
+import { IconCard, IconCheck } from "@/components/common/Icons";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/client";
@@ -146,28 +147,28 @@ export function PaymentClaimModal({
       aria-modal="true"
       aria-labelledby="payment-claim-title"
     >
-      <div className="relative max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-3xl border border-[var(--border-subtle)] bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="relative max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-3xl border border-[var(--border-subtle)] bg-white p-6 shadow-2xl dark:border-earth-800 dark:bg-earth-900">
         <button
           type="button"
           onClick={onClose}
           aria-label={lang === "mr" ? "बंद करा" : "Close"}
-          className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full text-xl text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+          className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full text-xl text-earth-500 hover:bg-earth-100 dark:text-earth-400 dark:hover:bg-earth-800"
         >
           ×
         </button>
 
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-2xl text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
-            💳
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-clay-50 text-2xl text-clay-600 dark:bg-clay-950/40 dark:text-clay-400">
+            <IconCard className="h-6 w-6" />
           </div>
           <div>
             <h2
               id="payment-claim-title"
-              className="text-xl font-bold text-zinc-900 dark:text-zinc-100 font-[family-name:var(--font-plus-jakarta)]"
+              className="text-xl font-bold text-earth-900 dark:text-earth-100 font-display"
             >
               {lang === "mr" ? "पेमेंट माहिती कळवा" : "Report Payment Done"}
             </h2>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs text-earth-500 dark:text-earth-400">
               {lang === "mr"
                 ? "UPI / QR द्वारे पैसे पाठवले असल्यास येथे UTR किंवा पावती जोडा"
                 : "Submit UPI transaction ID / receipt for verification"}
@@ -176,14 +177,14 @@ export function PaymentClaimModal({
         </div>
 
         {submitted ? (
-          <div className="mt-6 flex flex-col items-center rounded-2xl bg-emerald-50 p-6 text-center text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300">
-            <span className="text-4xl">✅</span>
+          <div className="mt-6 flex flex-col items-center rounded-2xl bg-leaf-50 p-6 text-center text-leaf-800 dark:bg-leaf-950/30 dark:text-leaf-300">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-leaf-600 text-white"><IconCheck className="h-7 w-7" strokeWidth={3} /></span>
             <p className="mt-2 text-base font-bold">
               {lang === "mr"
                 ? "पेमेंट माहिती यशस्वीरीत्या पाठवली!"
                 : "Payment details submitted successfully!"}
             </p>
-            <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-400">
+            <p className="mt-1 text-xs text-leaf-700 dark:text-leaf-400">
               {lang === "mr"
                 ? "गिरणी मालकाकडून पडताळणी झाल्यानंतर तुमची उधारी अपडेट केली जाईल."
                 : "The mill owner will verify and confirm your payment status shortly."}
@@ -192,21 +193,21 @@ export function PaymentClaimModal({
         ) : (
           <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-4">
             {error && (
-              <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-400">
-                ⚠️ {error}
+              <div className="rounded-xl border border-clay-200 bg-clay-50 p-3 text-xs font-semibold text-clay-700 dark:border-clay-900 dark:bg-clay-950/40 dark:text-clay-400">
+                {error}
               </div>
             )}
 
             {/* Order Selector */}
             {dueOrders.length > 0 && (
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-earth-600 dark:text-earth-400">
                   {lang === "mr" ? "ऑर्डर निवडा" : "Select Order"}
                 </label>
                 <select
                   value={selectedOrderId}
                   onChange={(e) => handleOrderChange(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2.5 text-sm font-medium text-zinc-800 shadow-xs focus:border-rose-500 focus:outline-hidden dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  className="mt-1 w-full rounded-xl border border-earth-300 bg-white px-3 py-2.5 text-sm font-medium text-earth-800 shadow-xs focus:border-clay-500 focus:outline-hidden dark:border-earth-700 dark:bg-earth-800 dark:text-earth-100"
                 >
                   {dueOrders.map((o) => (
                     <option key={o.id} value={o.id}>
@@ -219,7 +220,7 @@ export function PaymentClaimModal({
 
             {/* Amount */}
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+              <label className="text-xs font-bold uppercase tracking-wider text-earth-600 dark:text-earth-400">
                 {lang === "mr" ? "पाठवलेली रक्कम (₹)" : "Amount Paid (₹)"}
               </label>
               <input
@@ -230,13 +231,13 @@ export function PaymentClaimModal({
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="उदा. 150"
-                className="mt-1 w-full rounded-xl border border-zinc-300 px-3.5 py-2.5 text-base font-bold text-zinc-900 shadow-xs focus:border-rose-500 focus:outline-hidden dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                className="mt-1 w-full rounded-xl border border-earth-300 px-3.5 py-2.5 text-base font-bold text-earth-900 shadow-xs focus:border-clay-500 focus:outline-hidden dark:border-earth-700 dark:bg-earth-800 dark:text-earth-100"
               />
             </div>
 
             {/* Transaction ID / UTR */}
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+              <label className="text-xs font-bold uppercase tracking-wider text-earth-600 dark:text-earth-400">
                 {lang === "mr" ? "ट्रान्झॅक्शन आयडी / UTR क्रमांक *" : "Transaction ID / UTR Number *"}
               </label>
               <input
@@ -245,9 +246,9 @@ export function PaymentClaimModal({
                 value={upiTxnId}
                 onChange={(e) => setUpiTxnId(e.target.value)}
                 placeholder={lang === "mr" ? "उदा. 435123456789 किंवा UPI Ref ID" : "e.g. 435123456789 or UPI Ref"}
-                className="mt-1 w-full rounded-xl border border-zinc-300 px-3.5 py-2.5 text-sm font-mono text-zinc-900 shadow-xs focus:border-rose-500 focus:outline-hidden dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                className="mt-1 w-full rounded-xl border border-earth-300 px-3.5 py-2.5 text-sm font-mono text-earth-900 shadow-xs focus:border-clay-500 focus:outline-hidden dark:border-earth-700 dark:bg-earth-800 dark:text-earth-100"
               />
-              <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
+              <p className="mt-1 text-[11px] text-earth-500 dark:text-earth-400">
                 {lang === "mr"
                   ? "Google Pay / PhonePe / Paytm मधील 12 अंकी UPI संदर्भ क्रमांक (UTR) टाका"
                   : "Enter the 12-digit UPI reference number from your payment app"}
@@ -256,14 +257,14 @@ export function PaymentClaimModal({
 
             {/* Receipt Screenshot upload */}
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+              <label className="text-xs font-bold uppercase tracking-wider text-earth-600 dark:text-earth-400">
                 {lang === "mr" ? "पेमेंट पावती / स्क्रीनशॉट (ऐच्छिक)" : "Payment Screenshot / Receipt (Optional)"}
               </label>
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
-                className="mt-1 block w-full text-xs text-zinc-500 file:mr-3 file:rounded-xl file:border-0 file:bg-rose-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-rose-700 hover:file:bg-rose-100 dark:file:bg-zinc-800 dark:file:text-zinc-300"
+                className="mt-1 block w-full text-xs text-earth-500 file:mr-3 file:rounded-xl file:border-0 file:bg-clay-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-clay-700 hover:file:bg-clay-100 dark:file:bg-earth-800 dark:file:text-earth-300"
               />
               {receiptImage && (
                 <div className="relative mt-2 inline-block">
@@ -271,12 +272,12 @@ export function PaymentClaimModal({
                   <img
                     src={receiptImage}
                     alt="Receipt preview"
-                    className="h-28 w-auto rounded-xl border border-zinc-200 object-contain dark:border-zinc-700"
+                    className="h-28 w-auto rounded-xl border border-earth-200 object-contain dark:border-earth-700"
                   />
                   <button
                     type="button"
                     onClick={() => setReceiptImage(null)}
-                    className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-600 text-xs font-bold text-white shadow-md hover:bg-rose-700"
+                    className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-clay-600 text-xs font-bold text-white shadow-md hover:bg-clay-700"
                   >
                     ×
                   </button>
@@ -286,7 +287,7 @@ export function PaymentClaimModal({
 
             {/* Note */}
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+              <label className="text-xs font-bold uppercase tracking-wider text-earth-600 dark:text-earth-400">
                 {lang === "mr" ? "टीप (ऐच्छिक)" : "Note (Optional)"}
               </label>
               <input
@@ -294,7 +295,7 @@ export function PaymentClaimModal({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder={lang === "mr" ? "उदा. Google Pay वरून पाठवले" : "e.g. Paid via Google Pay"}
-                className="mt-1 w-full rounded-xl border border-zinc-300 px-3.5 py-2 text-sm text-zinc-900 shadow-xs focus:border-rose-500 focus:outline-hidden dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                className="mt-1 w-full rounded-xl border border-earth-300 px-3.5 py-2 text-sm text-earth-900 shadow-xs focus:border-clay-500 focus:outline-hidden dark:border-earth-700 dark:bg-earth-800 dark:text-earth-100"
               />
             </div>
 
@@ -302,14 +303,14 @@ export function PaymentClaimModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="min-h-11 rounded-xl border border-zinc-300 px-4 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className="min-h-11 rounded-xl border border-earth-300 px-4 text-sm font-semibold text-earth-700 hover:bg-earth-50 dark:border-earth-700 dark:text-earth-300 dark:hover:bg-earth-800"
               >
                 {lang === "mr" ? "रद्द करा" : "Cancel"}
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="min-h-11 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 px-5 text-sm font-bold text-white shadow-md hover:from-rose-700 hover:to-pink-700 disabled:opacity-50"
+                className="min-h-11 rounded-xl bg-clay-600 px-5 text-sm font-bold text-white shadow-md hover:bg-clay-700 disabled:opacity-50"
               >
                 {submitting
                   ? (lang === "mr" ? "पाठवत आहे..." : "Submitting...")

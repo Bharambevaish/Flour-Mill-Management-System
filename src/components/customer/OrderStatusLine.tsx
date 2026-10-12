@@ -2,6 +2,7 @@
 
 import { ORDER_LIFECYCLE_STATUSES, type OrderStatus } from "@/lib/order-status";
 import { t, type Lang } from "@/lib/i18n/dict";
+import { IconCheck } from "@/components/common/Icons";
 
 /** Dict key per lifecycle step, so the strip and the times list never disagree. */
 const STEP_KEY: Record<(typeof ORDER_LIFECYCLE_STATUSES)[number], string> = {
@@ -11,28 +12,27 @@ const STEP_KEY: Record<(typeof ORDER_LIFECYCLE_STATUSES)[number], string> = {
   collected: "step.collected",
 };
 
-/** Text colour per step — the bright end of each STATUS_BADGE palette. */
-const STEP_TEXT: Record<(typeof ORDER_LIFECYCLE_STATUSES)[number], string> = {
-  pending: "text-amber-700 dark:text-amber-400",
-  processing: "text-sky-700 dark:text-sky-400",
-  completed: "text-emerald-700 dark:text-emerald-400",
-  collected: "text-rose-700 dark:text-rose-400",
+/** Colour of the CURRENT step — the same family as its StatusBadge. */
+const NOW_DOT: Record<(typeof ORDER_LIFECYCLE_STATUSES)[number], string> = {
+  pending: "bg-haldi-500 ring-haldi-200 dark:ring-haldi-900",
+  processing: "bg-neel-500 ring-neel-200 dark:ring-neel-900",
+  completed: "bg-leaf-600 ring-leaf-200 dark:ring-leaf-900",
+  collected: "bg-earth-600 ring-earth-200 dark:bg-earth-400 dark:ring-earth-800",
+};
+const NOW_TEXT: Record<(typeof ORDER_LIFECYCLE_STATUSES)[number], string> = {
+  pending: "text-haldi-700 dark:text-haldi-300",
+  processing: "text-neel-600 dark:text-neel-300",
+  completed: "text-leaf-700 dark:text-leaf-300",
+  collected: "text-earth-700 dark:text-earth-300",
 };
 
 /**
- * The order's journey as ONE line of plain words (रांगेत · दळण सुरू · तयार ·
- * घेतले) with the current step highlighted in its own colour.
+ * The order's journey: four stops on one track (रांगेत → दळण सुरू → तयार →
+ * घेतले). Done stops get a tick, the current stop a coloured ring and a bold
+ * word, the ones still ahead stay faint. Labels are 13px words under each
+ * stop — readable on a 320px phone without decoding anything.
  *
- * This replaced a 4-dot progress bar with `text-[10px]` labels and a separate
- * "Currently: …" caption. Four tiny dots under a hairline track is a desktop
- * idiom that reads as clutter on a phone and is hard to interpret for someone
- * who has never used the app before; four readable words in a row answer
- * "where is my order?" without needing the track decoded.
- *
- * Deliberately NOT `whitespace-nowrap`: at 320 px the line wraps to two rows
- * rather than being clipped.
- *
- * A cancelled order has no journey, so it shows a single word instead.
+ * A cancelled order has no journey, so it shows a single struck-through word.
  */
 export function OrderStatusLine({
   status,
@@ -43,7 +43,7 @@ export function OrderStatusLine({
 }) {
   if (status === "cancelled") {
     return (
-      <p className="mt-2.5 text-sm font-bold text-zinc-500 line-through dark:text-zinc-400">
+      <p className="mt-3 text-sm font-bold text-earth-500 line-through dark:text-earth-400">
         {t("step.cancelled", lang)}
       </p>
     );
@@ -52,33 +52,50 @@ export function OrderStatusLine({
   const current = ORDER_LIFECYCLE_STATUSES.indexOf(
     status as (typeof ORDER_LIFECYCLE_STATUSES)[number],
   );
+  const last = ORDER_LIFECYCLE_STATUSES.length - 1;
 
   return (
-    <p className="mt-2.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-sm">
+    <ol className="mt-4 grid grid-cols-4" aria-label={t(STEP_KEY[ORDER_LIFECYCLE_STATUSES[current]], lang)}>
       {ORDER_LIFECYCLE_STATUSES.map((s, i) => {
-        const isCurrent = i === current;
-        const isPast = i < current;
+        const done = i < current;
+        const now = i === current;
         return (
-          <span key={s} className="inline-flex items-center gap-1.5">
+          <li key={s} className="relative flex flex-col items-center text-center" aria-current={now ? "step" : undefined}>
+            {/* track segments, drawn behind the dots */}
             {i > 0 && (
-              <span aria-hidden="true" className="text-zinc-300 dark:text-zinc-700">
-                ·
-              </span>
+              <span
+                aria-hidden="true"
+                className={`absolute right-1/2 top-[9px] h-0.5 w-full ${
+                  i <= current ? "bg-earth-500 dark:bg-earth-400" : "bg-earth-200 dark:bg-earth-700"
+                }`}
+              />
             )}
             <span
-              className={
-                isCurrent
-                  ? `font-bold ${STEP_TEXT[s]}`
-                  : isPast
-                    ? "font-medium text-zinc-500 dark:text-zinc-400"
-                    : "font-normal text-zinc-400/70 dark:text-zinc-600"
-              }
+              className={`relative z-10 flex h-5 w-5 items-center justify-center rounded-full ${
+                now
+                  ? `${NOW_DOT[s]} ring-4`
+                  : done
+                    ? "bg-earth-600 text-white dark:bg-earth-400 dark:text-earth-950"
+                    : "border-2 border-earth-300 bg-surface dark:border-earth-700"
+              }`}
+            >
+              {done && <IconCheck className="h-3 w-3" strokeWidth={3} />}
+              {now && i === last && <IconCheck className="h-3 w-3 text-white" strokeWidth={3} />}
+            </span>
+            <span
+              className={`mt-1.5 text-[13px] leading-tight ${
+                now
+                  ? `font-bold ${NOW_TEXT[s]}`
+                  : done
+                    ? "font-medium text-earth-600 dark:text-earth-300"
+                    : "text-earth-400 dark:text-earth-500"
+              }`}
             >
               {t(STEP_KEY[s], lang)}
             </span>
-          </span>
+          </li>
         );
       })}
-    </p>
+    </ol>
   );
 }

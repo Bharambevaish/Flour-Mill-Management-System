@@ -118,7 +118,7 @@ export function NewOrderForm({
   const balance = Math.max(0, Math.round((batchTotal - advanceAmount) * 100) / 100);
 
   const inputClass = "stitch-input w-full";
-  const labelClass = "mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#6b545a] dark:text-zinc-300";
+  const labelClass = "mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted dark:text-earth-300";
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -201,7 +201,7 @@ export function NewOrderForm({
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-[#4c0519] dark:text-zinc-100">
+          <h2 className="text-sm font-bold text-heading dark:text-earth-100">
             {lang === "mr" ? "दळणाच्या नोंदी (बॅगा)" : "Milling lines (bags)"}
           </h2>
           <button
@@ -217,7 +217,7 @@ export function NewOrderForm({
         {lines.map((line, i) => (
           <div
             key={line.id}
-            className="rounded-2xl border border-rose-200/80 bg-rose-50/30 p-4 dark:border-zinc-800 dark:bg-zinc-950"
+            className="rounded-2xl border border-clay-200/80 bg-clay-50/30 p-4 dark:border-earth-800 dark:bg-earth-950"
           >
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
               <div>
@@ -280,16 +280,16 @@ export function NewOrderForm({
               </div>
 
               <div className="flex items-end justify-between gap-2">
-                <p className="flex-1 rounded-xl border border-rose-200/80 bg-white px-3 py-2 text-sm text-zinc-900 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
-                  <span className="block text-[11px] font-semibold text-[#805e68] dark:text-zinc-400">₹ एकूण</span>
-                  <span className="font-bold text-gray-900 dark:text-zinc-100">{lineTotal(line).toLocaleString("en-IN")}</span>
+                <p className="flex-1 rounded-xl border border-clay-200/80 bg-white px-3 py-2 text-sm text-earth-900 shadow-xs dark:border-earth-800 dark:bg-earth-900 dark:text-earth-100">
+                  <span className="block text-[11px] font-semibold text-muted dark:text-earth-400">₹ एकूण</span>
+                  <span className="font-bold text-earth-900 dark:text-earth-100">{lineTotal(line).toLocaleString("en-IN")}</span>
                 </p>
                 <button
                   type="button"
                   onClick={() => removeLine(i)}
                   disabled={lines.length <= 1}
                   aria-label={lang === "mr" ? "ओळ काढा" : "Remove line"}
-                  className="rounded-xl border border-rose-200 bg-white px-3 py-2.5 text-sm font-bold text-rose-600 shadow-xs transition-colors hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900 dark:text-rose-400 dark:hover:bg-zinc-800"
+                  className="rounded-xl border border-clay-200 bg-white px-3 py-2.5 text-sm font-bold text-clay-600 shadow-xs transition-colors hover:bg-clay-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-earth-700 dark:bg-earth-900 dark:text-clay-400 dark:hover:bg-earth-800"
                 >
                   ✕
                 </button>
@@ -311,7 +311,7 @@ export function NewOrderForm({
       </div>
 
       <div className="flex flex-col gap-3">
-        <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-rose-200/80 bg-rose-50/40 px-3.5 py-2.5 text-sm font-semibold text-rose-950 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
+        <label className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-clay-200/80 bg-clay-50/40 px-3.5 py-2.5 text-sm font-semibold text-clay-950 dark:border-earth-800 dark:bg-earth-900 dark:text-earth-200">
           <input
             type="checkbox"
             checked={takeAdvance}
@@ -319,7 +319,7 @@ export function NewOrderForm({
               setTakeAdvance(e.target.checked);
               if (e.target.checked && batchTotal > 0) setAdvance(String(batchTotal));
             }}
-            className="h-4 w-4 rounded border-rose-300 accent-[#9d174d]"
+            className="h-4 w-4 rounded border-clay-300 accent-clay-600"
           />
           <span>{lang === "mr" ? "आगाऊ रक्कम (Advance Payment) नोंदवा" : "Record Advance Payment"}</span>
         </label>
@@ -339,27 +339,27 @@ export function NewOrderForm({
         )}
 
         <div className="grid gap-2.5 sm:grid-cols-3">
-          <div className="rounded-xl border border-rose-200/80 bg-white p-3 shadow-xs dark:border-zinc-800 dark:bg-zinc-950">
-            <span className="block text-xs font-semibold text-[#805e68] dark:text-zinc-400">
+          <div className="rounded-xl border border-clay-200/80 bg-white p-3 shadow-xs dark:border-earth-800 dark:bg-earth-950">
+            <span className="block text-xs font-semibold text-muted dark:text-earth-400">
               {lang === "mr" ? "एकूण बॅगा / वजन" : "Bags / Total weight"}
             </span>
-            <span className="mt-1 block text-base font-extrabold text-gray-900 dark:text-zinc-100">
+            <span className="mt-1 block text-base font-extrabold text-earth-900 dark:text-earth-100">
               {validLines.length} · {Math.round(totalWeight * 100) / 100} kg
             </span>
           </div>
-          <div className="rounded-xl border border-rose-200/80 bg-white p-3 shadow-xs dark:border-zinc-800 dark:bg-zinc-950">
-            <span className="block text-xs font-semibold text-[#805e68] dark:text-zinc-400">
+          <div className="rounded-xl border border-clay-200/80 bg-white p-3 shadow-xs dark:border-earth-800 dark:bg-earth-950">
+            <span className="block text-xs font-semibold text-muted dark:text-earth-400">
               {lang === "mr" ? "एकूण आकारणी" : "Total Charges"}
             </span>
-            <span className="mt-1 block text-base font-extrabold text-[#9d174d] dark:text-rose-400">
+            <span className="mt-1 block text-base font-extrabold text-clay-700 dark:text-clay-400">
               ₹ {batchTotal.toLocaleString("en-IN")}
             </span>
           </div>
-          <div className="rounded-xl border border-rose-200/80 bg-white p-3 shadow-xs dark:border-zinc-800 dark:bg-zinc-950">
-            <span className="block text-xs font-semibold text-[#805e68] dark:text-zinc-400">
+          <div className="rounded-xl border border-clay-200/80 bg-white p-3 shadow-xs dark:border-earth-800 dark:bg-earth-950">
+            <span className="block text-xs font-semibold text-muted dark:text-earth-400">
               {lang === "mr" ? "उर्वरित बाकी" : "Balance Due"}
             </span>
-            <span className={`mt-1 block text-base font-extrabold ${balance > 0 ? "text-rose-700 dark:text-rose-400" : "text-emerald-700 dark:text-emerald-400"}`}>
+            <span className={`mt-1 block text-base font-extrabold ${balance > 0 ? "text-clay-700 dark:text-clay-400" : "text-leaf-700 dark:text-leaf-400"}`}>
               ₹ {balance.toLocaleString("en-IN")}
             </span>
           </div>
@@ -367,17 +367,17 @@ export function NewOrderForm({
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">
+        <div className="rounded-xl border border-clay-200 bg-clay-50 p-3 text-xs font-semibold text-clay-800 dark:border-clay-900/50 dark:bg-clay-950/40 dark:text-clay-300">
           {error}
         </div>
       )}
 
       {createdNos !== null && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-sm font-semibold text-emerald-900 shadow-xs dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200">
+        <div className="rounded-xl border border-leaf-200 bg-leaf-50 p-3.5 text-sm font-semibold text-leaf-900 shadow-xs dark:border-leaf-500/40 dark:bg-leaf-500/10 dark:text-leaf-200">
           {lang === "mr"
             ? `ऑर्डर ${createdNos.join(", #")} यशस्वीरित्या नोंदवल्या (${createdNos.length}).`
             : `Order${createdNos.length > 1 ? "s" : ""} #${createdNos.join(", #")} created (${createdNos.length}).`}
-          <Link href="/owner/queue" className="ml-2 font-bold underline underline-offset-2 hover:text-emerald-950">
+          <Link href="/owner/queue" className="ml-2 font-bold underline underline-offset-2 hover:text-leaf-950">
             {lang === "mr" ? "रांग यादी पहा →" : "View Queue →"}
           </Link>
         </div>
@@ -392,9 +392,9 @@ export function NewOrderForm({
           {pending ? "..." : lang === "mr" ? "+ ऑर्डर तयार करा" : "+ Create Order"}
         </button>
         {customers.length === 0 && (
-          <p className="mt-2 text-xs text-[#7d5e67] dark:text-zinc-400">
+          <p className="mt-2 text-xs text-muted dark:text-earth-400">
             {lang === "mr" ? "ऑर्डरसाठी प्रथम ग्राहक नोंदवा." : "Please add a customer account first."}{" "}
-            <Link href="/owner/customers" className="font-semibold text-rose-700 underline dark:text-rose-400">
+            <Link href="/owner/customers" className="font-semibold text-clay-700 underline dark:text-clay-400">
               {lang === "mr" ? "ग्राहक खाती" : "Manage Customers"}
             </Link>
           </p>

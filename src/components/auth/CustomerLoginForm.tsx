@@ -41,7 +41,7 @@ export function CustomerLoginForm() {
   return (
     <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-4">
       <div>
-        <label htmlFor="mobile" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#6b545a] dark:text-zinc-300">
+        <label htmlFor="mobile" className="mb-1.5 block text-xs font-semibold text-muted dark:text-earth-300">
           मोबाईल क्रमांक / Mobile number
         </label>
         <input
@@ -59,7 +59,7 @@ export function CustomerLoginForm() {
       </div>
 
       <div>
-        <label htmlFor="customer-pin" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#6b545a] dark:text-zinc-300">
+        <label htmlFor="customer-pin" className="mb-1.5 block text-xs font-semibold text-muted dark:text-earth-300">
           ४ अंकी पिन / 4-digit PIN
         </label>
         <input
@@ -78,7 +78,7 @@ export function CustomerLoginForm() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">
+        <div className="rounded-xl border border-clay-200 bg-clay-50 p-3 text-xs font-semibold text-clay-800 dark:border-clay-900/50 dark:bg-clay-950/40 dark:text-clay-300">
           {error}
         </div>
       )}
@@ -86,7 +86,7 @@ export function CustomerLoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="stitch-btn-primary mt-2 w-full py-3.5"
+        className="stitch-btn-primary mt-2 w-full py-3 text-base"
         suppressHydrationWarning
       >
         {pending ? "..." : "लॉगिन करा / Sign In"}
