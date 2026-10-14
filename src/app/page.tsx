@@ -8,6 +8,7 @@ import { APP_NAME } from "@/lib/brand";
 import { getSettingsOrDefault, type SettingsView } from "@/services/settingsService";
 import { LandingNavLanguageToggle, CustomerTrackForm } from "@/components/landing/LandingClientComponents";
 import { MillIllustration } from "@/components/landing/MillIllustration";
+import { TiltCard } from "@/components/landing/TiltCard";
 
 export const dynamic = "force-dynamic";
 
@@ -94,6 +95,7 @@ export default async function Home() {
   const [lang, settings] = await Promise.all([getLang(), getSettingsOrDefault().catch(() => null)]);
   const tx = (l: L) => (lang === "mr" ? l.mr : l.en);
   const mr = lang === "mr";
+  const hero = heroMedia();
   const millName = settings?.millName || APP_NAME;
 
   return (
@@ -157,23 +159,29 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="relative mx-auto w-full max-w-[440px]">
-              <HeroArt alt={mr ? "गिरणीत दळण सुरू आहे" : "Grain being milled at the mill"} />
-              {/* floating "ready" toast, the moment the customer waits for */}
-              <div className="float-bob absolute bottom-6 left-1 flex max-w-[230px] -rotate-2 items-start gap-2.5 rounded-xl border border-leaf-200 bg-surface p-3 shadow-elevated md:-left-6 dark:border-leaf-900">
-                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-leaf-600 text-white">
-                  <IconBell className="h-3.5 w-3.5" />
-                </span>
-                <span className="text-sm leading-snug">
-                  <span className="block font-bold text-leaf-800 dark:text-leaf-300">{mr ? "तुमचा माल तयार आहे" : "Your flour is ready"}</span>
-                  <span className="text-xs text-muted">{mr ? "#12 · गहू · 25 kg" : "#12 · Wheat · 25 kg"}</span>
-                </span>
-              </div>
-              <div style={{ animationDelay: "-2s" }} className="float-bob absolute right-1 top-8 rotate-3 rounded-xl border border-[var(--border-subtle)] bg-surface px-3 py-2 shadow-elevated md:-right-4">
-                <span className="block text-[11px] font-semibold text-muted">{mr ? "शिल्लक बाकी" : "Balance due"}</span>
-                <span className="font-display text-2xl leading-none text-clay-700 dark:text-clay-400">₹ 60</span>
-              </div>
-            </div>
+            <TiltCard className="mx-auto w-full max-w-[480px]" max={hero.kind === "video" ? 7 : 10}>
+              <HeroArt hero={hero} alt={mr ? "गिरणीत दळण सुरू आहे" : "Grain being milled at the mill"} />
+              {/* The generated clip already carries its own "ready" and "balance"
+                  cards, so ours only float over the drawn mill. */}
+              {hero.kind === "drawing" && (
+                <>
+                  {/* floating "ready" toast, the moment the customer waits for */}
+                  <div className="tilt-pop float-bob absolute bottom-6 left-1 flex max-w-[230px] -rotate-2 items-start gap-2.5 rounded-xl border border-leaf-200 bg-surface p-3 shadow-elevated md:-left-6 dark:border-leaf-900">
+                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-leaf-600 text-white">
+                      <IconBell className="h-3.5 w-3.5" />
+                    </span>
+                    <span className="text-sm leading-snug">
+                      <span className="block font-bold text-leaf-800 dark:text-leaf-300">{mr ? "तुमचा माल तयार आहे" : "Your flour is ready"}</span>
+                      <span className="text-xs text-muted">{mr ? "#12 · गहू · 25 kg" : "#12 · Wheat · 25 kg"}</span>
+                    </span>
+                  </div>
+                  <div style={{ animationDelay: "-2s" }} className="tilt-pop float-bob absolute right-1 top-8 rotate-3 rounded-xl border border-[var(--border-subtle)] bg-surface px-3 py-2 shadow-elevated md:-right-4">
+                    <span className="block text-[11px] font-semibold text-muted">{mr ? "शिल्लक बाकी" : "Balance due"}</span>
+                    <span className="font-display text-2xl leading-none text-clay-700 dark:text-clay-400">₹ 60</span>
+                  </div>
+                </>
+              )}
+            </TiltCard>
           </div>
         </section>
 
@@ -218,7 +226,9 @@ export default async function Home() {
         {/* ── Phone preview ── */}
         <section className="border-y border-[var(--border-subtle)] bg-surface">
           <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-4 py-16 sm:px-6 md:grid-cols-[1fr_1.1fr] md:py-20">
-            <PhoneMock lang={lang} />
+            <TiltCard className="mx-auto" max={8}>
+              <PhoneMock lang={lang} />
+            </TiltCard>
             <div>
               <h2 className="text-4xl text-heading">{tx(COPY.phoneTitle)}</h2>
               <p className="mt-2 text-lg text-earth-700 dark:text-earth-300">{tx(COPY.phoneSub)}</p>
@@ -317,48 +327,55 @@ export default async function Home() {
 const LANDING_DIR = path.join(process.cwd(), "public", "landing");
 const has = (f: string) => existsSync(path.join(LANDING_DIR, f));
 
-function HeroArt({ alt }: { alt: string }) {
-  const mp4 = has("hero.mp4");
-  const webm = has("hero.webm");
-  const poster = has("hero.jpg") ? "/landing/hero.jpg" : has("hero.webp") ? "/landing/hero.webp" : undefined;
+type Hero =
+  | { kind: "video"; mp4: boolean; webm: boolean; poster?: string }
+  | { kind: "image"; src: string }
+  | { kind: "drawing" };
 
-  if (mp4 || webm) {
+function heroMedia(): Hero {
+  const poster = has("hero.jpg") ? "/landing/hero.jpg" : has("hero.webp") ? "/landing/hero.webp" : undefined;
+  if (has("hero.mp4") || has("hero.webm")) return { kind: "video", mp4: has("hero.mp4"), webm: has("hero.webm"), poster };
+  if (poster) return { kind: "image", src: poster };
+  return { kind: "drawing" };
+}
+
+function HeroArt({ hero, alt }: { hero: Hero; alt: string }) {
+  if (hero.kind === "video") {
     return (
-      <div className="aspect-square overflow-hidden rounded-[2rem] border border-[var(--border-subtle)] bg-haldi-100 shadow-elevated dark:bg-earth-900">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-[var(--border-subtle)] bg-[#f3d6d1] shadow-elevated ring-8 ring-surface">
         <video
           className="h-full w-full object-cover motion-reduce:hidden"
           autoPlay
           muted
           loop
           playsInline
-          preload="metadata"
-          poster={poster}
+          preload="auto"
+          poster={hero.poster}
           aria-label={alt}
         >
-          {webm && <source src="/landing/hero.webm" type="video/webm" />}
-          {mp4 && <source src="/landing/hero.mp4" type="video/mp4" />}
+          {hero.webm && <source src="/landing/hero.webm" type="video/webm" />}
+          {hero.mp4 && <source src="/landing/hero.mp4" type="video/mp4" />}
         </video>
         {/* reduced motion: the poster still, or the drawn mill */}
-        {poster ? (
+        {hero.poster ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={poster} alt={alt} className="hidden h-full w-full object-cover motion-reduce:block" />
+          <img src={hero.poster} alt={alt} className="hidden h-full w-full object-cover motion-reduce:block" />
         ) : (
           <MillIllustration className="hidden w-full motion-reduce:block" />
         )}
       </div>
     );
   }
-  if (poster) {
+  if (hero.kind === "image") {
     return (
-      <div className="aspect-square overflow-hidden rounded-[2rem] border border-[var(--border-subtle)] shadow-elevated">
+      <div className="aspect-[4/3] overflow-hidden rounded-[2rem] border border-[var(--border-subtle)] shadow-elevated ring-8 ring-surface">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={poster} alt={alt} className="h-full w-full object-cover" />
+        <img src={hero.src} alt={alt} className="h-full w-full object-cover" />
       </div>
     );
   }
   return <MillIllustration className="w-full" />;
 }
-
 
 function WheatGlyph() {
   return (

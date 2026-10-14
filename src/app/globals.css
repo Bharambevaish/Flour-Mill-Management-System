@@ -118,8 +118,8 @@
   --color-neel-900: #2b3446;
   --color-neel-950: #1c212d;
 
-  --font-sans: var(--font-mukta), "Noto Sans Devanagari", "Nirmala UI", "Mangal", system-ui, Arial, sans-serif;
-  --font-display: var(--font-tiro), var(--font-mukta), "Noto Serif Devanagari", Georgia, serif;
+  --font-sans: var(--font-anek), "Noto Sans Devanagari", "Nirmala UI", "Mangal", system-ui, Arial, sans-serif;
+  --font-display: var(--font-eczar), var(--font-anek), "Noto Serif Devanagari", Georgia, serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
   --shadow-xs: 0 1px 0 rgba(60, 40, 20, 0.05);
@@ -139,8 +139,8 @@ body {
 h1,
 h2 {
   font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: -0.005em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 ::selection {
@@ -151,6 +151,14 @@ h2 {
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+
+/* Eczar's regular cut is light for big rupee figures; default display text to
+   its semi-bold. In the base layer, so a `font-*` utility still wins. */
+@layer base {
+  .font-display {
+    font-weight: 600;
+  }
 }
 
 /* Component classes live in the `components` layer so a utility on the
@@ -400,6 +408,37 @@ select option {
   .rise-in {
     animation: none;
   }
+}
+
+/* 3D tilt + parallax on hover (TiltCard). Flat until a fine pointer hovers. */
+.tilt {
+  perspective: 1000px;
+}
+.tilt-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: transform;
+}
+.tilt-inner.is-tilting {
+  transition: transform 0.12s ease-out;
+}
+.tilt-pop {
+  transform: translateZ(60px);
+}
+.tilt-glare {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.35), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  mix-blend-mode: soft-light;
+}
+.tilt-inner.is-tilting .tilt-glare {
+  opacity: 1;
 }
 
 /* Print → browser "Save as PDF". Toolbars/sidebar/theme switch carry `.no-print`. */
