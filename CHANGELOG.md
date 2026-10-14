@@ -8,6 +8,24 @@ All notable changes to this project, in reverse chronological order. Format base
 - Web push (needs a service worker — see the PWA note in `0.12.0`)
 - Phase 2: SMS (MSG91) + WhatsApp (Meta)
 
+## [0.15.0] - 2026-10-14 — Hero video, hover tilt, new fonts
+
+- **Hero video**: the Gemini-generated chakki clip is on the landing page
+  (`public/landing/hero.{webm,mp4,jpg}`): cropped to 4:3 so both of its cards
+  stay in frame, audio stripped, 1.7 MB → ~250 KB mp4 / ~200 KB webm, poster
+  frame for first paint and reduced-motion visitors. While a clip is used the
+  page's own floating cards are hidden (the clip carries its own).
+- **3D tilt + parallax on hover** (`TiltCard`): the hero art and the phone
+  mock lean toward the cursor with a soft glare that follows it; `.tilt-pop`
+  children (the floating cards over the drawn mill) sit forward in Z for a
+  parallax drift. One style write per animation frame; off for touch-only
+  devices and `prefers-reduced-motion`.
+- **Fonts**: Eczar (Indian-designed serif with real Devanagari) for headings
+  and rupee figures, semi-bold by default; Anek Devanagari for UI and body
+  text. Replaces Tiro Devanagari Marathi + Mukta.
+- Animated drawn chakki (0.14.x): turning top stone, handle occluded by the
+  hopper on the back half, grain/flour/dust motion, paper-grain filter.
+
 ## [0.14.0] - 2026-10-12 — Flour Mill: payment reminders, order details, new landing
 
 ### Renamed to "Flour Mill"
