@@ -1,7 +1,41 @@
+import { networkInterfaces } from "node:os";
 import type { NextConfig } from "next";
+
+/**
+ * Hosts allowed to talk to the DEV server besides localhost.
+ *
+ * Next 16 blocks cross-origin requests to dev-only assets and the HMR socket.
+ * Opening `npm run dev` from a phone or another PC on the same Wi-Fi (e.g.
+ * http://192.168.1.5:3000) therefore loaded the HTML but none of the client
+ * JS: the page never hydrated, so every <button> in a <form> fell back to a
+ * native submit and the page reloaded on every tap — and login never worked.
+ *
+ * Allowed: this machine's own IPv4 addresses, the private LAN ranges
+ * (10/8, 172.16/12, 192.168/16), `*.local` mDNS names, plus anything listed in
+ * DEV_ALLOWED_ORIGINS (comma-separated hostnames, e.g. a tunnel domain).
+ * Dev only — production (`next start`) ignores this setting.
+ */
+function devOrigins(): string[] {
+  const own = Object.values(networkInterfaces())
+    .flat()
+    .filter((i) => i && i.family === "IPv4" && !i.internal)
+    .map((i) => i!.address);
+  const privateLan = [
+    "10.*.*.*",
+    "192.168.*.*",
+    ...Array.from({ length: 16 }, (_, k) => `172.${16 + k}.*.*`),
+    "*.local",
+  ];
+  const extra = (process.env.DEV_ALLOWED_ORIGINS ?? "")
+    .split(",")
+    .map((h) => h.trim())
+    .filter(Boolean);
+  return [...new Set([...own, ...privateLan, ...extra])];
+}
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  allowedDevOrigins: devOrigins(),
 
   async headers() {
     const securityHeaders = [

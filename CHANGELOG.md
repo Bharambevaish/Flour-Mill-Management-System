@@ -8,6 +8,22 @@ All notable changes to this project, in reverse chronological order. Format base
 - Web push (needs a service worker — see the PWA note in `0.12.0`)
 - Phase 2: SMS (MSG91) + WhatsApp (Meta)
 
+## [0.15.1] - 2026-10-15 — Fix: every tap reloaded the page when dev was opened over the LAN
+
+- **Bug**: opening `npm run dev` from a phone or another PC (e.g.
+  `http://192.168.1.5:3000`) loaded the HTML but Next 16 blocked the dev JS
+  assets and the HMR websocket as cross-origin (403). The page never
+  hydrated, so every `<button>` inside a `<form>` did a native submit and the
+  page reloaded on every tap; login never completed.
+- **Fix**: `next.config.ts` sets `allowedDevOrigins` to this machine's own
+  IPv4 addresses, the private LAN ranges (10/8, 172.16/12, 192.168/16) and
+  `*.local`, plus anything in the new `DEV_ALLOWED_ORIGINS` env (comma list,
+  e.g. a tunnel host; documented in `.env.example`). Unknown origins are
+  still blocked. Dev only — `next start` is unaffected.
+- Verified before/after against the dev server: from 192.168.1.50, 10.0.0.7
+  and mill-pc.local the HMR socket went 403 → 101 and dev JS 403 → served;
+  evil.example.com stays blocked.
+
 ## [0.15.0] - 2026-10-14 — Hero video, hover tilt, new fonts
 
 - **Hero video**: the Gemini-generated chakki clip is on the landing page
